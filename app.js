@@ -327,7 +327,8 @@
       const txt = `${AUD[a][1]} Cisco Secure Networking builds security into the network itself, so you get ${AUD[a][0]}.\n\nWhat that means for "${o.toLowerCase()}": ${OUT[o]}.\n\nIn ${d.toLowerCase()}: ${DOM[d][0]}\n\nClose: "Which of these matters most to you today? I'll show you how it works in practice."\n\n(${DOM[d][1]})`;
       $("#pout").innerHTML = `<div class="out" id="ptxt"></div><div class="row"><span></span><button class="btn alt" id="cp">Copy</button></div>`;
       $("#ptxt").textContent = txt; addXP(10, `lab:${a}:${o}:${d}`);
-      $("#cp").onclick = () => { navigator.clipboard && navigator.clipboard.writeText(txt).then(() => toast("Copied")); };
+      $("#cp").onclick = () => { const sel = getSelection(), r = document.createRange(); r.selectNodeContents($("#ptxt")); sel.removeAllRanges(); sel.addRange(r);
+        (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => toast("Copied"), () => toast("Text selected: press Ctrl/Cmd+C")); };
     };
   }
 
@@ -355,6 +356,11 @@
     else viewHome();
   }
   addEventListener("hashchange", route);
-  $("#reset").onclick = () => { if (confirm("Erase all progress on this device?")) { S = blank(); save(); stats(); location.hash = "#/"; route(); } };
+  let armed = 0;
+  $("#reset").onclick = (e) => {
+    if (!armed) { armed = setTimeout(() => { armed = 0; e.target.textContent = "Reset my progress"; }, 4000); e.target.textContent = "Click again to erase all progress"; return; }
+    clearTimeout(armed); armed = 0; e.target.textContent = "Reset my progress";
+    S = blank(); save(); stats(); location.hash = "#/"; route(); toast("Progress erased");
+  };
   stats(); route();
 })();
