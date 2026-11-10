@@ -34,3 +34,7 @@ and fast-moving topics carry a `verify` note shown in the module.
 - Availability of Cloud Control / AI Canvas, Hypershield, Access Manager and SGT support in cloud products is changing quickly.
   Confirm with Cisco before quoting dates or capabilities to customers.
 - This is an independent learning aid, not an official Cisco product or certification.
+
+## Also in this repo
+[`living-network/`](living-network/) — Living Network, a standalone interactive 3D explainer of how Cisco networking and security
+products work together (scenario builder, five lenses, 30 presets). Open `living-network/index.html`. See its README for sources and the rule table.

@@ -1,0 +1,1941 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Living Network — conceptual architecture explainer</title>
+<meta name="description" content="Independent interactive explainer: how Cisco networking and security products work together across data, identity, policy, threat and trust.">
+<meta name="referrer" content="no-referrer">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<style>
+:root{
+  --bg:#070b16; --bg2:#0c1222; --panel:#0f172b; --panel2:#141e37; --line:#22304f; --line2:#31436b;
+  --tx:#e6ecfa; --tx2:#a9b6d3; --tx3:#7385aa;
+  --data:#4cc9f0; --identity:#b79cff; --policy:#f4c95d; --threat:#ff7a6b; --trust:#5be3a4;
+  --lens:var(--data);
+  --ok:#5be3a4; --limit:#8ed0ff; --step:#f4c95d; --block:#ff7a6b; --contain:#ff5fa2;
+  --r:10px; --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.45 var(--font);display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;height:100dvh;overflow:hidden}
+body[data-lens=data]{--lens:var(--data)} body[data-lens=identity]{--lens:var(--identity)}
+body[data-lens=policy]{--lens:var(--policy)} body[data-lens=threat]{--lens:var(--threat)} body[data-lens=trust]{--lens:var(--trust)}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--data)}
+:focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:4px}
+h1,h2,h3,h4,p,ul,ol{margin:0}
+ul,ol{padding:0;list-style:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* top bar */
+#top{display:flex;gap:14px;align-items:center;padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;gap:10px;align-items:center;min-width:0}
+.brand svg{flex:none}
+.brand h1{font-size:15px;font-weight:650;letter-spacing:.01em}
+.brand p{font-size:11px;color:var(--tx3)}
+.lenses{display:flex;gap:4px;background:var(--bg);padding:3px;border-radius:9px;border:1px solid var(--line)}
+.lenses button{border:0;background:transparent;padding:6px 11px;border-radius:7px;font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--tx2);display:flex;gap:6px;align-items:center}
+.lenses button i{width:8px;height:8px;border-radius:50%;background:var(--c);opacity:.55}
+.lenses button kbd{font:10px var(--font);color:var(--tx3)}
+.lenses button[aria-checked=true]{background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--tx);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 60%,transparent)}
+.lenses button[aria-checked=true] i{opacity:1;box-shadow:0 0 8px var(--c)}
+.search{margin-left:auto;position:relative;display:flex;gap:6px}
+.search input,.search select,.tp select{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12px}
+.search input{width:170px}
+#qres{position:absolute;top:calc(100% + 4px);right:0;width:300px;max-height:320px;overflow:auto;background:var(--panel2);border:1px solid var(--line2);border-radius:var(--r);z-index:30;box-shadow:0 12px 30px #0008}
+#qres button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:7px 10px}
+#qres button:hover,#qres button:focus-visible{background:#ffffff10}
+#qres small{display:block;color:var(--tx3);font-size:11px}
+
+/* layout */
+main{display:grid;grid-template-columns:300px minmax(0,1fr) 350px;min-height:0}
+.panel{background:var(--panel);overflow:auto;min-height:0;overscroll-behavior:contain}
+#left{border-right:1px solid var(--line);grid-column:1;grid-row:1}
+#stage{grid-column:2;grid-row:1}
+#right{border-left:1px solid var(--line);grid-column:3;grid-row:1}
+.panel h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);font-weight:650}
+.pad{padding:12px 14px}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:10px 14px;position:sticky;top:0;background:var(--panel);z-index:5;border-bottom:1px solid var(--line)}
+.modes button{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px 2px;font-size:11.5px;font-weight:600;color:var(--tx2);white-space:nowrap}
+.modes button[aria-selected=true]{background:var(--panel2);border-color:var(--lens);color:var(--tx)}
+
+/* presets */
+.pg{margin:12px 0 4px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3)}
+.preset{display:flex;gap:9px;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:8px;padding:6px 8px;align-items:baseline}
+.preset:hover{background:#ffffff08}
+.preset[aria-current=true]{background:var(--panel2);border-color:var(--line2)}
+.preset b{font:600 11px var(--font);color:var(--tx3);min-width:18px;font-variant-numeric:tabular-nums}
+.preset span{font-size:13px}
+
+/* builder */
+.slotbar{display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.slotbar button,.btn{background:var(--bg);border:1px solid var(--line2);border-radius:7px;padding:6px 10px;font-size:12px;font-weight:600}
+.slotbar button[aria-pressed=true]{border-color:var(--lens);background:var(--panel2)}
+.btn.primary{background:var(--lens);color:#06101f;border-color:transparent}
+.pk{margin-bottom:12px}
+.pk h3{font-size:12px;font-weight:650;margin-bottom:5px;display:flex;gap:6px;align-items:baseline}
+.pk h3 b{color:var(--lens);font-size:11px}
+.pk h3 small{color:var(--tx3);font-weight:400}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:12px;color:var(--tx2)}
+.chip:hover{border-color:var(--line2)}
+.chip[aria-checked=true]{background:color-mix(in srgb,var(--lens) 16%,transparent);border-color:var(--lens);color:var(--tx)}
+.chip[aria-disabled=true]{opacity:.38;cursor:not-allowed;text-decoration:line-through;text-decoration-color:#fff5}
+.why{font-size:11px;color:var(--tx3);margin-top:4px;min-height:15px}
+.notes{font-size:11px;color:var(--policy);margin:6px 0}
+.bg{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);width:100%;margin-top:4px}
+
+/* explore list */
+.exlist button{display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:6px 2px;font-size:13px}
+.exlist button:hover{background:#ffffff08}
+.exlist small{color:var(--tx3);font-size:11px}
+
+/* stage */
+#stage{position:relative;overflow:hidden;background:radial-gradient(120% 90% at 50% 20%,#0d1730 0%,var(--bg) 70%);min-height:0}
+#gl,#svg2d{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;pointer-events:auto;background:#0a1020cc;border:1px solid #ffffff14;border-radius:6px;padding:1px 6px 2px;font-size:11px;font-weight:600;white-space:nowrap;color:var(--tx);line-height:1.25;text-align:center;will-change:transform}
+.lbl small{display:block;font-weight:400;font-size:9.5px;color:var(--lens)}
+.lbl.place{font-weight:500;color:var(--tx2);background:#0a102088;border-color:transparent;font-size:10.5px}
+.lbl.zone{pointer-events:none;background:none;border:0;color:var(--tx3);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:650}
+.lbl.off{opacity:.42} .lbl.off small{display:none}
+.lbl.hit{border-color:var(--lens);box-shadow:0 0 0 1px var(--lens)}
+.lbl.sel{border-color:#fff;background:#16223f}
+.lbl.filtered{opacity:.12}
+.lbl.cull{opacity:0;pointer-events:none}
+.lbl.cull:focus-visible{opacity:1;z-index:5}
+.lbl.hit,.lbl.sel{z-index:3}
+#labels.compact .lbl small{display:none}
+#labels.narrow .lbl.zone{display:none}
+#labels.compact .lbl.hit small,#labels.compact .lbl.sel small{display:block}
+.tchip{position:absolute;left:0;top:0;pointer-events:none;font:700 12px var(--font);padding:2px 7px;border-radius:999px;background:#0a1020;border:1.5px solid var(--c,#fff);color:var(--c,#fff);white-space:nowrap}
+#tip{position:absolute;z-index:20;max-width:260px;background:#0a1020f2;border:1px solid var(--line2);border-radius:8px;padding:7px 9px;font-size:12px;pointer-events:none;box-shadow:0 8px 24px #0009}
+#tip b{display:block;margin-bottom:2px}
+#tip span{color:var(--tx2)}
+.badge{position:absolute;top:10px;left:12px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);background:#0a1020b0;border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+#legend{position:absolute;top:10px;right:12px;max-width:260px;background:#0a1020c8;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:11.5px;color:var(--tx2)}
+#legend b{color:var(--lens);letter-spacing:.08em;font-size:11px}
+#legend li{display:flex;gap:7px;align-items:center;margin-top:3px}
+#legend svg{flex:none}
+#callout{position:absolute;left:12px;bottom:62px;max-width:min(440px,calc(100% - 24px));display:grid;gap:5px}
+.co{background:#0a1020ea;border:1px solid var(--line2);border-left:3px solid var(--c);border-radius:8px;padding:7px 10px;font-size:12.5px}
+.co b{color:var(--c)}
+.co em{font-style:normal;color:var(--tx3);font-size:11px;margin-right:6px}
+#transport{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:4px;align-items:center;background:#0a1020e0;border:1px solid var(--line2);border-radius:10px;padding:5px}
+.tp button{width:36px;height:34px;border-radius:7px;border:0;background:transparent;display:grid;place-items:center}
+.tp button:hover{background:#ffffff12}
+.tp .sep{width:1px;height:20px;background:var(--line2);margin:0 3px}
+#nogl{position:absolute;top:40px;left:12px;font-size:11px;color:var(--tx3);background:#0a1020c8;border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+
+/* svg fallback */
+#svg2d text{font:600 1.05px var(--font);fill:var(--tx);text-anchor:middle;pointer-events:none}
+#svg2d text.pl{font-weight:400;fill:var(--tx2);font-size:.95px}
+#svg2d text.zn{font-size:1px;letter-spacing:.12px;fill:var(--tx3);text-anchor:start;text-transform:uppercase}
+#svg2d .zone{fill:#111a31;stroke:var(--line);stroke-width:.08}
+#svg2d .lk{stroke:#2a3a60;stroke-width:.06}
+#svg2d .lk.on{stroke:var(--lens);stroke-opacity:.5;stroke-width:.09}
+#svg2d .n{cursor:pointer}
+#svg2d .n .sh{fill:#33405c;stroke:#0008;stroke-width:.06}
+#svg2d .n.on .sh{fill:var(--lens)}
+#svg2d .n.place .sh{fill:#51607f}
+#svg2d .n.sel .sh{stroke:#fff;stroke-width:.2}
+#svg2d .n.filtered{opacity:.15}
+#svg2d .n:focus-visible{outline:none}
+#svg2d .n:focus-visible .sh{stroke:#fff;stroke-width:.22}
+#svg2d .mk{fill:none;stroke:var(--policy);stroke-width:.14}
+
+/* results */
+.rhead{display:flex;gap:6px;flex-wrap:wrap;align-items:center;position:sticky;top:0;background:var(--panel);padding:10px 14px;border-bottom:1px solid var(--line);z-index:5}
+.rhead h2{margin-right:auto}
+.runs{display:grid;gap:0}
+.runs.cmp{grid-template-columns:1fr 1fr}
+.run{padding:12px 14px;min-width:0;border-bottom:1px solid var(--line)}
+.runs.cmp .run+.run{border-left:1px solid var(--line)}
+.run h3{font-size:13px;margin-bottom:6px}
+.sum{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.sum span{font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:2px 6px;color:var(--tx2)}
+.verdict{border-radius:var(--r);padding:10px 12px;border:1px solid var(--vc);background:color-mix(in srgb,var(--vc) 12%,transparent);margin-bottom:10px}
+.verdict .vt{font-size:17px;font-weight:750;letter-spacing:.05em;color:var(--vc);display:flex;gap:8px;align-items:center}
+.verdict p{margin-top:4px;font-size:13px}
+.verdict .note{font-size:11px;color:var(--tx2);font-style:italic}
+.v-ALLOW{--vc:var(--ok)} .v-LIMIT{--vc:var(--limit)} .v-STEPUP{--vc:var(--step)} .v-BLOCK{--vc:var(--block)} .v-CONTAIN{--vc:var(--contain)}
+.run.pending .verdict{display:none}
+.run:not(.pending) .wait{display:none}
+.wait{border:1px dashed var(--line2);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;color:var(--tx2);font-size:13px}
+.gap{border:1px dashed var(--policy);border-radius:var(--r);padding:8px 10px;margin-bottom:10px;font-size:12px}
+.gap b{color:var(--policy)}
+.gap li{margin-top:3px;color:var(--tx2)}
+.run h4{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);margin:14px 0 6px;font-weight:650}
+.graph{width:100%;height:auto;display:block;background:var(--bg);border:1px solid var(--line);border-radius:8px}
+.sig li{font-size:12px;display:flex;gap:6px;padding:2px 0;color:var(--tx2)}
+.sig b{min-width:34px;text-align:right;font-variant-numeric:tabular-nums}
+.sig .up{color:var(--ok)} .sig .dn{color:var(--block)}
+.sig li.dim,.tl li.dim{opacity:.35}
+.tl li{display:grid;grid-template-columns:20px 1fr;gap:2px 8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px;border-left:2px solid transparent;padding-left:6px}
+.tl li.cur{border-left-color:var(--c);background:#ffffff08}
+.tl li.unl{opacity:.55}
+.tl .n{color:var(--tx3);font-variant-numeric:tabular-nums}
+.tl .p{background:none;border:0;padding:0;font-weight:650;color:var(--c);text-align:left}
+.tl .p:hover{text-decoration:underline}
+.tl .c{color:var(--tx3);font-size:11.5px}
+.tl .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;font-size:11px;color:var(--tx3)}
+.vc{font-weight:700;color:var(--vc);font-size:10.5px;letter-spacing:.06em;border:1px solid var(--vc);border-radius:4px;padding:0 4px}
+.prods{display:flex;flex-wrap:wrap;gap:4px}
+.prods a{font-size:12px;text-decoration:none;border:1px solid var(--line2);border-radius:6px;padding:3px 7px;color:var(--tx)}
+.prods a:hover{border-color:var(--data)}
+.prods a::after{content:" ↗";color:var(--tx3)}
+.sug{display:grid;gap:4px}
+.sug button{display:flex;justify-content:space-between;gap:8px;align-items:center;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12.5px}
+.sug button:hover{border-color:var(--line2)}
+.ctl select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:6px 8px}
+.ctl small,.small{font-size:11px;color:var(--tx3)}
+
+/* detail */
+#detail{border-bottom:1px solid var(--line2);background:var(--panel2);padding:12px 14px}
+#detail .x{float:right;background:none;border:1px solid var(--line2);border-radius:6px;width:28px;height:28px}
+#detail h3{font-size:15px;margin-bottom:2px}
+#detail .cat{font-size:11px;color:var(--tx3);letter-spacing:.08em;text-transform:uppercase}
+#detail p{margin-top:8px;font-size:13px}
+#detail dl{margin:10px 0 0;display:grid;grid-template-columns:76px 1fr;gap:6px 8px;font-size:12.5px}
+#detail dt{color:var(--tx3)} #detail dd{margin:0}
+.lchips{display:flex;flex-wrap:wrap;gap:4px}
+.lchips span{border:1px solid var(--c);color:var(--c);border-radius:5px;padding:1px 6px;font-size:11px}
+.conn .row{border-bottom:1px solid var(--line);padding:4px 0;font-size:12.5px}
+.conn button{background:none;border:0;padding:0;color:var(--data);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.conn small{color:var(--tx3)}
+.src{display:inline-block;margin-top:10px;font-weight:600}
+
+footer{font-size:10.5px;color:var(--tx3);padding:5px 14px;background:var(--bg2);border-top:1px solid var(--line);text-align:center}
+#toast{position:fixed;left:50%;bottom:128px;transform:translateX(-50%);background:#16223f;border:1px solid var(--line2);border-radius:8px;padding:7px 12px;font-size:12.5px;z-index:60;max-width:90vw}
+#mobnav{display:none}
+
+body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
+@media (max-width:1400px){ .brand p{display:none} .search input{width:140px} body[data-cmp="1"] main{grid-template-columns:270px minmax(0,1fr) 440px} }
+@media (max-width:1180px){ body[data-cmp="1"] main{grid-template-columns:270px minmax(0,1fr) 310px} main{grid-template-columns:270px minmax(0,1fr) 310px} .runs.cmp{grid-template-columns:1fr} .runs.cmp .run+.run{border-left:0} }
+@media (max-width:900px){
+  body{grid-template-rows:auto minmax(0,1fr) auto auto}
+  body[data-cmp="1"] main{grid-template-columns:1fr}
+  footer{order:4} #mobnav{order:5;height:calc(46px + env(safe-area-inset-bottom))}
+  main{grid-template-columns:1fr}
+  #stage{grid-column:1}
+  .panel{position:fixed;left:0;right:0;bottom:calc(46px + env(safe-area-inset-bottom));height:62dvh;z-index:40;border:0;border-top:1px solid var(--line2);border-radius:14px 14px 0 0;transform:translateY(115%);transition:transform .28s ease;box-shadow:0 -14px 40px #000a}
+  body[data-sheet=left] #left, body[data-sheet=right] #right{transform:none}
+  #mobnav{display:grid;grid-template-columns:repeat(3,1fr);background:var(--bg2);border-top:1px solid var(--line);z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+  #mobnav button{background:none;border:0;padding:0 4px;font-size:12px;font-weight:650;color:var(--tx2);border-top:2px solid transparent}
+  #mobnav button[aria-pressed=true]{color:var(--tx);border-top-color:var(--lens)}
+  footer{font-size:9.5px;padding:3px 8px}
+  #top{gap:8px;padding:6px 10px}
+  .brand p{display:none}
+  .lenses{order:3;width:100%;gap:2px}
+  .lenses button{padding:6px 2px;font-size:10px;letter-spacing:.02em;gap:4px;flex:1 1 0;min-width:0;justify-content:center}
+  .search{flex:1;min-width:0} .search input{flex:1;min-width:0;width:auto}
+  .badge{font-size:9px;letter-spacing:.06em;right:12px;text-align:center}
+  .lenses kbd{display:none}
+  .search input{width:118px} .search select{max-width:96px}
+  #legend{display:none}
+  #callout{bottom:58px}
+}
+@media (min-width:2200px){ body{font-size:16px} main{grid-template-columns:420px minmax(0,1fr) 480px} .lbl{font-size:13px} }
+@media (prefers-reduced-motion:reduce){ .panel{transition:none} }
+</style>
+</head>
+<body data-lens="data" data-sheet="none">
+<header id="top">
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M15 3 26 9v12L15 27 4 21V9z" fill="none" stroke="var(--lens)" stroke-width="1.6"/><path d="M15 3v24M4 9l22 12M26 9 4 21" stroke="var(--lens)" stroke-width=".8" opacity=".5"/><circle cx="15" cy="15" r="3" fill="var(--lens)"/></svg>
+    <div><h1>Living Network</h1><p>Conceptual architecture · how Cisco networking and security work together</p></div>
+  </div>
+  <div class="lenses" id="lenses" role="radiogroup" aria-label="Lens"></div>
+  <div class="search" role="search">
+    <input id="q" type="search" placeholder="Search products" aria-label="Search products" autocomplete="off">
+    <select id="qcat" aria-label="Filter by category"></select>
+    <div id="qres" hidden></div>
+  </div>
+</header>
+<main>
+  <aside id="left" class="panel" aria-label="Scenario">
+    <div class="modes" role="tablist" aria-label="Mode">
+      <button role="tab" data-mode="presets">Presets</button>
+      <button role="tab" data-mode="build">Build your own</button>
+      <button role="tab" data-mode="explore">Free explore</button>
+    </div>
+    <div id="leftBody" class="pad"></div>
+  </aside>
+  <section id="stage" aria-label="Conceptual architecture scene">
+    <canvas id="gl" aria-label="3D conceptual network scene. Use Tab to move through product labels." role="img"></canvas>
+    <svg id="svg2d" hidden role="group" aria-label="2D conceptual network map"></svg>
+    <div id="labels"></div>
+    <div class="badge">Conceptual architecture — not a validated design</div>
+    <div id="legend" aria-live="polite"></div>
+    <div id="callout" aria-live="polite"></div>
+    <div id="nogl" hidden>2D fallback view (WebGL or 3D library unavailable)</div>
+    <div id="transport" class="tp" role="toolbar" aria-label="Playback">
+      <button id="bRestart" aria-label="Restart" title="Restart"></button>
+      <button id="bPlay" aria-label="Play" title="Play / pause (Space)"></button>
+      <button id="bStep" aria-label="Step to next checkpoint" title="Step"></button>
+      <button id="bEnd" aria-label="Skip to result" title="Skip to result"></button>
+      <span class="sep"></span>
+      <select id="speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+      <span class="sep"></span>
+      <button id="bView" aria-label="Reset view" title="Reset view"></button>
+    </div>
+    <div id="tip" role="tooltip" hidden></div>
+  </section>
+  <aside id="right" class="panel" aria-label="Result and product detail">
+    <div id="detail" hidden></div>
+    <div id="result"></div>
+  </aside>
+</main>
+<nav id="mobnav" aria-label="Panels">
+  <button data-sheet="left">Scenario</button>
+  <button data-sheet="none">Scene</button>
+  <button data-sheet="right">Result</button>
+</nav>
+<footer id="foot"></footer>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<script type="module">
+/* =====================================================================================
+   DATA — everything the page shows lives here. A new scenario is a data edit.
+   Product facts were read from each product's own cisco.com page on the date below.
+   ===================================================================================== */
+const CX = 'https://www.cisco.com/site/us/en/';
+const DATA = {
+  meta: {
+    verified: '10 November 2026',
+    verdictNote: 'Illustrative outcome — actual result depends on configured policy and licensed products.',
+    footer: 'Independent educational visualization. Not an official Cisco product. Product names are trademarks of Cisco Systems, Inc. Content verified against cisco.com on {date}.',
+    sceneLabel: 'Conceptual architecture — not a validated design'
+  },
+
+  lenses: [
+    { id: 'data', label: 'DATA', color: '#4cc9f0', blurb: 'Packet path hop by hop',
+      legend: [['line', 'Encrypted tunnel or overlay'], ['dim', 'Other transit'], ['ring', 'Inspection point']] },
+    { id: 'identity', label: 'IDENTITY', color: '#b79cff', blurb: 'Who or what is asking',
+      legend: [['node', 'Verifies user, device, posture or context'], ['beam', 'Identity check in progress']] },
+    { id: 'policy', label: 'POLICY', color: '#f4c95d', blurb: 'Authored, distributed, enforced',
+      legend: [['diamond', 'Authored here'], ['dash', 'Distributed along these links'], ['ring', 'Enforced here']] },
+    { id: 'threat', label: 'THREAT', color: '#ff7a6b', blurb: 'Detection, telemetry, response',
+      legend: [['node', 'Detection or response point'], ['dash', 'Telemetry and intelligence flows'], ['x', 'Session stopped here']] },
+    { id: 'trust', label: 'TRUST', color: '#5be3a4', blurb: 'Session trust score, 0–100',
+      legend: [['grad', 'Path coloured by live trust score'], ['node', 'Supplies a trust signal']] }
+  ],
+
+  categories: {
+    net: 'Networking', id: 'Identity & access', netsec: 'Network security', cloud: 'Cloud & application security',
+    endpoint: 'Endpoint & email', detect: 'Detection & intelligence', ot: 'Industrial (OT) security', suite: 'Suites'
+  },
+
+  zones: [
+    { id: 'actors', label: '1 · Actors & devices', x: [-44, -34], z: [-27, 28], y: 0 },
+    { id: 'loc', label: '2 · Locations', x: [-32, -22], z: [-27, 28], y: 0 },
+    { id: 'access', label: '3 · Access edge', x: [-20, -10], z: [-27, 28], y: 0 },
+    { id: 'wan', label: '4 · WAN & SASE cloud edge', x: [-8, 6], z: [-27, 28], y: 0 },
+    { id: 'dest', label: '5 · Destinations', x: [8, 27], z: [-27, 28], y: 0 },
+    { id: 'ops', label: '6 · Operations plane', x: [-18, 23], z: [-8, 8], y: 13 }
+  ],
+
+  /* extra source pages used for relationships that sit on solution pages */
+  sources: {
+    campus: CX + 'solutions/networking/campus-branch-networking/secure-campus/index.html',
+    netsec: CX + 'products/networking/network-security/index.html',
+    sase: CX + 'solutions/secure-access-service-edge-sase/index.html',
+    zta: CX + 'solutions/security/zero-trust-access/index.html',
+    nexusone: CX + 'products/networking/cloud-networking/nexus-one/index.html'
+  },
+
+  /* pol: where the product sits in the policy lifecycle. inspect: inspects traffic in the DATA lens. */
+  products: {
+    wireless: { name: 'Cisco Wireless (Wi-Fi 7)', s: 'Wi-Fi 7', cat: 'net', zone: 'access', p: [-17.5, 0, -22.5],
+      fn: 'Wi-Fi 7 access points and controllers with WPA3, rogue management and security group tags for segmented wireless access.',
+      url: CX + 'products/networking/wireless/index.html', pol: ['enforce'],
+      roles: { data: 'Encrypted air link', identity: 'Wireless onboarding', policy: 'Enforce: segment tags' } },
+    switches: { name: 'Cisco Smart Switches (Catalyst)', s: 'Smart Switches', cat: 'net', zone: 'access', p: [-12.5, 0, -21],
+      fn: 'Campus and branch switching that carries identity-based segmentation and feeds telemetry to management and assurance tools.',
+      url: CX + 'products/networking/switches/index.html', pol: ['enforce'],
+      roles: { data: 'Wired access', identity: 'Port-level identity with ISE', policy: 'Enforce: segment tags' } },
+    industrial: { name: 'Cisco Industrial IoT Networking', s: 'Industrial network', cat: 'net', zone: 'access', p: [-15, 0, 14],
+      fn: 'Rugged switches, routers and wireless for operational sites, with OT visibility, segmentation and remote access built in.',
+      url: CX + 'products/networking/industrial-iot/index.html', pol: ['enforce'],
+      roles: { data: 'Factory access', policy: 'Enforce: zones and conduits', threat: 'Hosts the OT sensor' } },
+    sdwan: { name: 'Cisco Secure Routers / SD-WAN', s: 'Secure Routers · SD-WAN', cat: 'net', zone: 'wan', p: [-5, 0, -11], inspect: true,
+      fn: 'Routing and SD-WAN platform with encryption, segmentation and a built-in next-generation firewall for branch and WAN.',
+      url: CX + 'products/networking/sdwan-routers/index.html', pol: ['enforce'],
+      roles: { data: 'Encrypted WAN overlay', policy: 'Enforce: segmentation, NGFW', threat: 'Branch inspection' } },
+    nexus: { name: 'Cisco Nexus Data Center Networking', s: 'Nexus', cat: 'net', zone: 'dest', p: [16, 0, -20],
+      fn: 'Data center switching and fabric management; N9300 Smart Switches embed Hypershield enforcement beside workloads.',
+      url: CX + 'products/networking/cloud-networking/index.html', pol: ['enforce'],
+      roles: { data: 'Data center fabric', policy: 'Enforce: on smart switches' } },
+    silicon: { name: 'Cisco Silicon One', s: 'Silicon One', cat: 'net', zone: 'dest', p: [16, 0, -25],
+      fn: 'Programmable networking silicon architecture used inside Cisco routing, Nexus and Catalyst switching platforms.',
+      url: CX + 'products/networking/silicon-one/index.html',
+      roles: { data: 'Forwarding silicon' } },
+    te: { name: 'Cisco ThousandEyes', s: 'ThousandEyes', cat: 'net', zone: 'ops', p: [4, 13, 4],
+      fn: 'Assurance that measures digital experience across owned and unowned networks, from the user to cloud and SaaS.',
+      url: CX + 'products/networking/software/internet-cloud-intelligence/index.html',
+      roles: { data: 'Path and experience visibility' } },
+    meraki: { name: 'Meraki dashboard (Cisco Networking Platform)', s: 'Meraki dashboard', cat: 'net', zone: 'ops', p: [-14, 13, -4],
+      fn: 'Cloud dashboard that configures and monitors wireless, switching, routing and industrial Ethernet from one place.',
+      url: CX + 'products/networking/networking-cloud/index.html', pol: ['author'],
+      roles: { policy: 'Author: network configuration' } },
+    agentic: { name: 'AgenticOps (Cisco AI Canvas)', s: 'AgenticOps', cat: 'net', zone: 'ops', p: [-14, 13, 4],
+      fn: 'Shared workspace in Cisco Cloud Control where teams and AI agents investigate and resolve cross-domain issues.',
+      url: CX + 'solutions/artificial-intelligence/agentic-ops/ai-canvas/index.html',
+      note: 'No standalone AgenticOps page was found on cisco.com; the AI Canvas page (“the workspace for AgenticOps”) is used as the source.',
+      roles: { data: 'Cross-domain troubleshooting' } },
+
+    duo: { name: 'Cisco Duo', s: 'Duo', cat: 'id', zone: 'wan', p: [-4, 0, -4],
+      fn: 'Identity and access management with phishing-resistant authentication that verifies the user and device before access.',
+      url: CX + 'products/security/duo/index.html', pol: ['enforce'],
+      roles: { identity: 'MFA and device trust', policy: 'Enforce: sign-in decision', trust: 'User verification signal' } },
+    ise: { name: 'Cisco Identity Services Engine (ISE)', s: 'ISE', cat: 'id', zone: 'access', p: [-12.5, 0, -15.5],
+      fn: 'Network access control that profiles endpoints, applies identity and posture context, segments access and quarantines risky devices.',
+      url: CX + 'products/security/identity-services-engine/index.html', pol: ['author'],
+      roles: { identity: 'Network identity, profiling, posture', policy: 'Author: segmentation policy', threat: 'Quarantine endpoint', trust: 'Posture and behaviour context' } },
+    cii: { name: 'Cisco Identity Intelligence', s: 'Identity Intelligence', cat: 'id', zone: 'ops', p: [12, 13, -4],
+      fn: 'Identity analytics that exposes risky accounts and privileges and flags high-risk access attempts for Duo, Secure Access and XDR.',
+      url: CX + 'solutions/security/identity-intelligence/index.html',
+      roles: { identity: 'Identity risk analytics', threat: 'Identity threat detection', trust: 'Identity risk signal' } },
+    client: { name: 'Cisco Secure Client', s: 'Secure Client', cat: 'id', zone: 'access', p: [-15, 0, -3],
+      fn: 'Modular endpoint client providing VPN and zero trust network access, with endpoint and roaming security modules.',
+      url: CX + 'products/security/secure-client/index.html',
+      roles: { data: 'Encrypted tunnel from device', identity: 'Device-side access agent' } },
+    sa: { name: 'Cisco Secure Access', s: 'Secure Access', cat: 'id', zone: 'wan', p: [2, 0, -2], inspect: true,
+      fn: 'Cloud-delivered security service edge: zero trust and VPN access to private apps, protected internet, SaaS and AI use.',
+      url: CX + 'products/security/secure-access/index.html', pol: ['enforce'],
+      roles: { data: 'Inspection at cloud edge', identity: 'Per-app zero trust access', policy: 'Enforce: user-to-app policy', threat: 'Internet and SaaS control', trust: 'Per-session decision' } },
+
+    fw: { name: 'Cisco Secure Firewall', s: 'Firewall', cat: 'netsec', zone: 'dest', p: [11, 0, -20], inspect: true,
+      fn: 'Firewalls that inspect traffic, use Talos intelligence and detect threats in encrypted flows without decrypting them.',
+      url: CX + 'products/security/firewalls/index.html', pol: ['enforce'],
+      roles: { data: 'Traffic inspection', policy: 'Enforce: network policy', threat: 'Threat prevention' } },
+    hmf: { name: 'Cisco Hybrid Mesh Firewall', s: 'Hybrid Mesh Firewall', cat: 'netsec', zone: 'dest', p: [11, 0, -14.5],
+      fn: 'Solution that unifies distributed enforcement points — firewalls, smart switches, agents and AI guardrails — under one management plane.',
+      url: CX + 'solutions/security/hybrid-mesh-firewall/index.html',
+      roles: { policy: 'Distribute: one policy, many enforcers', threat: 'Unified enforcement mesh' } },
+    mcd: { name: 'Cisco Multicloud Defense', s: 'Multicloud Defense', cat: 'netsec', zone: 'dest', p: [13, 0, -3.5], inspect: true,
+      fn: 'Cloud firewalling from one control plane with ingress, egress and east-west protection across public and private clouds.',
+      url: CX + 'products/security/multicloud-defense/index.html', pol: ['enforce'],
+      roles: { data: 'Cloud gateway inspection', policy: 'Enforce: cloud network policy', threat: 'Blocks attacks, C2, exfiltration' } },
+    scc: { name: 'Cisco Security Cloud Control', s: 'Security Cloud Control', cat: 'netsec', zone: 'ops', p: [4, 13, -4],
+      fn: 'Unified management that authors policy once and applies it across Cisco and third-party enforcement points.',
+      url: CX + 'products/security/security-cloud-control/index.html', pol: ['author'],
+      note: 'The cisco.com product page is currently titled “Security in Cisco Cloud Control”.',
+      roles: { policy: 'Author: unified security policy' } },
+
+    umb: { name: 'Cisco Umbrella', s: 'Umbrella', cat: 'cloud', zone: 'wan', p: [2, 0, 5],
+      fn: 'Cloud security at the internet edge that blocks requests to malicious destinations before a connection is made.',
+      url: CX + 'products/security/umbrella/index.html', pol: ['enforce'],
+      roles: { policy: 'Enforce: internet destinations', threat: 'Blocks malicious destinations' } },
+    hs: { name: 'Cisco Hypershield', s: 'Hypershield', cat: 'cloud', zone: 'dest', p: [16, 0, -15],
+      fn: 'Distributed security fabric giving stateful segmentation close to workloads, enforced on Nexus N9300 Smart Switches.',
+      url: CX + 'products/security/hypershield/index.html', pol: ['enforce'],
+      roles: { policy: 'Enforce: segmentation at the workload edge', threat: 'Shields vulnerabilities' } },
+    wl: { name: 'Cisco Secure Workload', s: 'Secure Workload', cat: 'cloud', zone: 'dest', p: [20, 0, -12],
+      fn: 'Zero trust microsegmentation for workloads in any environment, with visibility into flows and policy recommendations.',
+      url: CX + 'products/security/secure-workload/index.html', pol: ['enforce'],
+      roles: { policy: 'Enforce: microsegmentation', threat: 'Stops lateral movement' } },
+    aid: { name: 'Cisco AI Defense', s: 'AI Defense', cat: 'cloud', zone: 'dest', p: [17, 0, -8],
+      fn: 'Discovers AI assets, tests models for vulnerabilities and applies runtime guardrails against prompt injection and data leakage.',
+      url: CX + 'products/security/ai-defense/index.html', pol: ['enforce'],
+      roles: { policy: 'Enforce: AI guardrails', threat: 'Prompt injection and leakage guardrails' } },
+    waap: { name: 'Cisco Web Application and API Protection (WAAP)', s: 'WAAP', cat: 'cloud', zone: 'wan', p: [2, 0, 21], inspect: true,
+      fn: 'Application, API and bot protection that uses behavioural analysis to identify threats before they reach the application.',
+      url: 'https://www.cisco.com/c/en/us/products/security/secure-web-application-firewall/index.html', pol: ['enforce'],
+      roles: { data: 'Application-layer inspection', policy: 'Enforce: application policy', threat: 'App, API and bot protection' } },
+
+    ep: { name: 'Cisco Secure Endpoint', s: 'Secure Endpoint', cat: 'endpoint', zone: 'access', p: [-15, 0, 3],
+      fn: 'Endpoint detection and response that blocks malware and can isolate an infected host with one action.',
+      url: CX + 'products/security/endpoint-security/secure-endpoint/index.html',
+      roles: { threat: 'Endpoint detection, host isolation', trust: 'Device health signal' } },
+    email: { name: 'Cisco Secure Email Threat Defense', s: 'Email Threat Defense', cat: 'endpoint', zone: 'wan', p: [2, 0, 13], inspect: true,
+      fn: 'Cloud email security that stops threats before delivery and remediates messages after delivery through APIs.',
+      url: CX + 'products/security/secure-email/index.html',
+      roles: { data: 'Mail inspection', threat: 'Phishing and email threat detection' } },
+
+    xdr: { name: 'Cisco XDR', s: 'XDR', cat: 'detect', zone: 'ops', p: [-5, 13, -4],
+      fn: 'Correlates telemetry from network, endpoint, email, cloud and identity into prioritised incidents with guided and automated response.',
+      url: CX + 'products/security/xdr/index.html',
+      roles: { threat: 'Correlate, prioritise, respond', trust: 'Incident signal' } },
+    sna: { name: 'Cisco Secure Network Analytics', s: 'Network Analytics', cat: 'detect', zone: 'access', p: [-17.5, 0, -16],
+      fn: 'Behavioural network analytics that detects insider threats, exfiltration and threats in encrypted traffic without decryption.',
+      url: CX + 'products/security/security-analytics/secure-network-analytics/index.html',
+      roles: { threat: 'Network behaviour detection', trust: 'Behaviour signal' } },
+    talos: { name: 'Cisco Talos', s: 'Talos', cat: 'detect', zone: 'ops', p: [-5, 13, 4],
+      fn: 'Cisco’s threat intelligence organisation; its research and detections feed Cisco security products.',
+      url: CX + 'products/security/talos/index.html',
+      roles: { threat: 'Threat intelligence feed' } },
+
+    cv: { name: 'Cisco Cyber Vision', s: 'Cyber Vision', cat: 'ot', zone: 'access', p: [-12, 0, 19],
+      fn: 'OT visibility from sensors embedded in network equipment: asset inventory, risk scoring, threat detection, segmentation and remote access.',
+      url: CX + 'products/security/industrial-security/cyber-vision/index.html', pol: ['author'],
+      roles: { identity: 'OT asset inventory', policy: 'Author: zones and conduits', threat: 'OT threat detection', trust: 'OT behaviour baseline' } },
+    itd: { name: 'Cisco Industrial Threat Defense', s: 'Industrial Threat Defense', cat: 'ot', zone: 'access', p: [-17.5, 0, 20.5],
+      fn: 'OT security solution combining asset discovery, segmentation, zero trust remote access and unified IT/OT detection.',
+      url: CX + 'products/security/industrial-security/index.html',
+      roles: { threat: 'OT security solution' } },
+    sea: { name: 'Cisco Secure Equipment Access', s: 'Secure Equipment Access', cat: 'ot', zone: 'access', p: [-12, 0, 8],
+      fn: 'Zero trust remote access to industrial assets; cisco.com states it is now part of Cyber Vision.',
+      url: CX + 'products/security/industrial-security/secure-equipment-access/index.html', pol: ['enforce'],
+      note: 'The product page states: “Cisco Secure Equipment Access is now part of Cisco Cyber Vision.” Capabilities shown here are those listed for remote access on the Cyber Vision page.',
+      roles: { data: 'Brokered remote session', identity: 'Least-privilege remote access', policy: 'Enforce: per-asset access' } },
+
+    ups: { name: 'Cisco User Protection Suite', s: 'User Protection', cat: 'suite', zone: 'ops', p: [12, 13, 4],
+      fn: 'Suite packaging Secure Access, Duo and Email Threat Defense; the Advantage tier adds Secure Endpoint and ISE.',
+      url: CX + 'products/security/user-protection/index.html', roles: {} },
+    cps: { name: 'Cisco Cloud Protection Suite', s: 'Cloud Protection', cat: 'suite', zone: 'ops', p: [19, 13, -4],
+      fn: 'Suite for adopting Hybrid Mesh Firewall: Secure Workload, Hypershield, Secure Firewall, Multicloud Defense and Security Cloud Control.',
+      url: CX + 'products/security/cloud-protection/index.html', roles: {} },
+    bps: { name: 'Cisco Breach Protection Suite', s: 'Breach Protection', cat: 'suite', zone: 'ops', p: [19, 13, 4],
+      fn: 'Suite unified by XDR with Email Threat Defense and Secure Endpoint; the Advantage tier adds Secure Network Analytics.',
+      url: CX + 'products/security/breach-protection/index.html', roles: {} }
+  },
+
+  /* non-product scene nodes */
+  places: {
+    hq: { name: 'HQ campus', kind: 'loc', p: [-27, 0, -20], fn: 'Corporate campus with wired and Wi-Fi access.' },
+    branch: { name: 'Branch office', kind: 'loc', p: [-27, 0, -11], fn: 'Smaller site connected over the WAN.' },
+    home: { name: 'Home', kind: 'loc', p: [-27, 0, -3], fn: 'Remote worker on a home network.' },
+    public: { name: 'Public Wi-Fi', kind: 'loc', p: [-27, 0, 5], fn: 'Untrusted network: coffee shop, airport or hotel.' },
+    factory: { name: 'Factory floor', kind: 'loc', p: [-27, 0, 14], fn: 'Operational site with industrial devices.' },
+    internet: { name: 'Open internet', kind: 'loc', p: [-27, 0, 23], hostile: true, fn: 'Outside the organisation; where external attackers start.' },
+    dcapp: { name: 'Private app · data center', kind: 'dest', p: [23, 0, -22.5], fn: 'Private application hosted in the data center.' },
+    workload: { name: 'Server / workload', kind: 'dest', p: [23, 0, -18.5], fn: 'A server or automated workload inside the data center.' },
+    server: { name: 'Internal server (east-west)', kind: 'dest', p: [23, 0, -14.5], fn: 'Another internal device or server.' },
+    intai: { name: 'Internal AI model', kind: 'dest', p: [23, 0, -8.5], fn: 'An AI model or agent the organisation runs itself.' },
+    cloudapp: { name: 'Private app · public cloud', kind: 'dest', p: [23, 0, -3.5], fn: 'Application hosted in a public cloud.' },
+    saas: { name: 'Sanctioned SaaS', kind: 'dest', p: [23, 0, 1.5], fn: 'A SaaS application the organisation has approved.' },
+    shadow: { name: 'Unsanctioned SaaS', kind: 'dest', p: [23, 0, 5.5], fn: 'A SaaS application adopted without approval (shadow IT).' },
+    ai: { name: 'Approved AI assistant', kind: 'dest', p: [23, 0, 9.5], fn: 'A third-party AI assistant approved for use.' },
+    pubai: { name: 'Unapproved AI tool', kind: 'dest', p: [23, 0, 13.5], fn: 'A public AI tool that has not been approved.' },
+    web: { name: 'Public web', kind: 'dest', p: [23, 0, 17.5], fn: 'Public websites: safe, risky-category or known malicious.' },
+    mail: { name: 'Email inbox', kind: 'dest', p: [23, 0, 21.5], fn: 'The user’s corporate mailbox.' },
+    otctl: { name: 'OT controller', kind: 'dest', p: [23, 0, 25.5], fn: 'Industrial controller on the factory floor.' }
+  },
+
+  /* Relationships stated on cisco.com. [a, b, relationship, source (product id or DATA.sources key), kind] */
+  links: [
+    ['ise', 'switches', 'Identity-based segmentation with security group tags, orchestrated by ISE', 'campus'],
+    ['ise', 'wireless', 'Security group tags on wireless; segmentation orchestrated by ISE', 'campus'],
+    ['ise', 'hmf', 'ISE identity context informs segmentation policy', 'ise'],
+    ['ise', 'fw', 'ISE shares identity context for segmentation', 'fw'],
+    ['ise', 'sna', 'Used together for segmentation policy and unauthorised-access alerts', 'sna'],
+    ['ise', 'cv', 'Out-of-the-box IT/OT integration', 'cv'],
+    ['ise', 'sa', 'Zero Trust Access is built with ISE, Secure Access and Duo', 'ise'],
+    ['ise', 'duo', 'Zero Trust Access is built with ISE, Secure Access and Duo', 'ise'],
+    ['duo', 'sa', 'Duo strengthens authentication for Secure Access', 'sa'],
+    ['cii', 'duo', 'Adds identity insights to Duo', 'cii'],
+    ['cii', 'sa', 'Adds identity intelligence against account takeover', 'cii'],
+    ['cii', 'xdr', 'Adds identity threat views and response actions to XDR', 'cii'],
+    ['client', 'ep', 'Secure Endpoint is offered as a Secure Client module', 'client'],
+    ['client', 'umb', 'Umbrella roaming protection is offered as a Secure Client module', 'client'],
+    ['client', 'xdr', 'Integration for detection and response', 'client'],
+    ['client', 'sna', 'Paired for visibility into application use and behaviour', 'client'],
+    ['sa', 'sdwan', 'SASE converges Secure Access with SD-WAN', 'sase'],
+    ['sa', 'meraki', 'Secure Access integrates with Meraki SD-WAN', 'sa'],
+    ['sa', 'te', 'ThousandEyes powers experience insights in Secure Access', 'sa'],
+    ['sa', 'scc', 'Brings user and app access into the same policy framework', 'scc'],
+    ['sa', 'aid', 'AI Access for third-party AI apps is listed under Secure Access', 'aid'],
+    ['fw', 'scc', 'Firewall management through Security Cloud Control', 'fw'],
+    ['fw', 'hmf', 'Firewall is an enforcement point of Hybrid Mesh Firewall', 'hmf'],
+    ['fw', 'talos', 'Talos supplies threat intelligence', 'fw'],
+    ['fw', 'wl', 'Native integration between Secure Workload and Secure Firewall', 'wl'],
+    ['fw', 'xdr', 'Listed firewall integration', 'fw'],
+    ['fw', 'waap', 'Listed firewall integration', 'fw'],
+    ['fw', 'cv', 'Out-of-the-box IT/OT integration', 'cv'],
+    ['hmf', 'scc', 'All enforcement points are managed through Security Cloud Control', 'hmf'],
+    ['hmf', 'wl', 'End-to-end segmentation powered by Secure Workload', 'hmf'],
+    ['hmf', 'aid', 'AI workload protection powered by AI Defense', 'hmf'],
+    ['hmf', 'hs', 'Vulnerability shielding powered by Hypershield technology', 'hmf'],
+    ['hmf', 'mcd', 'Multicloud firewalling powered by Multicloud Defense', 'hmf'],
+    ['hmf', 'nexus', 'Unifies switches, firewalls and Kubernetes workloads under one control plane', 'nexusone'],
+    ['mcd', 'scc', 'Policy managed from Security Cloud Control', 'mcd'],
+    ['hs', 'nexus', 'Enforced on Nexus N9300 Smart Switches', 'hs'],
+    ['hs', 'scc', 'Cloud Control manages Hypershield policy, visibility and lifecycle', 'hs'],
+    ['wl', 'scc', 'Consistent segmentation and zero trust policy', 'scc'],
+    ['aid', 'scc', 'Extends the architecture to AI risk', 'scc'],
+    ['sdwan', 'scc', 'Router NGFW combined with other security through Security Cloud Control', 'sdwan'],
+    ['aid', 'talos', 'Talos intelligence informs detections', 'aid'],
+    ['ep', 'xdr', 'Integrated XDR capabilities', 'ep'],
+    ['ep', 'talos', 'Talos threat hunting and intelligence built in', 'ep'],
+    ['ep', 'umb', 'Listed combination for always-on security', 'ep'],
+    ['ep', 'duo', 'Duo verifies user identity before application access', 'ep'],
+    ['email', 'ep', 'Listed “better together” pairing', 'email'],
+    ['xdr', 'email', 'Listed Cisco integration', 'xdr'],
+    ['xdr', 'sna', 'Listed Cisco integration for network visibility', 'xdr'],
+    ['cv', 'xdr', 'Out-of-the-box IT/OT integration', 'cv'],
+    ['cv', 'talos', 'Talos intelligence and detection content', 'cv'],
+    ['cv', 'industrial', 'Cyber Vision sensor is built into industrial network equipment', 'industrial'],
+    ['itd', 'cv', 'Component of Industrial Threat Defense', 'itd'],
+    ['itd', 'fw', 'Component of Industrial Threat Defense', 'itd'],
+    ['itd', 'ise', 'Component of Industrial Threat Defense', 'itd'],
+    ['itd', 'xdr', 'OT insights surface in XDR', 'itd'],
+    ['itd', 'talos', 'Talos intelligence and incident response', 'itd'],
+    ['sea', 'cv', 'Secure Equipment Access is now part of Cyber Vision', 'sea'],
+    ['silicon', 'nexus', 'Silicon One inside Nexus switches', 'silicon'],
+    ['silicon', 'switches', 'Silicon One inside Catalyst and Smart Switches', 'silicon'],
+    ['te', 'wireless', 'Embedded assurance in Cisco wireless', 'wireless'],
+    ['te', 'switches', 'Listed better-together switching solution', 'switches'],
+    ['te', 'meraki', 'Embedded assurance in the Meraki dashboard', 'meraki'],
+    ['te', 'nexus', 'Traffic insights within the data center', 'te'],
+    ['meraki', 'switches', 'Cloud monitoring and management of Catalyst switching', 'switches'],
+    ['meraki', 'wireless', 'Cloud configuration and management of wireless', 'wireless'],
+    ['meraki', 'industrial', 'Deploy, manage and monitor from the Meraki platform', 'industrial'],
+    ['agentic', 'wireless', 'AgenticOps capabilities for wireless', 'wireless'],
+    ['agentic', 'meraki', 'AI Canvas routes to a Meraki agent', 'agentic'],
+    ['agentic', 'te', 'AI Canvas routes to a ThousandEyes agent', 'agentic'],
+    ['umb', 'sdwan', 'Umbrella deployed with access networking and SD-WAN', 'netsec'],
+    ['ups', 'sa', 'Included in the suite', 'ups', 'suite'], ['ups', 'duo', 'Included in the suite', 'ups', 'suite'],
+    ['ups', 'email', 'Included in the suite', 'ups', 'suite'], ['ups', 'ep', 'Included in the Advantage tier', 'ups', 'suite'],
+    ['ups', 'ise', 'Included in the Advantage tier', 'ups', 'suite'], ['ups', 'talos', 'Talos intelligence for user protection', 'ups', 'suite'],
+    ['cps', 'wl', 'Included in the Segmentation package', 'cps', 'suite'], ['cps', 'hs', 'Included in the Segmentation package', 'cps', 'suite'],
+    ['cps', 'scc', 'Included in both packages', 'cps', 'suite'], ['cps', 'fw', 'Included in the Gateway package', 'cps', 'suite'],
+    ['cps', 'mcd', 'Included in the Gateway package', 'cps', 'suite'], ['cps', 'hmf', 'The suite is the licensing path to Hybrid Mesh Firewall', 'cps', 'suite'],
+    ['bps', 'xdr', 'Suite is unified by XDR', 'bps', 'suite'], ['bps', 'email', 'Included in the suite', 'bps', 'suite'],
+    ['bps', 'ep', 'Included in the suite', 'bps', 'suite'], ['bps', 'sna', 'Included in the Advantage tier', 'bps', 'suite'],
+    ['bps', 'talos', 'Threat intelligence from Talos', 'bps', 'suite']
+  ],
+  /* subsets of the links above that the POLICY and THREAT lenses animate */
+  policyFlow: [['scc', 'fw'], ['scc', 'mcd'], ['scc', 'hs'], ['scc', 'sa'], ['scc', 'wl'], ['scc', 'aid'], ['scc', 'sdwan'],
+    ['ise', 'switches'], ['ise', 'wireless'], ['meraki', 'switches'], ['meraki', 'wireless'], ['meraki', 'industrial'], ['cv', 'industrial']],
+  teleFlow: [['ep', 'xdr'], ['email', 'xdr'], ['sna', 'xdr'], ['client', 'xdr'], ['cv', 'xdr'], ['fw', 'xdr'], ['cii', 'xdr'],
+    ['talos', 'fw'], ['talos', 'ep'], ['talos', 'cv'], ['talos', 'aid']],
+
+  /* DATA lens: how each path segment is carried. First match wins; default is "clear". */
+  segments: [['*', 'wireless', 'enc', 'WPA3 air link'], ['client', '*', 'enc', 'Device tunnel (VPN / zero trust access)'],
+    ['sdwan', '*', 'enc', 'Encrypted SD-WAN overlay'], ['sea', '*', 'enc', 'Brokered remote-access session']],
+
+  groups: {
+    HUMAN: ['emp', 'admin', 'exec', 'contractor', 'guest', 'insider', 'attacker'],
+    STAFF: ['emp', 'admin', 'exec', 'insider'],
+    AUTHN: ['emp', 'admin', 'exec', 'contractor', 'insider', 'attacker'],
+    NONHUMAN: ['iot', 'ot', 'aiagent'],
+    MANAGED: ['mgd', 'stale', 'mobile', 'compromised'],
+    ONPREM: ['hq', 'branch', 'factory'], REMOTE: ['home', 'public', 'travel'],
+    INET: ['saas', 'shadow', 'web_safe', 'web_risky', 'web_mal', 'ai', 'pubai', 'mail'],
+    WEB: ['web_safe', 'web_risky', 'web_mal'],
+    PRIV: ['dcapp', 'cloudapp', 'eastwest', 'intai', 'ot'], DC: ['dcapp', 'eastwest', 'intai'],
+    AIDEST: ['ai', 'pubai', 'intai'],
+    ACC: ['switches', 'industrial', 'sdwan'],                                   /* hop where network access control acts */
+    AUTH: ['sa', 'sea', 'switches', 'industrial', 'sdwan', 'client', '@dst'],   /* hop where sign-in is evaluated */
+    EDGE: ['sdwan', 'client', 'industrial', 'switches']                         /* hop where internet-edge lookups happen */
+  },
+
+  /* t = contribution to the starting trust score (base 50) */
+  pickers: {
+    who: [
+      { id: 'emp', label: 'Employee (standard)', short: 'Employee', t: 5 },
+      { id: 'admin', label: 'Privileged admin', short: 'Privileged admin', t: 5 },
+      { id: 'exec', label: 'Executive', short: 'Executive', t: 5 },
+      { id: 'contractor', label: 'Contractor / third party', short: 'Contractor', t: 0 },
+      { id: 'guest', label: 'Guest', short: 'Guest', t: -15 },
+      { id: 'iot', label: 'IoT device (camera, printer, sensor)', short: 'IoT device', t: -5 },
+      { id: 'ot', label: 'OT / industrial device (PLC, robot)', short: 'OT device', t: -5 },
+      { id: 'aiagent', label: 'AI agent or automated workload', short: 'AI agent / workload', t: 0 },
+      { id: 'attacker', label: 'External attacker', short: 'External attacker', t: -30 },
+      { id: 'insider', label: 'Malicious or careless insider', short: 'Insider', t: 5 }
+    ],
+    device: [
+      { id: 'mgd', label: 'Managed laptop (compliant)', short: 'Managed laptop', t: 10 },
+      { id: 'stale', label: 'Managed laptop, out of date', short: 'Out-of-date laptop', t: 0 },
+      { id: 'mobile', label: 'Managed mobile', short: 'Managed mobile', t: 5 },
+      { id: 'byod', label: 'Personal phone or laptop (unmanaged)', short: 'Unmanaged device', t: -5 },
+      { id: 'claptop', label: 'Contractor-owned laptop', short: 'Contractor laptop', t: -5 },
+      { id: 'headless', label: 'Headless device (IoT / OT)', short: 'Headless device', t: -5 },
+      { id: 'server', label: 'Server or cloud workload', short: 'Server / workload', t: 0 },
+      { id: 'compromised', label: 'Compromised device (malware present)', short: 'Compromised device', t: 10 }
+    ],
+    loc: [
+      { id: 'hq', label: 'HQ campus (wired / Wi-Fi)', short: 'HQ campus', place: 'hq', t: 5 },
+      { id: 'branch', label: 'Branch office', short: 'Branch', place: 'branch', t: 5 },
+      { id: 'home', label: 'Home', short: 'Home', place: 'home', t: 0 },
+      { id: 'public', label: 'Coffee shop / airport / hotel', short: 'Public Wi-Fi', place: 'public', t: -5 },
+      { id: 'factory', label: 'Factory floor', short: 'Factory', place: 'factory', t: 0 },
+      { id: 'travel', label: 'Unusual country / impossible travel', short: 'Unusual country', place: 'public', t: -5 },
+      { id: 'internet', label: 'Internet (outside the organisation)', short: 'Internet', place: 'internet', t: -10 }
+    ],
+    dest: [
+      { id: 'dcapp', label: 'Private app in the data center', short: 'Private app (DC)', node: 'dcapp' },
+      { id: 'cloudapp', label: 'Private app in public cloud', short: 'Private app (cloud)', node: 'cloudapp' },
+      { id: 'saas', label: 'Sanctioned SaaS', short: 'Sanctioned SaaS', node: 'saas' },
+      { id: 'shadow', label: 'Unsanctioned SaaS (shadow IT)', short: 'Unsanctioned SaaS', node: 'shadow' },
+      { id: 'web_safe', label: 'Public website: safe', short: 'Safe website', node: 'web' },
+      { id: 'web_risky', label: 'Public website: risky category', short: 'Risky website', node: 'web' },
+      { id: 'web_mal', label: 'Public website: known malicious', short: 'Malicious website', node: 'web' },
+      { id: 'ai', label: 'Approved AI assistant', short: 'Approved AI assistant', node: 'ai' },
+      { id: 'pubai', label: 'Unapproved public AI tool', short: 'Unapproved AI tool', node: 'pubai' },
+      { id: 'intai', label: 'Internal AI model or agent', short: 'Internal AI model', node: 'intai' },
+      { id: 'eastwest', label: 'Another internal device or server', short: 'Internal server', node: 'server' },
+      { id: 'ot', label: 'OT controller', short: 'OT controller', node: 'otctl' },
+      { id: 'mail', label: 'Email inbox', short: 'Email inbox', node: 'mail' }
+    ],
+    /* g = sub-group heading; x = cannot be combined with "Normal use"; mfa = mutually exclusive set */
+    beh: [
+      { id: 'norm', label: 'Normal use', g: 'Baseline' },
+      { id: 'mfa_ok', label: 'MFA passed', g: 'Authentication', mfa: 1 },
+      { id: 'mfa_fail', label: 'MFA failed', g: 'Authentication', mfa: 1, x: 1 },
+      { id: 'fatigue', label: 'MFA fatigue push-bombing', g: 'Authentication', mfa: 1, x: 1 },
+      { id: 'stolen', label: 'Stolen credentials, valid password', g: 'Authentication', x: 1 },
+      { id: 'offhours', label: 'Access outside working hours', g: 'Authentication', x: 1 },
+      { id: 'priv', label: 'Excessive privilege request', g: 'Authentication', x: 1 },
+      { id: 'upload', label: 'Uploads sensitive data', g: 'Data', x: 1 },
+      { id: 'aipaste', label: 'Pastes confidential data or code into an AI prompt', g: 'Data', x: 1 },
+      { id: 'inject', label: 'Prompt injection or jailbreak attempt', g: 'Data', x: 1 },
+      { id: 'exfil', label: 'Data exfiltration over DNS or encrypted channel', g: 'Data', x: 1 },
+      { id: 'malfile', label: 'Downloads a malicious file', g: 'Threat', x: 1 },
+      { id: 'phish', label: 'Clicks a phishing link', g: 'Threat', x: 1 },
+      { id: 'scan', label: 'Scans the network / lateral movement', g: 'Threat', x: 1 },
+      { id: 'ransom', label: 'Ransomware behaviour', g: 'Threat', x: 1 },
+      { id: 'anomaly', label: 'Device behaves unlike its profile', g: 'Threat', x: 1 },
+      { id: 'slow', label: 'Application is slow (experience fault)', g: 'Operations', x: 1 },
+      { id: 'push', label: 'New policy authored and pushed', g: 'Operations', x: 1 }
+    ]
+  },
+
+  /* Invalid combinations. Evaluated in picker order who → device → loc → dest → beh; `when` may only reference earlier pickers. */
+  constraints: [
+    { pick: 'device', when: { who: ['$STAFF'] }, only: ['mgd', 'stale', 'mobile', 'byod', 'compromised'], why: 'Staff use a laptop or mobile device.' },
+    { pick: 'device', when: { who: ['contractor'] }, only: ['claptop', 'byod'], why: 'Contractors bring their own equipment.' },
+    { pick: 'device', when: { who: ['guest'] }, only: ['byod'], why: 'Guests bring an unmanaged personal device.' },
+    { pick: 'device', when: { who: ['iot', 'ot'] }, only: ['headless'], why: 'IoT and OT devices are headless.' },
+    { pick: 'device', when: { who: ['aiagent'] }, only: ['server'], why: 'An AI agent or workload runs on a server.' },
+    { pick: 'device', when: { who: ['attacker'] }, only: ['byod'], why: 'An external attacker uses a device the organisation does not manage.' },
+    { pick: 'loc', when: { who: ['guest'] }, only: ['hq', 'branch'], why: 'Guests connect on site.' },
+    { pick: 'loc', when: { who: ['iot'] }, only: ['hq', 'branch', 'factory'], why: 'IoT devices are installed on site.' },
+    { pick: 'loc', when: { who: ['ot'] }, only: ['factory'], why: 'OT devices operate on the factory floor.' },
+    { pick: 'loc', when: { who: ['aiagent'] }, only: ['hq'], why: 'Workloads run in the data center (shown under HQ).' },
+    { pick: 'loc', when: { who: ['attacker'] }, only: ['internet', 'travel'], why: 'An external attacker starts outside the organisation.' },
+    { pick: 'loc', when: { who: ['$STAFF', 'contractor'] }, deny: ['internet'], why: 'For a legitimate remote user choose Home or Public Wi-Fi.' },
+    { pick: 'dest', when: { who: ['attacker'] }, deny: ['web_safe', 'web_risky', 'web_mal', 'pubai', 'ai', 'shadow'], why: 'Not a resource the organisation protects from an outside attacker.' },
+    { pick: 'dest', when: { who: ['iot', 'ot'] }, deny: ['mail', 'ai', 'pubai'], why: 'A headless device has no mailbox or AI assistant.' },
+    { pick: 'dest', when: { who: ['aiagent', 'guest'] }, deny: ['mail'], why: 'This identity has no corporate mailbox.' },
+    { pick: 'beh', when: { who: ['$NONHUMAN', 'guest'] }, deny: ['mfa_ok', 'mfa_fail', 'fatigue', 'stolen'], why: 'No interactive sign-in for this identity.' },
+    { pick: 'beh', when: { who: ['$NONHUMAN'] }, deny: ['phish', 'malfile'], why: 'Needs a human user.' },
+    { pick: 'beh', when: { dest: ['dcapp', 'cloudapp', 'saas', 'shadow', 'web_safe', 'web_risky', 'web_mal', 'eastwest', 'ot', 'mail'] }, deny: ['aipaste', 'inject'], why: 'Needs an AI destination.' },
+    { pick: 'beh', when: { device: ['mgd', 'stale', 'mobile', 'byod', 'claptop', 'server', 'compromised'] }, deny: ['anomaly'], why: 'Applies to headless IoT / OT devices.' },
+    { pick: 'beh', when: { who: ['attacker'] }, deny: ['norm', 'slow', 'push', 'offhours'], why: 'Does not apply to an external attacker.' },
+    { pick: 'beh', when: { who: ['$NONHUMAN', 'guest', 'contractor'] }, deny: ['push'], why: 'Policy is authored by an administrator.' }
+  ],
+
+  /* ---------------- RULE TABLE ----------------
+     paths: the most specific matching rule wins (ties: the later rule); a rule with no `when` is the fallback.
+     '@loc' = the chosen location, '@dest' = the chosen destination. */
+  paths: {
+    access: [
+      { id: 'AC-0', nodes: ['@loc'] },
+      { id: 'AC-remote', when: { loc: ['$REMOTE'] }, nodes: ['@loc'] },
+      { id: 'AC-internet', when: { loc: ['internet'] }, nodes: ['internet'] },
+      { id: 'AC-hq', when: { loc: ['hq'] }, nodes: ['hq', 'wireless', 'switches'] },
+      { id: 'AC-hq-wired', when: { loc: ['hq'], device: ['headless'] }, nodes: ['hq', 'switches'] },
+      { id: 'AC-branch', when: { loc: ['branch'] }, nodes: ['branch', 'sdwan'] },
+      { id: 'AC-factory', when: { loc: ['factory'] }, nodes: ['factory', 'industrial'] },
+      { id: 'AC-remote-client', when: { loc: ['$REMOTE'], device: ['$MANAGED'] }, nodes: ['@loc', 'client'] },
+      { id: 'AC-workload', when: { device: ['server'] }, nodes: ['workload', 'nexus'] }
+    ],
+    route: [
+      { id: 'RT-0', nodes: ['sa', '@dest'] },
+      { id: 'RT-dc', when: { dest: ['$DC'] }, nodes: ['fw', 'nexus', '@dest'] },
+      { id: 'RT-dc-remote', when: { dest: ['$DC'], loc: ['$REMOTE'] }, nodes: ['sa', 'fw', 'nexus', '@dest'] },
+      { id: 'RT-dc-workload', when: { dest: ['$DC'], device: ['server'] }, nodes: ['@dest'] },
+      { id: 'RT-cloud', when: { dest: ['cloudapp'] }, nodes: ['sa', 'mcd', 'cloudapp'] },
+      { id: 'RT-cloud-onprem', when: { dest: ['cloudapp'], loc: ['$ONPREM'] }, nodes: ['sdwan', 'mcd', 'cloudapp'] },
+      { id: 'RT-cloud-workload', when: { dest: ['cloudapp'], device: ['server'] }, nodes: ['fw', 'mcd', 'cloudapp'] },
+      { id: 'RT-cloud-internet', when: { dest: ['cloudapp'], loc: ['internet'] }, nodes: ['waap', 'mcd', 'cloudapp'] },
+      { id: 'RT-inet', when: { dest: ['$INET'] }, nodes: ['sa', '@dest'] },
+      { id: 'RT-inet-onprem', when: { dest: ['$INET'], loc: ['$ONPREM'] }, nodes: ['sdwan', 'sa', '@dest'] },
+      { id: 'RT-inet-workload', when: { dest: ['$INET'], device: ['server'] }, nodes: ['fw', '@dest'] },
+      { id: 'RT-inet-internet', when: { dest: ['$INET'], loc: ['internet'] }, nodes: ['@dest'] },
+      { id: 'RT-ot', when: { dest: ['ot'] }, nodes: ['fw', 'industrial', 'otctl'] },
+      { id: 'RT-ot-factory', when: { dest: ['ot'], loc: ['factory'] }, nodes: ['otctl'] },
+      { id: 'RT-ot-remote', when: { dest: ['ot'], loc: ['$REMOTE'] }, nodes: ['sea', 'industrial', 'otctl'] }
+    ]
+  },
+
+  /* checks: every matching rule fires in path order.
+     when: who/device/loc/dest (any-of), beh (any-of), ball (all-of), nbeh (none-of), not{}, via/nvia (path contains / lacks node)
+     hop : path node where the check happens (first present wins). post:true = happens after the path (response / operations).
+     at  : the product doing the checking.   d: trust change.   sig: the signal that moved the score.
+     v   : verdict this rule argues for. Highest severity wins: ALLOW < LIMIT < STEPUP < BLOCK < CONTAIN.
+           STEPUP, BLOCK and CONTAIN on the path stop the traffic at that hop.
+     tele: emits telemetry that XDR can correlate.  base: routine check, skipped once the session is stopped at that hop. */
+  checks: [
+    /* --- network identity and segmentation --- */
+    { id: 'N1', when: { via: ['$ACC'], not: { device: ['headless', 'server'], who: ['guest', 'attacker'] } }, hop: ['$ACC'], at: 'ise', lens: 'identity',
+      c: 'Network access control', r: 'User and device authenticated to the network; segment assigned from identity', d: 5, sig: 'Network identity established' },
+    { id: 'N2', when: { device: ['headless'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'identity',
+      c: 'Endpoint profiling', r: 'Headless device profiled and placed in a least-privilege segment', d: 5, sig: 'Device profiled',
+      v: 'LIMIT', why: 'Headless devices are profiled and confined to a least-privilege segment.' },
+    { id: 'N3', when: { who: ['guest'], dest: ['$INET'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
+      c: 'Guest access', r: 'Guest identity mapped to an internet-only segment',
+      v: 'LIMIT', why: 'Guests receive internet access only, isolated from internal resources.' },
+    { id: 'N4', when: { who: ['guest'], dest: ['$PRIV'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
+      c: 'Guest segmentation', r: 'The guest segment has no path to internal resources', d: -10, sig: 'Out-of-scope request',
+      v: 'BLOCK', why: 'Guest access is internet-only; internal resources are unreachable from the guest segment.' },
+    { id: 'N5', when: { who: ['iot', 'ot'], dest: ['dcapp', 'cloudapp', 'intai'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
+      c: 'Device segmentation', r: 'Destination is outside what this device profile may reach', d: -10, sig: 'Out-of-profile destination',
+      v: 'BLOCK', why: 'The device’s segment only permits the destinations its profile needs.' },
+    { id: 'N6', when: { who: ['iot'], dest: ['ot'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
+      c: 'Device segmentation', r: 'IT-side device has no path into the industrial zone', d: -10, sig: 'Out-of-profile destination',
+      v: 'BLOCK', why: 'The device’s segment only permits the destinations its profile needs.' },
+    { id: 'N7', when: { who: ['ot'], dest: ['$INET'], via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'policy',
+      c: 'Zones and conduits', r: 'No conduit is defined from this OT zone to the internet', d: -10, sig: 'Out-of-zone destination',
+      v: 'BLOCK', why: 'OT assets communicate only through defined zones and conduits.' },
+
+    /* --- device posture and trust --- */
+    { id: 'P1', when: { device: ['mgd', 'mobile'], loc: ['$ONPREM'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'identity',
+      c: 'Device posture', r: 'Managed device meets compliance policy', d: 5, sig: 'Posture compliant' },
+    { id: 'P2', when: { device: ['mgd', 'mobile'], loc: ['$REMOTE'], who: ['$AUTHN'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+      c: 'Device trust', r: 'Managed, healthy device confirmed', d: 5, sig: 'Trusted device' },
+    { id: 'P3', when: { device: ['stale'], loc: ['$ONPREM'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'identity',
+      c: 'Device posture', r: 'Device is out of date and fails compliance policy', d: -15, sig: 'Posture non-compliant',
+      v: 'LIMIT', why: 'An out-of-date device is restricted until it is remediated.' },
+    { id: 'P4', when: { device: ['stale'], loc: ['$REMOTE'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+      c: 'Device trust', r: 'Device is out of date and fails the device-health policy', d: -15, sig: 'Posture non-compliant',
+      v: 'LIMIT', why: 'An out-of-date device is restricted until it is remediated.' },
+    { id: 'P5', when: { device: ['byod', 'claptop'], who: ['emp', 'admin', 'exec', 'contractor', 'insider'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+      c: 'Device trust', r: 'Device is not managed by the organisation; trust not established', d: -10, sig: 'Unmanaged device',
+      v: 'LIMIT', why: 'Unmanaged devices receive limited access.' },
+
+    /* --- identity analytics, then authentication --- */
+    { id: 'M6', when: { beh: ['fatigue'], who: ['$AUTHN'] }, hop: ['$AUTH'], at: 'cii', lens: 'threat', tele: true,
+      c: 'Identity analytics', r: 'Abnormal authentication pattern flagged on the account', d: -10, sig: 'Identity risk raised',
+      v: 'STEPUP', why: 'An abnormal authentication pattern means the identity must re-verify.' },
+    { id: 'M7', when: { beh: ['stolen'], who: ['$AUTHN'] }, hop: ['$AUTH'], at: 'cii', lens: 'identity', tele: true,
+      c: 'Identity analytics', r: 'Valid password presented from an unfamiliar context: high-risk sign-in', d: -25, sig: 'Credential risk',
+      v: 'STEPUP', why: 'A valid password alone is not trusted; the session must re-authenticate with a stronger factor.' },
+    { id: 'M8', when: { loc: ['travel'], who: ['$AUTHN'] }, hop: ['$AUTH'], at: 'cii', lens: 'trust', tele: true,
+      c: 'Sign-in context', r: 'Location is inconsistent with the account’s recent activity', d: -20, sig: 'Impossible travel',
+      v: 'STEPUP', why: 'The sign-in location is inconsistent with recent activity, so re-authentication is required.' },
+    { id: 'M9', when: { beh: ['offhours'], who: ['$AUTHN'] }, hop: ['$AUTH'], at: 'cii', lens: 'trust',
+      c: 'Access pattern', r: 'Access time is outside the identity’s normal pattern', d: -8, sig: 'Unusual time of access' },
+    { id: 'M1', when: { who: ['emp', 'exec', 'contractor', 'insider'], nbeh: ['mfa_fail', 'fatigue', 'stolen'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+      c: 'User authentication', r: 'User verified with phishing-resistant MFA', d: 10, sig: 'MFA passed' },
+    { id: 'M1b', when: { who: ['$AUTHN'], ball: ['stolen', 'mfa_ok'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+      c: 'User authentication', r: 'MFA challenge completed', d: 5, sig: 'MFA passed' },
+    { id: 'M2', when: { who: ['admin'], beh: ['mfa_ok'], nbeh: ['stolen'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+      c: 'Privileged authentication', r: 'Administrator verified with fresh phishing-resistant MFA', d: 10, sig: 'MFA passed' },
+    { id: 'M3', when: { who: ['admin'], nbeh: ['mfa_ok', 'mfa_fail', 'fatigue'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+      c: 'Privileged session', r: 'Privileged access requires fresh strong authentication', d: -5, sig: 'Fresh authentication required',
+      v: 'STEPUP', why: 'Privileged access requires fresh strong authentication before the session continues.' },
+    { id: 'M4', when: { who: ['$AUTHN'], beh: ['mfa_fail'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+      c: 'User authentication', r: 'MFA not completed; no session issued', d: -30, sig: 'MFA failed',
+      v: 'BLOCK', why: 'Authentication was not completed, so no session is created.' },
+    { id: 'M5', when: { who: ['$AUTHN'], beh: ['fatigue'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+      c: 'Push-bombing resistance', r: 'Repeated prompts were not approved by a verified user; sign-in refused', d: -25, sig: 'MFA fatigue pattern',
+      v: 'BLOCK', why: 'Repeated unverified MFA prompts are treated as an attack on the identity.' },
+    { id: 'M10', when: { who: ['attacker'], nbeh: ['stolen'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+      c: 'User authentication', r: 'No valid identity presented', d: -20, sig: 'Unauthenticated request',
+      v: 'BLOCK', why: 'Without a verified identity there is no session.' },
+
+    /* --- access scope --- */
+    { id: 'S1', when: { who: ['contractor'], dest: ['dcapp', 'cloudapp'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
+      c: 'Zero trust access', r: 'Access granted to the one approved application, not to the network',
+      v: 'LIMIT', why: 'Contractor access is limited to one approved application.' },
+    { id: 'S1b', when: { who: ['contractor'], dest: ['dcapp', 'cloudapp'], nvia: ['sa'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
+      c: 'Contractor segmentation', r: 'Contractor segment permits only the approved application',
+      v: 'LIMIT', why: 'Contractor access is limited to one approved application.' },
+    { id: 'S2', when: { who: ['contractor'], dest: ['eastwest', 'intai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
+      c: 'Zero trust access', r: 'Requested resource is not among the contractor’s granted applications', d: -15, sig: 'Out-of-scope request',
+      v: 'BLOCK', why: 'The resource is outside the contractor’s approved scope.' },
+    { id: 'S2b', when: { who: ['contractor'], dest: ['eastwest', 'intai'], nvia: ['sa'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
+      c: 'Contractor segmentation', r: 'Requested resource is outside the contractor segment', d: -15, sig: 'Out-of-scope request',
+      v: 'BLOCK', why: 'The resource is outside the contractor’s approved scope.' },
+    { id: 'S3', when: { via: ['sea'] }, hop: ['sea'], at: 'sea', lens: 'policy',
+      c: 'Remote equipment access', r: 'Least-privilege session to the named asset, with approval workflow and session recording',
+      v: 'LIMIT', why: 'Remote access to the machine is limited to the named asset through a controlled, recorded session.' },
+    { id: 'S4', when: { beh: ['priv'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
+      c: 'Least-privilege access', r: 'Requested privilege exceeds what the identity’s role allows', d: -15, sig: 'Excess privilege request',
+      v: 'BLOCK', why: 'The request exceeds the role’s least-privilege entitlement.' },
+    { id: 'S5', when: { beh: ['priv'], nvia: ['sa'], via: ['nexus'] }, hop: ['nexus'], at: 'wl', lens: 'policy',
+      c: 'Microsegmentation policy', r: 'Flow is outside the workload’s allowed communication policy', d: -15, sig: 'Excess privilege request',
+      v: 'BLOCK', why: 'The request exceeds the role’s least-privilege entitlement.' },
+    { id: 'S6', when: { beh: ['priv'], nvia: ['sa', 'nexus'] }, hop: ['$ACC', '@dst'], at: 'cii', lens: 'identity', tele: true,
+      c: 'Privilege analytics', r: 'Privilege request exceeds the role and is flagged as risky', d: -15, sig: 'Excess privilege request',
+      v: 'BLOCK', why: 'The request exceeds the role’s least-privilege entitlement.' },
+
+    /* --- external attacker at the perimeter --- */
+    { id: 'X1', when: { who: ['attacker'], via: ['fw'] }, hop: ['fw'], at: 'fw', lens: 'threat', tele: true, also: ['talos'],
+      c: 'Inbound threat prevention', r: 'Unsolicited inbound connection denied; known attack patterns blocked using Talos intelligence', d: -25, sig: 'Hostile inbound traffic',
+      v: 'BLOCK', why: 'Private resources are not exposed to the internet; hostile inbound traffic is dropped at the firewall.' },
+    { id: 'X2', when: { who: ['attacker'], via: ['waap'] }, hop: ['waap'], at: 'waap', lens: 'threat',
+      c: 'Application and API protection', r: 'Malicious requests and automated-client patterns filtered in front of the application', d: -25, sig: 'Application attack pattern',
+      v: 'BLOCK', why: 'Application-layer attack traffic is filtered in front of the application.' },
+    { id: 'X3', when: { who: ['attacker'], via: ['mcd'] }, hop: ['mcd'], at: 'mcd', lens: 'threat',
+      c: 'Cloud ingress protection', r: 'Inbound attack blocked at the cloud gateway', d: -20, sig: 'Hostile inbound traffic',
+      v: 'BLOCK', why: 'Inbound attack traffic is blocked at the cloud gateway.' },
+    { id: 'X4', when: { who: ['attacker'], via: ['nexus'] }, hop: ['nexus'], at: 'hs', lens: 'threat',
+      c: 'Vulnerability shielding', r: 'A compensating control shields the exposed workload from exploitation', d: -20, sig: 'Exploit attempt',
+      v: 'BLOCK', why: 'An exploit attempt against an unpatched workload is stopped by a compensating control next to the workload.' },
+
+    /* --- threat behaviour --- */
+    { id: 'T1a', when: { device: ['compromised'], nbeh: ['scan', 'ransom', 'exfil'] }, hop: ['@src'], at: 'ep', lens: 'threat', tele: true,
+      c: 'Endpoint detection', r: 'Malware detected on the device; host isolated from the network', d: -45, sig: 'Malware on device',
+      v: 'CONTAIN', why: 'Malware is present on the device, so the host is isolated and an incident is opened.' },
+    { id: 'T1b', when: { device: ['compromised'], beh: ['scan', 'exfil'] }, hop: ['@src'], at: 'ep', lens: 'threat', tele: true,
+      c: 'Endpoint detection', r: 'Malicious activity observed on the device; telemetry raised', d: -30, sig: 'Malware on device' },
+    { id: 'T8', when: { beh: ['ransom'], device: ['$MANAGED'] }, hop: ['@src'], at: 'ep', lens: 'threat', tele: true,
+      c: 'Endpoint detection and response', r: 'Ransomware behaviour detected; host isolated', d: -45, sig: 'Ransomware behaviour',
+      v: 'CONTAIN', why: 'Ransomware behaviour triggers host isolation, confining the outbreak to one segment.' },
+    { id: 'T2', when: { beh: ['scan'], via: ['switches', 'nexus'] }, hop: ['switches', 'nexus'], at: 'sna', lens: 'threat', tele: true,
+      c: 'Network behaviour analytics', r: 'Scanning and lateral-movement pattern detected from this host', d: -25, sig: 'Lateral-movement behaviour' },
+    { id: 'T5', when: { beh: ['scan'], via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'threat', tele: true,
+      c: 'OT threat detection', r: 'Abnormal scanning traffic seen by the sensor in the industrial network', d: -20, sig: 'Lateral-movement behaviour' },
+    { id: 'T3', when: { beh: ['scan'], via: ['$ACC'], not: { who: ['attacker'], device: ['server'] } }, hop: ['$ACC'], at: 'ise', lens: 'threat',
+      c: 'Automated containment', r: 'Endpoint moved to a quarantine segment', d: -15, sig: 'Endpoint quarantined',
+      v: 'CONTAIN', why: 'Scanning from an internal host is treated as lateral movement, so the endpoint is quarantined.' },
+    { id: 'T4', when: { beh: ['scan'], via: ['sa'], nvia: ['$ACC'] }, hop: ['sa'], at: 'sa', lens: 'threat',
+      c: 'Zero trust access', r: 'Only the granted application is reachable; there is no network path to scan', d: -15, sig: 'Lateral-movement behaviour',
+      v: 'BLOCK', why: 'Zero trust access exposes single applications, not the network, so scanning finds nothing.' },
+    { id: 'T6', when: { beh: ['scan', 'ransom'], via: ['nexus'] }, hop: ['nexus'], at: 'wl', lens: 'threat',
+      c: 'Microsegmentation', r: 'Flow to other workloads denied outside the allowed policy', d: -10, sig: 'Segment boundary hit',
+      v: 'BLOCK', why: 'Segmentation confines the activity to its own segment.' },
+    { id: 'T7', when: { beh: ['scan', 'exfil'], via: ['mcd'] }, hop: ['mcd'], at: 'mcd', lens: 'threat',
+      c: 'Cloud east-west and egress control', r: 'Lateral-movement or exfiltration traffic blocked at the cloud gateway', d: -15, sig: 'Malicious cloud traffic',
+      v: 'BLOCK', why: 'The cloud gateway blocks lateral movement and exfiltration.' },
+    { id: 'T11', when: { beh: ['exfil'], via: ['switches', 'nexus'] }, hop: ['switches', 'nexus'], at: 'sna', lens: 'threat', tele: true,
+      c: 'Encrypted traffic analytics', r: 'Exfiltration pattern identified in encrypted traffic without decryption', d: -25, sig: 'Exfiltration behaviour' },
+    { id: 'T12', when: { beh: ['exfil'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'threat',
+      c: 'DNS and internet egress control', r: 'Covert channel to the external destination blocked', d: -15, sig: 'Exfiltration behaviour',
+      v: 'BLOCK', why: 'The covert outbound channel is blocked at the egress control point.' },
+    { id: 'T13', when: { beh: ['exfil'], via: ['fw'], not: { who: ['attacker'] } }, hop: ['fw'], at: 'fw', lens: 'threat', tele: true,
+      c: 'Encrypted threat visibility', r: 'Malicious encrypted flow identified and blocked without decryption', d: -15, sig: 'Exfiltration behaviour',
+      v: 'BLOCK', why: 'The covert outbound channel is blocked at the egress control point.' },
+    { id: 'T14', when: { beh: ['anomaly'], via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'threat', tele: true,
+      c: 'OT behaviour baseline', r: 'Communication deviates from the asset’s recorded behaviour', d: -25, sig: 'OT anomaly' },
+    { id: 'T15', when: { beh: ['anomaly'], via: ['switches'] }, hop: ['switches'], at: 'sna', lens: 'threat', tele: true,
+      c: 'Behavioural analytics', r: 'Device traffic no longer matches its expected behaviour', d: -20, sig: 'IoT anomaly' },
+    { id: 'T16', when: { beh: ['anomaly'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'threat',
+      c: 'Automated containment', r: 'Device no longer matches its profile; moved to a quarantine segment', d: -20, sig: 'Profile mismatch',
+      v: 'CONTAIN', why: 'A device behaving unlike its profile is quarantined and an alert is raised.' },
+
+    /* --- email, web and SaaS --- */
+    { id: 'E1', when: { beh: ['phish'] }, hop: ['@src'], at: 'email', lens: 'threat', tele: true,
+      c: 'Email threat detection', r: 'Phishing message identified and remediated from the mailbox after delivery', d: -5, sig: 'Phishing email' },
+    { id: 'W1', when: { dest: ['web_mal'], via: ['$EDGE'] }, hop: ['$EDGE'], at: 'umb', lens: 'threat',
+      c: 'Internet-edge protection', r: 'Request to a known malicious destination blocked before a connection is made', d: -20, sig: 'Malicious destination',
+      v: 'BLOCK', why: 'The destination is known to be malicious, so the request is blocked before any connection.' },
+    { id: 'W1p', when: { beh: ['phish'], via: ['$EDGE'] }, hop: ['$EDGE'], at: 'umb', lens: 'threat',
+      c: 'Internet-edge protection', r: 'Phishing destination blocked before a connection is made', d: -15, sig: 'Phishing link clicked',
+      v: 'BLOCK', why: 'The phishing destination is blocked, and phishing-resistant authentication prevents credential replay.' },
+    { id: 'W1f', when: { beh: ['malfile'], dest: ['$INET'], via: ['$EDGE'] }, hop: ['$EDGE'], at: 'umb', lens: 'threat',
+      c: 'Internet-edge protection', r: 'Malware download source blocked', d: -15, sig: 'Malicious download',
+      v: 'BLOCK', why: 'The malicious file is stopped before it can run.' },
+    { id: 'W2', when: { dest: ['web_mal'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'threat',
+      c: 'Secure internet access', r: 'Destination denied by threat policy', d: -20, sig: 'Malicious destination',
+      v: 'BLOCK', why: 'The destination is known to be malicious, so the request is blocked before any connection.' },
+    { id: 'W2p', when: { beh: ['phish'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'threat',
+      c: 'Secure internet access', r: 'Phishing destination denied by threat policy', d: -15, sig: 'Phishing link clicked',
+      v: 'BLOCK', why: 'The phishing destination is blocked, and phishing-resistant authentication prevents credential replay.' },
+    { id: 'W2f', when: { beh: ['malfile'], dest: ['$INET'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'threat',
+      c: 'Secure internet access', r: 'Malicious download denied by threat policy', d: -15, sig: 'Malicious download',
+      v: 'BLOCK', why: 'The malicious file is stopped before it can run.' },
+    { id: 'W3', when: { dest: ['web_mal'], via: ['fw'], nvia: ['sa'] }, hop: ['fw'], at: 'fw', lens: 'threat', tele: true, also: ['talos'],
+      c: 'Egress threat prevention', r: 'Outbound connection to a known malicious destination blocked using Talos intelligence', d: -20, sig: 'Malicious destination',
+      v: 'BLOCK', why: 'The destination is known to be malicious, so the request is blocked before any connection.' },
+    { id: 'W4', when: { dest: ['web_risky'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
+      c: 'Web category policy', r: 'Risky category: session permitted with restrictions', d: -5, sig: 'Risky web category',
+      v: 'LIMIT', why: 'Risky-category sites are permitted only in a restricted session, for example isolated or read-only.' },
+    { id: 'W5', when: { dest: ['shadow'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
+      c: 'Shadow IT control', r: 'Unsanctioned application identified; use restricted', d: -10, sig: 'Unsanctioned application',
+      v: 'LIMIT', why: 'Unsanctioned SaaS is restricted; sensitive actions such as uploads are not permitted.' },
+    { id: 'W6', when: { beh: ['upload'], dest: ['shadow', '$WEB', 'pubai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
+      c: 'Data movement policy', r: 'Sensitive upload to an unapproved destination denied', d: -15, sig: 'Sensitive data upload',
+      v: 'BLOCK', why: 'Sensitive data may not be uploaded to an unapproved destination.' },
+    { id: 'W7', when: { beh: ['upload'], dest: ['saas', 'ai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
+      c: 'Data movement policy', r: 'Upload to a sanctioned application evaluated and logged', d: -5, sig: 'Sensitive data upload' },
+    { id: 'W8', when: { beh: ['upload'], who: ['insider'], via: ['switches', 'nexus'] }, hop: ['switches', 'nexus'], at: 'sna', lens: 'threat', tele: true,
+      c: 'Insider-threat analytics', r: 'Unusually large data movement by this user detected', d: -20, sig: 'Bulk data movement',
+      v: 'LIMIT', why: 'Unusual bulk data movement restricts the session and raises an incident for review.' },
+
+    /* --- AI use --- */
+    { id: 'A1', when: { dest: ['ai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
+      c: 'AI access policy', r: 'Approved AI application permitted for this user' },
+    { id: 'A2', when: { dest: ['pubai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
+      c: 'Shadow AI control', r: 'Unapproved AI application denied', d: -10, sig: 'Unapproved AI tool',
+      v: 'BLOCK', why: 'Unapproved AI tools are blocked; the approved assistant is available instead.' },
+    { id: 'A3', when: { dest: ['ai', 'pubai'], beh: ['aipaste'], via: ['sa'] }, hop: ['sa'], at: 'aid', lens: 'threat',
+      c: 'AI data-leakage guardrail', r: 'Confidential data detected in the prompt; prompt not sent', d: -15, sig: 'Sensitive data in prompt',
+      v: 'BLOCK', why: 'Confidential data is not allowed to leave in an AI prompt.' },
+    { id: 'A4', when: { dest: ['intai'], beh: ['aipaste'] }, hop: ['@dst'], at: 'aid', lens: 'threat',
+      c: 'AI data-leakage guardrail', r: 'Sensitive content in the prompt flagged and logged', d: -5, sig: 'Sensitive data in prompt',
+      v: 'LIMIT', why: 'Sensitive data in prompts to the internal model is logged and limited by guardrail policy.' },
+    { id: 'A5', when: { dest: ['$AIDEST'], beh: ['inject'] }, hop: ['sa', '@dst'], at: 'aid', lens: 'threat',
+      c: 'AI runtime guardrail', r: 'Prompt-injection pattern detected; request rejected', d: -25, sig: 'Prompt injection attempt',
+      v: 'BLOCK', why: 'Runtime guardrails reject prompts that try to override the model’s instructions.' },
+    { id: 'A6', when: { dest: ['intai'], nbeh: ['inject', 'aipaste'] }, hop: ['@dst'], at: 'aid', lens: 'threat', base: true,
+      c: 'AI runtime protection', r: 'Model interaction covered by runtime guardrails' },
+
+    /* --- routine transit checks (skipped at a hop once the session is stopped there) --- */
+    { id: 'B1', when: { via: ['wireless'] }, hop: ['wireless'], at: 'wireless', lens: 'data', base: true,
+      c: 'Air link', r: 'WPA3-protected wireless association' },
+    { id: 'B2', when: { via: ['client'] }, hop: ['client'], at: 'client', lens: 'data', base: true,
+      c: 'Device tunnel', r: 'Secure Client provides the device-side VPN / zero trust access session' },
+    { id: 'B3', when: { via: ['sdwan'] }, hop: ['sdwan'], at: 'sdwan', lens: 'data', base: true,
+      c: 'WAN transport', r: 'Traffic carried in the encrypted, segmented SD-WAN overlay' },
+    { id: 'B4', when: { via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy', base: true,
+      c: 'User-to-app policy', r: 'Session evaluated against identity, device and destination policy at the cloud edge' },
+    { id: 'B5', when: { via: ['fw'], not: { who: ['attacker'] } }, hop: ['fw'], at: 'fw', lens: 'data', base: true,
+      c: 'Traffic inspection', r: 'Flow inspected; encrypted traffic assessed without decryption' },
+    { id: 'B6', when: { via: ['mcd'] }, hop: ['mcd'], at: 'mcd', lens: 'data', base: true,
+      c: 'Cloud gateway', r: 'Ingress, egress and east-west policy applied in the cloud network' },
+    { id: 'B7', when: { via: ['nexus'] }, hop: ['nexus'], at: 'hs', lens: 'policy', base: true,
+      c: 'Workload-edge segmentation', r: 'Flow checked against segmentation policy on the smart switch' },
+    { id: 'B8', when: { via: ['nexus'], dest: ['$DC'] }, hop: ['nexus'], at: 'wl', lens: 'policy', base: true,
+      c: 'Workload policy', r: 'Flow matches the workload’s allowed communication policy' },
+    { id: 'B9', when: { via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'identity', base: true,
+      c: 'OT visibility', r: 'Asset and its communications inventoried by the embedded sensor' },
+    { id: 'B10', when: { dest: ['mail'] }, hop: ['@dst'], at: 'email', lens: 'data', base: true,
+      c: 'Mail protection', r: 'Messages scanned for threats before they reach the mailbox' },
+
+    /* --- experience assurance (operations) --- */
+    { id: 'O1', when: { beh: ['slow'] }, hop: ['wireless', 'switches', 'sdwan', 'client', '@src'], at: 'te', lens: 'data',
+      c: 'Owned-network path', r: 'Access and WAN segments measured from the user’s vantage point: healthy' },
+    { id: 'O2', when: { beh: ['slow'], via: ['sa'] }, hop: ['sa'], at: 'te', lens: 'data',
+      c: 'Access-flow correlation', r: 'Digital experience correlated with the Secure Access session' },
+    { id: 'O3', when: { beh: ['slow'] }, post: true, at: 'te', lens: 'data',
+      c: 'Fault localisation', r: 'Degradation located on a network segment the organisation does not own', sig: 'Experience fault (not a security signal)' },
+
+    /* --- response, after the path --- */
+    { id: 'F1', when: { beh: ['malfile'], device: ['$MANAGED'] }, post: true, at: 'ep', lens: 'threat', tele: true,
+      c: 'Endpoint file protection', r: 'Malicious file blocked and quarantined on the device', d: -15, sig: 'Malicious download',
+      v: 'BLOCK', why: 'The malicious file is stopped before it can run.' },
+    { id: 'E2', when: { beh: ['phish'], who: ['$AUTHN'] }, post: true, at: 'duo', lens: 'identity',
+      c: 'Phishing-resistant authentication', r: 'A captured password cannot be replayed without the phishing-resistant factor' },
+    { id: 'T9', when: { beh: ['ransom'], loc: ['$ONPREM'], not: { device: ['server'] } }, post: true, at: 'ise', lens: 'threat',
+      c: 'Automated containment', r: 'Endpoint moved to a quarantine segment', d: -10, sig: 'Endpoint quarantined',
+      v: 'CONTAIN', why: 'Ransomware behaviour triggers quarantine, confining the outbreak to one segment.' },
+    { id: 'T10', when: { beh: ['ransom'] }, post: true, at: 'hs', lens: 'policy',
+      c: 'Segment boundary', r: 'Stateful segmentation near workloads keeps the outbreak inside one segment' },
+    { id: 'Z1', needsTele: true, post: true, at: 'xdr', lens: 'threat', from: '@tele',
+      c: 'Cross-domain correlation', r: 'Telemetry correlated into one prioritised incident with guided response', d: -5, sig: 'Incident opened' },
+    { id: 'Z2', when: { beh: ['scan', 'ransom', 'exfil'], not: { who: ['attacker'] } }, needsTele: true, post: true, at: 'xdr', lens: 'threat',
+      c: 'Automated response', r: 'Containment action triggered to stop lateral movement',
+      v: 'CONTAIN', why: 'Correlated detections trigger containment and an incident for the security team.' },
+    { id: 'Z3', when: { beh: ['ransom'] }, needsTele: true, post: true, at: 'xdr', lens: 'threat',
+      c: 'Recovery', r: 'Affected host can be restored from a last-known-good snapshot' },
+
+    /* --- policy authoring and distribution (operations). `fan` expands into one check per enforcement point. --- */
+    { id: 'O4', when: { beh: ['push'] }, post: true, at: 'scc', lens: 'policy',
+      c: 'Policy authoring', r: 'Intent defined once in a single management plane' },
+    { id: 'O5', when: { beh: ['push'] }, post: true, lens: 'policy', from: 'scc', fan: ['fw', 'mcd', 'hs', 'sa', 'wl', 'aid', 'sdwan'],
+      c: 'Policy distribution', r: 'Enforcement point receives the policy from Security Cloud Control' }
+  ],
+
+  verdicts: {
+    ALLOW: { label: 'ALLOW', sev: 0, why: 'Identity, device and context meet policy for this destination.' },
+    LIMIT: { label: 'ALLOW WITH LIMITS', sev: 1 },
+    STEPUP: { label: 'STEP-UP', sev: 2 },
+    BLOCK: { label: 'BLOCK', sev: 3 },
+    CONTAIN: { label: 'CONTAIN', sev: 4 },
+    noControl: 'No remaining control in this illustrative model stopped the session.'
+  },
+
+  /* "Change one thing": set = picker values, beh = behaviour to toggle on, clear = back to normal use */
+  suggest: [
+    { l: 'Switch to a managed, compliant laptop', set: { device: 'mgd' } },
+    { l: 'Use an out-of-date laptop', set: { device: 'stale' } },
+    { l: 'Use an unmanaged personal device', set: { device: 'byod' } },
+    { l: 'Use a compromised device', set: { device: 'compromised' } },
+    { l: 'Pass MFA', beh: 'mfa_ok' },
+    { l: 'Fail MFA', beh: 'mfa_fail' },
+    { l: 'Move to public Wi-Fi', set: { loc: 'public' } },
+    { l: 'Move to the HQ campus', set: { loc: 'hq' } },
+    { l: 'Sign in from an unusual country', set: { loc: 'travel' } },
+    { l: 'Change the actor to a contractor', set: { who: 'contractor' } },
+    { l: 'Change the actor to an employee', set: { who: 'emp' } },
+    { l: 'Target an internal server instead', set: { dest: 'eastwest' } },
+    { l: 'Target an unsanctioned SaaS app', set: { dest: 'shadow' } },
+    { l: 'Use the approved AI assistant', set: { dest: 'ai' } },
+    { l: 'Paste confidential data into the prompt', beh: 'aipaste' },
+    { l: 'Attempt lateral movement', beh: 'scan' },
+    { l: 'Upload sensitive data', beh: 'upload' },
+    { l: 'Return to normal use', clear: true }
+  ],
+
+  /* s: [who, device, loc, dest, [behaviours]]; b: optional second scenario (opens compare mode) */
+  presets: [
+    { g: 'Everyday access', n: 1, t: 'Employee, managed laptop, HQ → private app', s: ['emp', 'mgd', 'hq', 'dcapp', ['norm']], lens: 'data' },
+    { n: 2, t: 'Same employee, mobile, coffee shop → same app', s: ['emp', 'mobile', 'public', 'dcapp', ['norm']], lens: 'data' },
+    { n: 3, t: 'Branch user → SaaS over SD-WAN + SSE', s: ['emp', 'mgd', 'branch', 'saas', ['norm']], lens: 'data' },
+    { n: 4, t: 'Home worker on personal laptop → sanctioned SaaS', s: ['emp', 'byod', 'home', 'saas', ['norm']], lens: 'identity' },
+    { n: 5, t: 'Guest on campus Wi-Fi → internet only', s: ['guest', 'byod', 'hq', 'web_safe', ['norm']], lens: 'policy' },
+    { g: 'Limited access', n: 6, t: 'Contractor, own laptop → one approved app', s: ['contractor', 'claptop', 'home', 'dcapp', ['norm']], lens: 'policy' },
+    { n: 7, t: 'Contractor tries a server outside their scope', s: ['contractor', 'claptop', 'home', 'eastwest', ['norm']], lens: 'policy' },
+    { n: 8, t: 'Vendor remote access to a factory machine', s: ['contractor', 'claptop', 'home', 'ot', ['mfa_ok']], lens: 'identity' },
+    { g: 'Devices', n: 9, t: 'IoT camera joins, is profiled and segmented', s: ['iot', 'headless', 'hq', 'eastwest', ['norm']], lens: 'identity' },
+    { n: 10, t: 'IoT device talks to an unknown internet host', s: ['iot', 'headless', 'hq', 'web_risky', ['anomaly']], lens: 'threat' },
+    { n: 11, t: 'OT controller gets a command from an unexpected source', s: ['ot', 'headless', 'factory', 'ot', ['anomaly']], lens: 'threat' },
+    { g: 'Web and email', n: 12, t: 'User opens a safe site vs a malicious site', s: ['emp', 'mgd', 'hq', 'web_safe', ['norm']], b: ['emp', 'mgd', 'hq', 'web_mal', ['norm']], lens: 'threat' },
+    { n: 13, t: 'Phishing email → click → credential page', s: ['emp', 'mgd', 'home', 'mail', ['phish']], lens: 'threat' },
+    { n: 14, t: 'Malicious file download', s: ['emp', 'mgd', 'hq', 'web_risky', ['malfile']], lens: 'threat' },
+    { g: 'AI use', n: 15, t: 'Employee uses the approved AI assistant', s: ['emp', 'mgd', 'hq', 'ai', ['norm']], lens: 'policy' },
+    { n: 16, t: 'Employee uses an unapproved public AI tool', s: ['emp', 'mgd', 'hq', 'pubai', ['norm']], lens: 'policy' },
+    { n: 17, t: 'Employee pastes customer data or code into a prompt', s: ['emp', 'mgd', 'hq', 'ai', ['aipaste']], lens: 'threat' },
+    { n: 18, t: 'Prompt injection against an internal AI app', s: ['insider', 'mgd', 'hq', 'intai', ['inject']], lens: 'threat' },
+    { n: 19, t: 'AI agent requests access beyond its role', s: ['aiagent', 'server', 'hq', 'dcapp', ['priv']], lens: 'policy' },
+    { g: 'Attacker', n: 20, t: 'Stolen password, MFA blocks it', s: ['attacker', 'byod', 'internet', 'saas', ['stolen', 'mfa_fail']], lens: 'identity' },
+    { n: 21, t: 'MFA fatigue attack', s: ['attacker', 'byod', 'internet', 'saas', ['stolen', 'fatigue']], lens: 'identity' },
+    { n: 22, t: 'Compromised laptop scans and moves laterally', s: ['emp', 'compromised', 'hq', 'eastwest', ['scan']], lens: 'threat' },
+    { n: 23, t: 'Ransomware outbreak contained in one segment', s: ['emp', 'compromised', 'hq', 'eastwest', ['ransom']], lens: 'threat' },
+    { n: 24, t: 'Data exfiltration attempt from a server', s: ['aiagent', 'server', 'hq', 'web_risky', ['exfil']], lens: 'threat' },
+    { n: 25, t: 'Attack on a public-facing web app / API', s: ['attacker', 'byod', 'internet', 'cloudapp', []], lens: 'threat' },
+    { n: 26, t: 'Exploit attempt on an unpatched data center workload', s: ['attacker', 'byod', 'internet', 'dcapp', ['scan']], lens: 'threat' },
+    { n: 27, t: 'Insider downloads large volumes before leaving', s: ['insider', 'mgd', 'hq', 'dcapp', ['upload', 'offhours']], lens: 'trust' },
+    { n: 28, t: 'Impossible-travel login from a new country', s: ['emp', 'mobile', 'travel', 'saas', ['norm']], lens: 'trust' },
+    { g: 'Operations', n: 29, t: 'App is slow: locate the fault', s: ['emp', 'mgd', 'branch', 'saas', ['slow']], lens: 'data' },
+    { n: 30, t: 'Policy authored once, pushed to every enforcement point', s: ['admin', 'mgd', 'hq', 'dcapp', ['mfa_ok', 'push']], lens: 'policy' }
+  ]
+};
+
+/* =====================================================================================
+   ENGINE — pure functions over DATA (no DOM)
+   ===================================================================================== */
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const h = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
+const G = DATA.groups, PK = DATA.pickers, PR = DATA.products, PL = DATA.places;
+const KEYS = ['who', 'device', 'loc', 'dest'];
+const PLABEL = { who: 'Who', device: 'Device', loc: 'Location', dest: 'Destination', beh: 'Behaviour / condition' };
+const SEV = Object.fromEntries(Object.entries(DATA.verdicts).filter(([, v]) => v.label).map(([k, v]) => [k, v.sev]));
+const LENS = Object.fromEntries(DATA.lenses.map(l => [l.id, l]));
+const opt = (k, id) => PK[k].find(o => o.id === id);
+const ex = a => a.flatMap(x => (typeof x === 'string' && x[0] === '$') ? G[x.slice(1)] : [x]);
+const exWhen = w => { if (!w) return; for (const k of [...KEYS, 'via', 'nvia']) if (w[k]) w[k] = ex(w[k]); if (w.not) for (const k in w.not) w.not[k] = ex(w.not[k]); };
+/* expand $GROUP references and `fan` rules once */
+DATA.checks = DATA.checks.flatMap(c => c.fan ? c.fan.map(f => ({ ...c, id: c.id + '-' + f, at: f, fan: undefined })) : [c]);
+DATA.checks.forEach(c => { exWhen(c.when); if (c.hop) c.hop = ex(c.hop); });
+[...DATA.paths.access, ...DATA.paths.route, ...DATA.constraints].forEach(r => exWhen(r.when));
+
+function match(w, s, path) {
+  if (!w) return true;
+  for (const k of KEYS) if (w[k] && !w[k].includes(s[k])) return false;
+  if (w.beh && !w.beh.some(b => s.beh.includes(b))) return false;
+  if (w.ball && !w.ball.every(b => s.beh.includes(b))) return false;
+  if (w.nbeh && w.nbeh.some(b => s.beh.includes(b))) return false;
+  if (w.not) for (const k in w.not) if (w.not[k].includes(s[k])) return false;
+  if (path) { if (w.via && !w.via.some(n => path.includes(n))) return false; if (w.nvia && w.nvia.some(n => path.includes(n))) return false; }
+  return true;
+}
+/* reason an option is unavailable given earlier pickers, or null */
+function blocked(pick, id, s) {
+  for (const c of DATA.constraints) {
+    if (c.pick !== pick || !match(c.when, s, null)) continue;
+    if (c.only && !c.only.includes(id)) return c.why;
+    if (c.deny && c.deny.includes(id)) return c.why;
+  }
+  return null;
+}
+function toggleBeh(beh, b) {
+  const o = opt('beh', b); let out = beh.filter(x => x !== b);
+  if (beh.includes(b)) return out;
+  if (o.mfa) out = out.filter(x => !opt('beh', x).mfa);
+  if (b === 'norm') out = out.filter(x => !opt('beh', x).x);
+  if (o.x) out = out.filter(x => x !== 'norm');
+  return [...out, b];
+}
+/* force a scenario into a valid state; earlier pickers win */
+function normalize(s0) {
+  const s = { ...s0, beh: [...(s0.beh || [])] }, notes = [];
+  for (const k of KEYS) {
+    if (!opt(k, s[k])) s[k] = PK[k][0].id;
+    const why = blocked(k, s[k], s);
+    if (why) { const f = PK[k].find(o => !blocked(k, o.id, s)); notes.push(`${PLABEL[k]} set to “${f.short}”. ${why}`); s[k] = f.id; }
+  }
+  s.beh = [...new Set(s.beh)].filter(b => opt('beh', b) && !blocked('beh', b, s));
+  const mfa = s.beh.filter(b => opt('beh', b).mfa); if (mfa.length > 1) s.beh = s.beh.filter(b => !opt('beh', b).mfa || b === mfa[mfa.length - 1]);
+  if (s.beh.some(b => opt('beh', b).x)) s.beh = s.beh.filter(b => b !== 'norm');
+  if (!s.beh.length && !blocked('beh', 'norm', s)) s.beh = ['norm'];
+  s.beh.sort((a, b) => PK.beh.findIndex(o => o.id === a) - PK.beh.findIndex(o => o.id === b));
+  return { s, notes };
+}
+const skey = s => [s.who, s.device, s.loc, s.dest, s.beh.join('+')].join('.');
+function unkey(str) { const [who, device, loc, dest, beh = ''] = String(str).split('.'); return normalize({ who, device, loc, dest, beh: beh ? beh.split('+') : [] }).s; }
+function pickRule(list, s) { let best = null, bs = -1; for (const r of list) { if (!match(r.when, s, null)) continue; const sc = r.when ? Object.keys(r.when).length : 0; if (sc >= bs) { best = r; bs = sc; } } return best; }
+function segType(a, b) { for (const [f, t, ty, label] of DATA.segments) if ((f === '*' || f === a) && (t === '*' || t === b)) return { ty, label }; return { ty: 'clear', label: 'Transit' }; }
+
+/* scenario → path, checkpoints, trust series, verdict. `off` = product id disabled ("without this control"). */
+function evaluate(s, off) {
+  const W = opt('who', s.who), D = opt('device', s.device), L = opt('loc', s.loc), T = opt('dest', s.dest);
+  const ac = pickRule(DATA.paths.access, s), rt = pickRule(DATA.paths.route, s);
+  let path = [...ac.nodes, ...rt.nodes].map(n => n === '@loc' ? L.place : n === '@dest' ? T.node : n);
+  path = path.filter((n, i, a) => a.indexOf(n) === i);
+  let trust = clamp(50 + W.t + D.t + L.t);
+  const series = [{ v: trust, d: 0, sig: `Starting context: ${W.short}, ${D.short}, ${L.short}`, k: -1 }];
+  const cand = [];
+  DATA.checks.forEach((c, order) => {
+    if (!match(c.when, s, path)) return;
+    let hi = 1e6;
+    if (!c.post) {
+      hi = -1;
+      for (const hp of c.hop) { const n = hp === '@src' ? path[0] : hp === '@dst' ? path[path.length - 1] : hp; const ix = path.indexOf(n); if (ix >= 0) { hi = ix; break; } }
+      if (hi < 0) return;
+    }
+    cand.push({ c, order, hi });
+  });
+  cand.sort((a, b) => a.hi - b.hi || a.order - b.order);
+  const tl = [], gaps = [], tele = []; let stopAt = -1, top = null;
+  for (const { c, hi } of cand) {
+    if (stopAt >= 0 && hi > stopAt && hi < 1e6) continue;           /* traffic never got this far */
+    if (c.base && stopAt === hi) continue;
+    if (c.needsTele && !tele.length) continue;
+    if (off && c.at === off) { gaps.push(c); continue; }
+    trust = clamp(trust + (c.d || 0));
+    const e = { id: c.id, at: c.at, hi, hop: hi < 1e6 ? path[hi] : null, lens: c.lens, c: c.c, r: c.r, d: c.d || 0, sig: c.sig, v: c.v || null, trust, from: c.from, also: c.also || [] };
+    if (c.from === '@tele') e.beams = [...new Set(tele)];
+    tl.push(e);
+    if (c.d) series.push({ v: trust, d: c.d, sig: c.sig || c.c, k: tl.length - 1, at: c.at });
+    if (c.tele) tele.push(c.at);
+    if (c.v) { if (!top || SEV[c.v] > SEV[top.v]) top = c; if (!c.post && SEV[c.v] >= SEV.STEPUP && stopAt < 0) stopAt = hi; }
+  }
+  if (series.length === 1) series.push({ v: trust, d: 0, sig: 'No signal changed the score', k: tl.length - 1 });
+  const verdict = top ? top.v : 'ALLOW';
+  let why = top ? top.why : DATA.verdicts.ALLOW.why;
+  if (!top && (s.who === 'attacker' || gaps.some(g => g.v))) why = DATA.verdicts.noControl;
+  const products = [...new Set([...path.filter(n => PR[n]), ...tl.flatMap(e => [e.at, ...e.also, ...(e.beams || [])])])].filter(p => p !== off);
+  const vpath = ['@actor', ...path];
+  const segs = vpath.slice(0, -1).map((a, i) => i === 0 ? { ty: 'clear', label: 'Local network' } : segType(a, vpath[i + 1]));
+  return { s, off, path, vpath, segs, tl, gaps, series, verdict, why, stopAt, trust, products, hostile: s.who === 'attacker',
+    rules: [ac.id, rt.id], fallback: !ac.when || !rt.when };
+}
+function buildSteps(r) {
+  const st = [];
+  for (let i = 0; i < r.path.length; i++) {
+    st.push({ t: 'move', e: i });
+    r.tl.forEach((e, k) => { if (e.hi === i) st.push({ t: 'check', k }); });
+    if (i === r.stopAt) break;
+  }
+  r.tl.forEach((e, k) => { if (e.hi === 1e6) st.push({ t: 'check', k }); });
+  st.push({ t: 'end' });
+  return st;
+}
+function suggestions(s, run) {
+  const out = [];
+  for (const g of DATA.suggest) {
+    const t = { ...s, beh: [...s.beh] };
+    if (g.set) Object.assign(t, g.set);
+    if (g.beh) { if (t.beh.includes(g.beh)) continue; t.beh = toggleBeh(t.beh, g.beh); }
+    if (g.clear) t.beh = ['norm'];
+    const n = normalize(t).s;
+    if (g.set && Object.keys(g.set).some(k => n[k] !== g.set[k])) continue;
+    if (g.beh && !n.beh.includes(g.beh)) continue;
+    if (skey(n) === skey(s)) continue;
+    const v = evaluate(n, null).verdict;
+    out.push({ l: g.l, s: n, v, diff: v !== run.verdict ? 1 : 0 });
+  }
+  return out.sort((a, b) => b.diff - a.diff).slice(0, 4);
+}
+
+/* =====================================================================================
+   STATE
+   ===================================================================================== */
+const RM = matchMedia('(prefers-reduced-motion: reduce)');
+const fromPreset = a => normalize({ who: a[0], device: a[1], loc: a[2], dest: a[3], beh: a[4] }).s;
+const S = {
+  mode: 'presets', lens: 'data', preset: 1, compare: false, active: 0, off: null, speed: 1, playing: false,
+  slots: [fromPreset(DATA.presets[0].s), fromPreset(DATA.presets[5].s)],
+  runs: [], selected: null, notes: [], filter: null
+};
+let R = null;   /* renderer */
+
+/* position of any scene node; ops-plane products float above */
+const POS = id => (PR[id] || PL[id]).p;
+const actorPos = (r, slot) => { const p = POS(r.path[0]); return [-39 + slot * 2.6, 0, p[2]]; };
+const nodeName = id => PR[id] ? PR[id].s : PL[id] ? PL[id].name : id;
+
+function rerun() {
+  S.notes = [];
+  if (S.mode === 'explore') S.runs = [];
+  else S.runs = (S.compare ? [0, 1] : [S.active]).map(i => {
+    const r = evaluate(S.slots[i], S.off); r.slot = i; r.base = S.off ? evaluate(S.slots[i], null) : null;
+    r.steps = buildSteps(r); r.pb = { i: 0, p: 0, done: false }; r.sug = suggestions(r.s, r); return r;
+  });
+  if (S.off && !S.runs.some(r => r.base.products.includes(S.off))) { S.off = null; return rerun(); }
+  document.body.dataset.cmp = S.runs.length > 1 ? '1' : '0';
+  R.setRuns(S.runs); renderResults(); S.playing = S.runs.length > 0; lastSig = ''; writeHash();
+}
+/* playback */
+const DUR = { move: 620, check: 1250, end: 1 };
+function advance(dt) {
+  let all = true;
+  for (const r of S.runs) {
+    const pb = r.pb; let budget = dt * S.speed;
+    while (!pb.done && budget > 0) {
+      const st = r.steps[pb.i]; let dur = DUR[st.t]; if (RM.matches && st.t === 'move') dur = 1;
+      const need = (1 - pb.p) * dur;
+      if (budget >= need) { budget -= need; pb.p = 0; if (st.t === 'end') pb.done = true; else pb.i++; }
+      else { pb.p += budget / dur; budget = 0; }
+    }
+    if (!pb.done) all = false;
+  }
+  if (all) S.playing = false;
+}
+function stepOnce() {
+  S.playing = false;
+  for (const r of S.runs) { const pb = r.pb; if (pb.done) continue; let i = pb.i + 1; while (r.steps[i].t === 'move') i++; pb.i = i; pb.p = 0; if (r.steps[i].t === 'end') pb.done = true; }
+}
+function restart() { S.runs.forEach(r => r.pb = { i: 0, p: 0, done: false }); S.playing = S.runs.length > 0; }
+function finish() { S.runs.forEach(r => r.pb = { i: r.steps.length - 1, p: 0, done: true }); S.playing = false; }
+/* how far a run has progressed: moves = path edges travelled (fractional), k = last checkpoint reached, cur = checkpoint being shown */
+function prog(r) {
+  let moves = 0, k = -1, cur = -1; const pb = r.pb;
+  for (let i = 0; i <= pb.i && i < r.steps.length; i++) {
+    const st = r.steps[i], full = i < pb.i || pb.done;
+    if (st.t === 'move') moves += full ? 1 : pb.p;
+    if (st.t === 'check') { k = st.k; if (!full) cur = st.k; }
+  }
+  return { moves, k, cur, done: pb.done };
+}
+
+/* =====================================================================================
+   URL HASH
+   ===================================================================================== */
+function writeHash() {
+  const q = new URLSearchParams({ mode: S.mode, lens: S.lens, a: skey(S.slots[0]) });
+  if (S.compare) { q.set('b', skey(S.slots[1])); q.set('cmp', '1'); }
+  if (S.off) q.set('off', S.off);
+  if (S.mode === 'presets' && S.preset) q.set('p', S.preset);
+  if (S.selected) q.set('sel', S.selected);
+  history.replaceState(null, '', '#' + q.toString());
+}
+function readHash() {
+  const q = new URLSearchParams(location.hash.slice(1)); if (!q.has('a')) return false;
+  if (['presets', 'build', 'explore'].includes(q.get('mode'))) S.mode = q.get('mode');
+  if (LENS[q.get('lens')]) S.lens = q.get('lens');
+  S.slots[0] = unkey(q.get('a')); if (q.get('b')) S.slots[1] = unkey(q.get('b'));
+  S.compare = q.get('cmp') === '1'; S.active = 0;
+  S.off = PR[q.get('off')] ? q.get('off') : null; S.preset = +q.get('p') || 0;
+  S.selected = (PR[q.get('sel')] || PL[q.get('sel')]) ? q.get('sel') : null;
+  return true;
+}
+
+/* =====================================================================================
+   UI
+   ===================================================================================== */
+const ICON = { restart: 'M5 4v12M17 4 8 10l9 6z', play: 'M6 4l11 6-11 6z', pause: 'M6 4h3v12H6zM11 4h3v12h-3z', step: 'M4 4l8 6-8 6zM14 4h3v12h-3z', end: 'M3 4l6 6-6 6zM10 4l6 6-6 6z', view: 'M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5' };
+const ico = n => `<svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="${ICON[n]}" fill="${n === 'view' ? 'none' : 'currentColor'}" stroke="currentColor" stroke-width="${n === 'view' ? 1.8 : 0}" stroke-linejoin="round"/></svg>`;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 3200); }
+const vchip = v => `<span class="vc v-${v}">${DATA.verdicts[v].label}</span>`;
+
+function setLens(id) {
+  S.lens = id; document.body.dataset.lens = id;
+  $$('#lenses button').forEach(b => b.setAttribute('aria-checked', b.dataset.lens === id));
+  const L = LENS[id], sw = { line: '<path d="M1 6h16" stroke="var(--lens)" stroke-width="3"/>', dim: '<path d="M1 6h16" stroke="#8fa3c8" stroke-width="2"/>',
+    ring: '<circle cx="9" cy="6" r="4.5" fill="none" stroke="var(--lens)" stroke-width="2"/>', node: '<path d="M9 1l5 5-5 5-5-5z" fill="var(--lens)"/>',
+    beam: '<path d="M1 10 17 2" stroke="var(--lens)" stroke-width="1.5"/>', diamond: '<path d="M9 0l4 6-4 6-4-6z" fill="none" stroke="var(--lens)" stroke-width="1.6"/>',
+    dash: '<path d="M1 6h16" stroke="var(--lens)" stroke-width="2" stroke-dasharray="3 2.5"/>', x: '<path d="M4 1l10 10M14 1 4 11" stroke="var(--lens)" stroke-width="2.2"/>',
+    grad: '<defs><linearGradient id="lg"><stop stop-color="#ff5d5d"/><stop offset=".5" stop-color="#f4c95d"/><stop offset="1" stop-color="#5be3a4"/></linearGradient></defs><path d="M1 6h16" stroke="url(#lg)" stroke-width="3"/>' };
+  $('#legend').innerHTML = `<b>${L.label}</b> · ${h(L.blurb)}<ul>${L.legend.map(([k, t]) => `<li><svg width="18" height="12" viewBox="0 0 18 12">${sw[k]}</svg>${h(t)}</li>`).join('')}</ul>`;
+  R && R.setLens(id); markTimeline(); lastSig = '';
+}
+function setMode(m) {
+  S.mode = m; $$('.modes button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === m));
+  if (m === 'presets' && !S.preset) S.preset = 0;
+  renderLeft(); rerun();
+}
+function loadPreset(n) {
+  const p = DATA.presets.find(x => x.n === n); if (!p) return;
+  S.preset = n; S.off = null; S.active = 0; S.slots[0] = fromPreset(p.s); S.compare = !!p.b; if (p.b) S.slots[1] = fromPreset(p.b);
+  if (p.lens) setLens(p.lens); renderLeft(); rerun();
+}
+function setScenario(slot, s, notes) { S.slots[slot] = s; S.preset = 0; renderLeft(); rerun(); S.notes = notes || []; if (S.notes.length) { toast(S.notes[0]); const n = $('#bnotes'); if (n) n.textContent = S.notes.join(' '); } }
+
+function renderLeft() {
+  const el = $('#leftBody');
+  if (S.mode === 'presets') {
+    el.innerHTML = `<h2>Preset library</h2><p class="small" style="margin:4px 0 2px">One click fills the five pickers and runs the scenario.</p>` +
+      DATA.presets.map(p => `${p.g ? `<div class="pg">${h(p.g)}</div>` : ''}<button class="preset" data-n="${p.n}" aria-current="${S.preset === p.n}"><b>${p.n}</b><span>${h(p.t)}</span></button>`).join('');
+  } else if (S.mode === 'build') {
+    const s = S.slots[S.active];
+    const group = k => {
+      let last = '';
+      const chips = PK[k].map(o => {
+        const why = blocked(k, o.id, s), on = k === 'beh' ? s.beh.includes(o.id) : s[k] === o.id;
+        const head = (k === 'beh' && o.g !== last) ? `<span class="bg">${h(last = o.g)}</span>` : '';
+        return `${head}<button class="chip" role="${k === 'beh' ? 'checkbox' : 'radio'}" data-k="${k}" data-id="${o.id}" aria-checked="${on}" ${why ? `aria-disabled="true" data-why="${h(why)}" title="Unavailable: ${h(why)}"` : ''}>${h(o.label)}</button>`;
+      }).join('');
+      const reasons = [...new Set(PK[k].map(o => blocked(k, o.id, s)).filter(Boolean))];
+      return `<div class="pk"><h3><b>${'ABCDE'['who device loc dest beh'.split(' ').indexOf(k)]}</b>${PLABEL[k]}${k === 'beh' ? '<small>multi-select</small>' : ''}</h3>
+        <div class="chips" role="${k === 'beh' ? 'group' : 'radiogroup'}" aria-label="${PLABEL[k]}">${chips}</div>
+        <p class="why" data-why-for="${k}">${reasons.length ? 'Struck-through options are unavailable: ' + h(reasons.join(' ')) : ''}</p></div>`;
+    };
+    el.innerHTML = `<h2>Scenario builder</h2>
+      <div class="slotbar" style="margin-top:8px">
+        <button id="cmpT" aria-pressed="${S.compare}">Compare two scenarios</button>
+        ${S.compare ? `<button data-slot="0" aria-pressed="${S.active === 0}">Edit A</button><button data-slot="1" aria-pressed="${S.active === 1}">Edit B</button>` : ''}
+      </div>
+      <p class="notes" id="bnotes" aria-live="polite">${h(S.notes.join(' '))}</p>
+      ${['who', 'device', 'loc', 'dest', 'beh'].map(group).join('')}
+      <div class="slotbar"><button class="btn primary" id="runB">Run</button><button class="btn" id="shareB">Copy link</button></div>
+      <p class="small">Changing any picker while a scenario runs re-evaluates it immediately.</p>`;
+  } else {
+    el.innerHTML = `<h2>Free explore</h2><p class="small" style="margin:4px 0 10px">Orbit, zoom and pan the scene. Select any product for its function, lenses, stated relationships and cisco.com source. Lines are relationships stated on cisco.com.</p>` +
+      Object.entries(DATA.categories).map(([c, name]) => `<div class="pg">${h(name)}</div><div class="exlist">` +
+        Object.entries(PR).filter(([, p]) => p.cat === c).map(([id, p]) => `<button data-id="${id}"><span>${h(p.name)}</span><small>${h(DATA.zones.find(z => z.id === p.zone).label.slice(4))}</small></button>`).join('') + '</div>').join('');
+  }
+}
+$('#left').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.mode) return setMode(b.dataset.mode);
+  if (b.dataset.n) { loadPreset(+b.dataset.n); if (matchMedia('(max-width:900px)').matches) sheet('none'); return; }
+  if (b.id === 'cmpT') { S.compare = !S.compare; S.active = 0; S.preset = 0; renderLeft(); return rerun(); }
+  if (b.dataset.slot) { S.active = +b.dataset.slot; return renderLeft(); }
+  if (b.id === 'runB') { rerun(); if (matchMedia('(max-width:900px)').matches) sheet('none'); return; }
+  if (b.id === 'shareB') return share();
+  if (b.dataset.k) {
+    if (b.getAttribute('aria-disabled') === 'true') { const w = $(`[data-why-for="${b.dataset.k}"]`); w.textContent = 'Unavailable: ' + b.dataset.why; return toast('Unavailable: ' + b.dataset.why); }
+    const s = { ...S.slots[S.active] }, k = b.dataset.k;
+    if (k === 'beh') s.beh = toggleBeh(s.beh, b.dataset.id); else s[k] = b.dataset.id;
+    const n = normalize(s); return setScenario(S.active, n.s, n.notes);
+  }
+  if (b.dataset.id) select(b.dataset.id, true);
+});
+function share() {
+  writeHash(); const url = location.href;
+  (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => toast('Link copied — it reproduces this scenario.'),
+    () => { prompt('Copy this link:', url); });
+}
+
+/* ---- results ---- */
+function graph(r) {
+  const W = 320, H = 96, n = r.series.length, x = i => 16 + i * (W - 32) / Math.max(1, n - 1), y = v => 10 + (100 - v) * (H - 24) / 100;
+  const pts = r.series.map((p, i) => `${x(i).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ');
+  return `<svg class="graph" viewBox="0 0 ${W} ${H}" role="img" aria-label="Trust score over the session, from ${r.series[0].v} to ${r.trust}">
+    ${[0, 50, 100].map(v => `<line x1="12" x2="${W - 8}" y1="${y(v)}" y2="${y(v)}" stroke="#22304f" stroke-width="1"/><text x="2" y="${y(v) + 3}" font-size="8" fill="#7385aa">${v}</text>`).join('')}
+    <polyline points="${pts}" fill="none" stroke="var(--trust)" stroke-width="2" stroke-linejoin="round"/>
+    ${r.series.map((p, i) => `<circle data-k="${p.k}" cx="${x(i)}" cy="${y(p.v)}" r="3.5" fill="${p.d < 0 ? 'var(--block)' : p.d > 0 ? 'var(--ok)' : '#a9b6d3'}"><title>${h(p.sig)}: ${p.v}</title></circle>`).join('')}
+    <text x="${W - 8}" y="${Math.max(9, y(r.trust) - 6)}" font-size="10" font-weight="700" text-anchor="end" fill="var(--trust)">${r.trust}</text></svg>
+    <ul class="sig">${r.series.map(p => `<li data-k="${p.k}"><b class="${p.d < 0 ? 'dn' : p.d > 0 ? 'up' : ''}">${p.d > 0 ? '+' + p.d : p.d < 0 ? p.d : '·'}</b><span>${h(p.sig)}${p.at ? ` <span class="small">(${h(PR[p.at].s)})</span>` : ''} → <b style="min-width:0">${p.v}</b></span></li>`).join('')}</ul>`;
+}
+function runHTML(r) {
+  const s = r.s, V = DATA.verdicts[r.verdict], multi = S.runs.length > 1;
+  const sum = [opt('who', s.who).short, opt('device', s.device).short, opt('loc', s.loc).short, '→ ' + opt('dest', s.dest).short, ...s.beh.map(b => opt('beh', b).label)];
+  const gap = r.off ? `<div class="gap"><b>Without ${h(PR[r.off].s)} (illustrative)</b><p>With all controls: ${vchip(r.base.verdict)} → without it: ${vchip(r.verdict)}${r.base.verdict === r.verdict ? '. No change in outcome: ' + (r.gaps.length ? 'another control still covers this scenario.' : 'this product does not act in this scenario.') : ''}</p>
+    ${r.gaps.length ? `<ul>${r.gaps.map(g => `<li>Skipped: ${h(g.c)} — ${h(g.r)}</li>`).join('')}</ul>` : ''}</div>` : '';
+  const sug = r.sug;
+  return `<section class="run pending" data-slot="${r.slot}" aria-label="Scenario ${'AB'[r.slot]} result">
+    <h3>${multi ? 'Scenario ' + 'AB'[r.slot] : 'Scenario'}</h3>
+    <div class="sum">${sum.map(x => `<span>${h(x)}</span>`).join('')}</div>
+    <div class="wait">Evaluating… <span class="prog"></span></div>
+    <div class="verdict v-${r.verdict}" role="status"><div class="vt">${V.label}</div><p>${h(r.why)}</p><p class="note">${h(DATA.meta.verdictNote)}</p></div>
+    ${gap}
+    <h4>Trust score</h4>${graph(r)}
+    <h4>Decision timeline</h4>
+    <ol class="tl">${r.tl.map((e, k) => `<li data-k="${k}" data-lens="${e.lens}" style="--c:${LENS[e.lens].color}"><span class="n">${k + 1}</span><div>
+      <button class="p" data-id="${e.at}">${h(PR[e.at].s)}</button> <span class="c">· ${h(e.c)}${e.hop && e.hop !== e.at ? ' @ ' + h(nodeName(e.hop)) : ''}</span>
+      <div>${h(e.r)}</div><div class="meta"><span>${LENS[e.lens].label}</span>${e.d ? `<span>trust ${e.d > 0 ? '+' : ''}${e.d} → ${e.trust}</span>` : ''}${e.v ? vchip(e.v) : ''}</div></div></li>`).join('')}</ol>
+    <p class="small" style="margin-top:6px">Path: ${r.path.map(n => h(nodeName(n))).join(' → ')}${r.stopAt >= 0 ? ' (stopped at ' + h(nodeName(r.path[r.stopAt])) + ')' : ''}. Rules ${r.rules.join(', ')}${r.fallback ? ' — nearest matching rule used' : ''}.</p>
+    <h4>Products involved</h4>
+    <div class="prods">${r.products.map(p => `<a href="${PR[p].url}" target="_blank" rel="noopener noreferrer" title="Source: cisco.com">${h(PR[p].s)}</a>`).join('')}</div>
+    ${sug.length ? `<h4>Change one thing</h4><div class="sug">${sug.map((g, i) => `<button data-sug="${i}"><span>${h(g.l)}</span>${vchip(g.v)}</button>`).join('')}</div>` : ''}
+    <h4>Without this control</h4>
+    <div class="ctl"><select data-off aria-label="Disable one product and replay"><option value="">All controls active</option>${(r.base || r).products.filter(p => PR[p].cat !== 'net' || PR[p].inspect).map(p => `<option value="${p}" ${S.off === p ? 'selected' : ''}>Without ${h(PR[p].s)}</option>`).join('')}</select>
+    <small>Illustrative: replays the scenario with one product removed to show the gap.</small></div>
+  </section>`;
+}
+function renderResults() {
+  const el = $('#result');
+  if (!S.runs.length) { el.innerHTML = `<div class="rhead"><h2>Free explore</h2></div><div class="pad"><p>Select a product in the scene or the list to see what it does and which other products cisco.com says it works with.</p><p class="small" style="margin-top:8px">${Object.keys(PR).length} products · ${DATA.links.length} stated relationships · verified ${DATA.meta.verified}.</p></div>`; return; }
+  el.innerHTML = `<div class="rhead"><h2>Result</h2><button class="btn" id="cmpR" aria-pressed="${S.compare}">${S.compare ? 'Exit compare' : 'Compare'}</button><button class="btn" id="shareR">Copy link</button></div>
+    <div class="runs ${S.runs.length > 1 ? 'cmp' : ''}">${S.runs.map(runHTML).join('')}</div>`;
+  markTimeline();
+}
+function markTimeline() { $$('.tl li').forEach(li => li.classList.toggle('unl', li.dataset.lens !== S.lens)); }
+$('#right').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'shareR') return share();
+  if (b.id === 'cmpR') { S.compare = !S.compare; S.active = 0; S.preset = 0; if (S.mode === 'presets') { S.mode = 'build'; $$('.modes button').forEach(x => x.setAttribute('aria-selected', x.dataset.mode === 'build')); } renderLeft(); return rerun(); }
+  if (b.classList.contains('x')) return select(null);
+  if (b.dataset.sug) { const slot = +b.closest('.run').dataset.slot, r = S.runs.find(x => x.slot === slot); if (S.mode === 'presets') { S.mode = 'build'; $$('.modes button').forEach(x => x.setAttribute('aria-selected', x.dataset.mode === 'build')); } S.active = slot; return setScenario(slot, r.sug[+b.dataset.sug].s); }
+  if (b.dataset.id) select(b.dataset.id, true);
+});
+$('#right').addEventListener('change', e => { if (e.target.matches('[data-off]')) { S.off = e.target.value || null; rerun(); } });
+
+/* per-frame sync of DOM to playback progress (only when something changed) */
+let lastSig = '';
+function syncUI() {
+  const sig = S.runs.map(r => r.pb.i + ':' + r.pb.done).join('|') + S.playing + S.lens;
+  if (sig === lastSig) return; lastSig = sig;
+  $('#bPlay').innerHTML = ico(S.playing ? 'pause' : 'play'); $('#bPlay').setAttribute('aria-label', S.playing ? 'Pause' : 'Play');
+  const co = [];
+  for (const r of S.runs) {
+    const P = prog(r), sec = $(`.run[data-slot="${r.slot}"]`); if (!sec) continue;
+    sec.classList.toggle('pending', !P.done);
+    $('.prog', sec).textContent = `checkpoint ${Math.max(0, P.k + 1)} of ${r.tl.length}`;
+    $$('.tl li', sec).forEach(li => { const k = +li.dataset.k; li.classList.toggle('dim', k > P.k); li.classList.toggle('cur', k === P.cur); });
+    $$('.sig li, .graph circle', sec).forEach(li => li.classList.toggle('dim', +li.dataset.k > P.k));
+    const e = r.tl[P.cur >= 0 ? P.cur : -1];
+    if (e) co.push(`<div class="co" style="--c:${LENS[e.lens].color}">${S.runs.length > 1 ? `<em>${'AB'[r.slot]}</em>` : ''}<b>${h(PR[e.at].s)}</b> · ${h(e.c)}<br>${h(e.r)}${e.v ? ' ' + vchip(e.v) : ''}</div>`);
+    else if (P.done) co.push(`<div class="co v-${r.verdict}" style="--c:var(--vc)">${S.runs.length > 1 ? `<em>${'AB'[r.slot]}</em>` : ''}<b>${DATA.verdicts[r.verdict].label}</b> · ${h(r.why)}</div>`);
+  }
+  $('#callout').innerHTML = co.join('');
+}
+
+/* ---- product / place detail ---- */
+function select(id, focusCam) {
+  S.selected = id; const el = $('#detail');
+  R && R.select(id);
+  if (!id) { el.hidden = true; writeHash(); return; }
+  if (PR[id]) {
+    const p = PR[id];
+    const conn = DATA.links.filter(l => l[0] === id || l[1] === id).map(l => ({ o: l[0] === id ? l[1] : l[0], rel: l[2], src: l[3] }));
+    const srcUrl = k => PR[k] ? PR[k].url : DATA.sources[k];
+    el.innerHTML = `<button class="x" aria-label="Close detail">×</button><div class="cat">${h(DATA.categories[p.cat])}</div><h3>${h(p.name)}</h3><p>${h(p.fn)}</p>
+      ${p.note ? `<p class="small">${h(p.note)}</p>` : ''}
+      <dl><dt>Zone</dt><dd>${h(DATA.zones.find(z => z.id === p.zone).label)}</dd>
+      <dt>Lenses</dt><dd><div class="lchips">${Object.entries(p.roles).map(([l, t]) => `<span style="--c:${LENS[l].color}" title="${h(t)}">${LENS[l].label}: ${h(t)}</span>`).join('') || '<span style="--c:#7385aa">Licensing suite — no runtime role</span>'}</div></dd>
+      <dt>Works with</dt><dd class="conn">${conn.map(c => `<div class="row"><button data-id="${c.o}">${h(PR[c.o].s)}</button> <small>— ${h(c.rel)} (<a href="${srcUrl(c.src)}" target="_blank" rel="noopener noreferrer">source</a>)</small></div>`).join('') || '<span class="small">No relationship stated on the pages reviewed.</span>'}</dd></dl>
+      <a class="src" href="${p.url}" target="_blank" rel="noopener noreferrer">Source: cisco.com ↗</a><p class="small">Verified ${DATA.meta.verified}.</p>`;
+  } else {
+    const p = PL[id];
+    el.innerHTML = `<button class="x" aria-label="Close detail">×</button><div class="cat">${p.kind === 'loc' ? 'Location' : 'Destination'}</div><h3>${h(p.name)}</h3><p>${h(p.fn)}</p><p class="small">Scene element, not a product.</p>`;
+  }
+  el.hidden = false; $('#right').scrollTop = 0;
+  if (matchMedia('(max-width:900px)').matches) sheet('right');
+  if (focusCam && R) R.focus(id);
+  writeHash();
+}
+function tip(id, x, y) {
+  const t = $('#tip'); if (!id) { t.hidden = true; return; }
+  const p = PR[id] || PL[id];
+  t.innerHTML = `<b>${h(p.name)}</b><span>${h(p.fn)}</span>${PR[id] && p.roles[S.lens] ? `<br><span style="color:var(--lens)">${LENS[S.lens].label}: ${h(p.roles[S.lens])}</span>` : ''}`;
+  t.hidden = false; const st = $('#stage').getBoundingClientRect();
+  t.style.left = clamp(x + 14, 4, st.width - t.offsetWidth - 4) + 'px'; t.style.top = clamp(y + 14, 4, st.height - t.offsetHeight - 4) + 'px';
+}
+function sheet(n) { document.body.dataset.sheet = n; $$('#mobnav button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sheet === n)); }
+
+/* ---- search ---- */
+function doSearch() {
+  const q = $('#q').value.trim().toLowerCase(), cat = $('#qcat').value, box = $('#qres');
+  const hits = Object.entries(PR).filter(([, p]) => (!cat || p.cat === cat) && (!q || (p.name + ' ' + p.s + ' ' + p.fn + ' ' + DATA.categories[p.cat]).toLowerCase().includes(q)));
+  S.filter = (q || cat) ? new Set(hits.map(([id]) => id)) : null; R && R.setFilter(S.filter);
+  if (!q && !cat) { box.hidden = true; return; }
+  box.innerHTML = hits.length ? hits.slice(0, 12).map(([id, p]) => `<button data-id="${id}">${h(p.name)}<small>${h(DATA.categories[p.cat])}</small></button>`).join('') : '<button disabled>No product matches</button>';
+  box.hidden = false;
+}
+
+/* =====================================================================================
+   RENDERER — WebGL (three.js)
+   ===================================================================================== */
+function trustColor(v) { return `hsl(${Math.round(v * 1.35)},72%,58%)`; }
+const lensLinks = lens => lens === 'policy' ? DATA.policyFlow : lens === 'threat' ? DATA.teleFlow
+  : DATA.links.filter(l => l[4] !== 'suite' && PR[l[0]].roles[lens] && PR[l[1]].roles[lens]).map(l => [l[0], l[1]]);
+const ringOn = (p, lens) => lens === 'policy' ? (p.pol || []).includes('enforce') : lens === 'data' ? !!p.inspect : false;
+const NODE_IDS = [...Object.keys(PR), ...Object.keys(PL)];
+
+function createGL(THREE, OrbitControls) {
+  const stage = $('#stage'), canvas = $('#gl'), labels = $('#labels');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x070b16);
+  const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 600);   /* positive near plane: ray picking starts at the camera */
+  const HOME_T = new THREE.Vector3(-7, 3, 1), HOME_O = new THREE.Vector3(68, 116, 100), VS = 36;
+  const controls = new OrbitControls(cam, canvas);
+  controls.enableDamping = true; controls.dampingFactor = .09; controls.minZoom = .2; controls.maxZoom = 6; controls.maxPolarAngle = 1.45; controls.screenSpacePanning = true;
+  let W = 1, H = 1, dirty = true, tick = 0;
+  /* zoom that fits the whole scene: project the scene's bounding box with the home orientation */
+  function fitZoom() {
+    const c = new THREE.OrthographicCamera(cam.left, cam.right, cam.top, cam.bottom, -300, 600); c.position.copy(HOME_T).add(HOME_O); c.lookAt(HOME_T); c.updateMatrixWorld(); c.updateProjectionMatrix();
+    let mx = 0, my = 0; const v = new THREE.Vector3();
+    for (const x of [-45, 28]) for (const y of [0, 15]) for (const z of [-28, 29]) { v.set(x, y, z).project(c); mx = Math.max(mx, Math.abs(v.x)); my = Math.max(my, Math.abs(v.y)); }
+    return clamp(.94 / Math.max(mx, my * 1.12), .2, 2);
+  }
+  function home(instant) { tween(HOME_T, HOME_T.clone().add(HOME_O), fitZoom(), instant); }
+  function resize() {
+    W = stage.clientWidth || 1; H = stage.clientHeight || 1; renderer.setSize(W, H, false);
+    const a = W / H; cam.left = -VS * a; cam.right = VS * a; cam.top = VS; cam.bottom = -VS; cam.updateProjectionMatrix();
+    dirty = true; labels.classList.toggle('narrow', W < 560);
+  }
+  /* eased camera transition, 750 ms */
+  let tw = null;
+  function tween(t, p, z, instant) {
+    if (instant || RM.matches) { controls.target.copy(t); cam.position.copy(p); cam.zoom = z; cam.updateProjectionMatrix(); tw = null; return; }
+    tw = { t0: performance.now(), d: 750, ft: controls.target.clone(), fp: cam.position.clone(), fz: cam.zoom, tt: t.clone(), tp: p.clone(), tz: z };
+  }
+  scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x0a1020, 1.15));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.3); sun.position.set(30, 60, 20); scene.add(sun);
+
+  /* zones */
+  const zoneLbl = [];
+  for (const z of DATA.zones) {
+    const w = z.x[1] - z.x[0], d = z.z[1] - z.z[0], ops = z.id === 'ops';
+    const g = new THREE.BoxGeometry(w, .3, d);
+    const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: ops ? 0x16264a : 0x101a33, transparent: true, opacity: ops ? .42 : .92, roughness: .95, depthWrite: !ops }));
+    m.position.set((z.x[0] + z.x[1]) / 2, z.y - .35, (z.z[0] + z.z[1]) / 2); scene.add(m);
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({ color: ops ? 0x4a639c : 0x2a3a60 })); e.position.copy(m.position); scene.add(e);
+    const el = document.createElement('div'); el.className = 'lbl zone'; el.textContent = z.label; labels.appendChild(el);
+    zoneLbl.push({ el, v: new THREE.Vector3(z.x[0] + .5, z.y, z.z[1] + 1.2) });
+  }
+  /* ops-plane tethers */
+  { const pts = []; for (const [x, z] of [[-18, -8], [23, -8], [-18, 8], [23, 8]]) pts.push(x, 12.6, z, x, 0, z);
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    scene.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x22304f, transparent: true, opacity: .7 }))); }
+
+  /* node geometry: one original abstract shape per category */
+  const GEO = {
+    net: new THREE.CylinderGeometry(.95, .95, .9, 6), id: new THREE.OctahedronGeometry(.95), netsec: new THREE.BoxGeometry(1.45, 1.05, 1.45),
+    cloud: new THREE.IcosahedronGeometry(.95, 0), endpoint: new THREE.CapsuleGeometry(.5, .6, 2, 8), detect: new THREE.DodecahedronGeometry(.9),
+    ot: new THREE.CylinderGeometry(.55, .98, 1.1, 8), suite: new THREE.TorusGeometry(.72, .27, 8, 20)
+  };
+  const P = { b: () => new THREE.BoxGeometry(1, 1, 1), c: () => new THREE.CylinderGeometry(.5, .5, 1, 10), k: () => new THREE.ConeGeometry(.5, 1, 4), s: () => new THREE.SphereGeometry(.5, 12, 8),
+    o: () => new THREE.OctahedronGeometry(.5), t: () => new THREE.TetrahedronGeometry(.6), r: () => new THREE.TorusGeometry(.5, .08, 6, 18), i: () => new THREE.IcosahedronGeometry(.5, 0), p: () => new THREE.CapsuleGeometry(.5, 1, 2, 8) };
+  const PG = {}; const prim = k => PG[k] || (PG[k] = P[k]());
+  /* spec rows: [primitive, sx, sy, sz, x, y, z, rotX?] */
+  function build(spec, mat) { const g = new THREE.Group(); for (const [k, sx, sy, sz, x, y, z, rx] of spec) { const m = new THREE.Mesh(prim(k), mat); m.scale.set(sx, sy, sz); m.position.set(x, y, z); if (rx) m.rotation.x = rx; g.add(m); } return g; }
+  const PLACE = {
+    hq: [['b', 2.2, 1.4, 1.6, 0, .7, 0], ['b', 1, 2.6, 1, -.3, 1.3, .1]], branch: [['b', 1.8, 1.1, 1.4, 0, .55, 0], ['b', .6, .5, .6, .4, 1.35, 0]],
+    home: [['b', 1.4, 1, 1.4, 0, .5, 0], ['k', 2.2, .9, 2.2, 0, 1.45, 0]], public: [['c', 1.6, .25, 1.6, 0, .13, 0], ['c', .7, 1, .7, 0, .75, 0], ['c', 1.9, .12, 1.9, 0, 1.3, 0]],
+    factory: [['b', 2.4, 1, 1.5, 0, .5, 0], ['c', .45, 1.8, .45, -.7, 1.4, 0], ['c', .45, 1.3, .45, .1, 1.2, 0]],
+    internet: [['i', 1.9, 1.9, 1.9, 0, 1.1, 0], ['t', 1, 1, 1, 1, 1.9, 0], ['t', .8, .8, .8, -.9, .7, .6]],
+    dcapp: [['b', 1.6, .4, 1.3, 0, .2, 0], ['b', 1.6, .4, 1.3, 0, .7, 0], ['b', 1.6, .4, 1.3, 0, 1.2, 0]], workload: [['b', 1.2, .4, 1.2, 0, .2, 0], ['b', 1.2, .4, 1.2, 0, .7, 0]],
+    server: [['b', 1.1, 1.5, 1.1, 0, .75, 0], ['b', 1.3, .15, 1.3, 0, 1.6, 0]], intai: [['o', 1.8, 1.8, 1.8, 0, 1, 0], ['r', 2.4, 2.4, 2.4, 0, 1, 0, Math.PI / 2]],
+    cloudapp: [['s', 1.5, 1.1, 1.5, -.3, .7, 0], ['s', 1.2, .9, 1.2, .55, .6, 0], ['b', 1, .5, 1, 0, 1.5, 0]], saas: [['s', 1.6, 1.1, 1.6, 0, .7, 0], ['s', 1.1, .8, 1.1, .7, .55, .2]],
+    shadow: [['s', 1.6, 1.1, 1.6, 0, .7, 0], ['k', 1, .8, 1, 0, 1.6, 0]], ai: [['o', 1.7, 1.7, 1.7, 0, 1, 0]], pubai: [['o', 1.7, 1.7, 1.7, 0, 1, 0], ['k', .9, .7, .9, 0, 2.1, 0]],
+    web: [['s', 1.8, 1.8, 1.8, 0, 1, 0], ['r', 2.3, 2.3, 2.3, 0, 1, 0, Math.PI / 2]], mail: [['b', 1.9, .25, 1.3, 0, .5, 0], ['k', 1.5, .5, 1, 0, .85, 0]],
+    otctl: [['b', 1.4, .8, 1.4, 0, .4, 0], ['c', .4, 1.4, .4, 0, 1.5, 0], ['b', 1.3, .3, .3, .5, 2.1, 0]]
+  };
+  const ACTOR = {
+    emp: [['p', .8, .7, .8, 0, .85, 0], ['s', .8, .8, .8, 0, 2.1, 0]], admin: [['p', .8, .7, .8, 0, .85, 0], ['s', .8, .8, .8, 0, 2.1, 0], ['r', 1.5, 1.5, 1.5, 0, 2.75, 0, Math.PI / 2]],
+    exec: [['p', .85, .95, .85, 0, 1.1, 0], ['s', .8, .8, .8, 0, 2.6, 0], ['b', 1.5, .2, .6, 0, 1.75, 0]], contractor: [['p', .8, .7, .8, 0, .85, 0], ['s', .8, .8, .8, 0, 2.1, 0], ['b', .7, .55, .5, .9, .35, 0]],
+    guest: [['p', .65, .55, .65, 0, .7, 0], ['s', .65, .65, .65, 0, 1.75, 0], ['r', 2, 2, 2, 0, .08, 0, Math.PI / 2]], insider: [['p', .8, .7, .8, 0, .85, 0], ['s', .8, .8, .8, 0, 2.1, 0], ['k', 1.3, .9, 1.3, 0, 2.7, 0]],
+    iot: [['b', 1.1, .8, .8, 0, .9, 0], ['c', .5, .5, .5, 0, .9, .55, Math.PI / 2], ['c', .2, .9, .2, 0, .2, 0]], ot: [['c', 1.2, .5, 1.2, 0, .25, 0], ['b', .35, 1.5, .35, 0, 1.2, 0], ['b', 1.3, .3, .3, .5, 1.95, 0]],
+    aiagent: [['o', 1.6, 1.6, 1.6, 0, 1.2, 0], ['r', 2.3, 2.3, 2.3, 0, 1.2, 0, Math.PI / 2]], attacker: [['t', 1.6, 1.6, 1.6, 0, 1.1, 0], ['t', 1.3, -1.3, 1.3, 0, 1.3, 0], ['k', .5, 1, .5, 0, 2.5, 0]]
+  };
+  const DEVICE = {
+    mgd: [['b', .9, .08, .6, 0, .04, 0], ['b', .9, .6, .06, 0, .35, -.3]], stale: [['b', .9, .08, .6, 0, .04, 0], ['b', .9, .6, .06, 0, .35, -.3], ['k', .35, .35, .35, .3, .85, -.3]],
+    mobile: [['b', .4, .75, .07, 0, .4, 0]], byod: [['b', .4, .75, .07, -.3, .4, 0], ['b', .7, .07, .5, .4, .04, 0]], claptop: [['b', .9, .08, .6, 0, .04, 0], ['b', .9, .6, .06, 0, .35, -.3], ['b', .3, .3, .3, .5, .16, .2]],
+    headless: [['b', .6, .6, .6, 0, .3, 0]], server: [['b', .8, .25, .8, 0, .13, 0], ['b', .8, .25, .8, 0, .45, 0], ['b', .8, .25, .8, 0, .77, 0]],
+    compromised: [['b', .9, .08, .6, 0, .04, 0], ['b', .9, .6, .06, 0, .35, -.3], ['t', .6, .6, .6, 0, 1.05, -.3]]
+  };
+
+  const nodes = {}, pickables = [], lensCol = new THREE.Color(), OFF = new THREE.Color(0x39486b), PLC = new THREE.Color(0x6b7da6);
+  const ringG = new THREE.TorusGeometry(1.45, .07, 6, 40), diaG = new THREE.OctahedronGeometry(.42), padG = new THREE.CylinderGeometry(1.25, 1.25, .12, 24);
+  for (const id of NODE_IDS) {
+    const p = PR[id] || PL[id], isP = !!PR[id], g = new THREE.Group(); g.position.set(...p.p);
+    const mat = new THREE.MeshStandardMaterial({ color: isP ? OFF : (p.hostile ? 0x8a4a55 : PLC), roughness: .55, metalness: .1, flatShading: true });
+    let top = 2.2;
+    if (isP) {
+      const pad = new THREE.Mesh(padG, new THREE.MeshStandardMaterial({ color: 0x1b2747, roughness: .9 })); pad.position.y = -.12; g.add(pad);
+      const m = new THREE.Mesh(GEO[p.cat], mat); m.position.y = .85; if (p.cat === 'suite') m.rotation.x = Math.PI / 2; m.userData.id = id; g.add(m); pickables.push(m);
+      const ring = new THREE.Mesh(ringG, new THREE.MeshBasicMaterial({ color: 0xffffff })); ring.rotation.x = Math.PI / 2; ring.position.y = .02; ring.visible = false; g.add(ring);
+      const dia = new THREE.Mesh(diaG, new THREE.MeshBasicMaterial({ color: 0xf4c95d, wireframe: true })); dia.position.y = 2.35; dia.visible = false; g.add(dia);
+      nodes[id] = { g, mat, mesh: m, ring, dia, isP, p }; top = 2.1;
+    } else {
+      const b = build(PLACE[id], mat); b.children.forEach(m => { m.userData.id = id; pickables.push(m); }); g.add(b);
+      if (id === 'internet' || id === 'web') b.children[0].material = new THREE.MeshStandardMaterial({ color: p.hostile ? 0x8a4a55 : PLC, wireframe: true });
+      nodes[id] = { g, mat, isP, p }; top = 3;
+    }
+    scene.add(g);
+    const el = document.createElement('button'); el.className = 'lbl' + (isP ? '' : ' place'); el.dataset.id = id; el.setAttribute('aria-label', (isP ? p.name + '. ' : p.name + ', scene element. ') + p.fn);
+    labels.appendChild(el); nodes[id].el = el; nodes[id].anchor = new THREE.Vector3(p.p[0], p.p[1] + top, p.p[2]);
+  }
+  /* relationship links: faint base set + brighter lens set */
+  const lineSet = (pairs, mat) => { const pts = []; for (const [a, b] of pairs) { const A = POS(a), B = POS(b); pts.push(A[0], A[1] + .5, A[2], B[0], B[1] + .5, B[2]); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); const l = new THREE.LineSegments(g, mat); if (mat.isLineDashedMaterial) l.computeLineDistances(); return l; };
+  const baseLinks = lineSet(DATA.links.filter(l => l[4] !== 'suite'), new THREE.LineBasicMaterial({ color: 0x3a4d7a, transparent: true, opacity: .28 })); scene.add(baseLinks);
+  let lensLine = null, selLine = null, flow = [];
+  /* ambient traffic: one instanced mesh */
+  const NP = 150, amb = new THREE.InstancedMesh(new THREE.SphereGeometry(.13, 6, 5), new THREE.MeshBasicMaterial({ color: 0xffffff }), NP); amb.frustumCulled = false; scene.add(amb);
+  const dummy = new THREE.Object3D(), va = new THREE.Vector3(), vb = new THREE.Vector3();
+  let lens = 'data', filter = null, selected = null;
+
+  function setLens(l) {
+    lens = l; lensCol.set(LENS[l].color);
+    for (const id in nodes) { const n = nodes[id]; if (!n.isP) { n.el.innerHTML = h(n.p.name); continue; }
+      const on = !!n.p.roles[l]; n.mat.color.copy(on ? lensCol : OFF); n.mat.emissive.copy(on ? lensCol : OFF).multiplyScalar(on ? .22 : 0);
+      n.ring.visible = ringOn(n.p, l); n.ring.material.color.copy(lensCol); n.dia.visible = l === 'policy' && (n.p.pol || []).includes('author');
+      n.el.classList.toggle('off', !on); n.el.innerHTML = h(n.p.s) + (on ? `<small>${h(n.p.roles[l])}</small>` : ''); }
+    if (lensLine) { scene.remove(lensLine); lensLine.geometry.dispose(); }
+    flow = lensLinks(l); const dashed = l === 'policy' || l === 'threat';
+    lensLine = lineSet(flow, dashed ? new THREE.LineDashedMaterial({ color: lensCol, transparent: true, opacity: .75, dashSize: .7, gapSize: .5 }) : new THREE.LineBasicMaterial({ color: lensCol, transparent: true, opacity: .5 }));
+    scene.add(lensLine); amb.material.color.copy(lensCol); colorRuns(); dirty = true;
+  }
+  function select(id) {
+    selected = id; for (const k in nodes) nodes[k].el.classList.toggle('sel', k === id);
+    if (selLine) { scene.remove(selLine); selLine.geometry.dispose(); selLine = null; }
+    if (id && PR[id]) { selLine = lineSet(DATA.links.filter(l => l[0] === id || l[1] === id), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .85 })); scene.add(selLine); }
+  }
+  function setFilter(f) { filter = f; for (const k in nodes) nodes[k].el.classList.toggle('filtered', !!f && !f.has(k)); }
+  function focus(id) { const p = POS(id), t = new THREE.Vector3(p[0], p[1], p[2]); tween(t, t.clone().add(cam.position.clone().sub(controls.target)), Math.max(cam.zoom, 1.7)); }
+
+  /* ---- run visuals ---- */
+  const CYL = new THREE.CylinderGeometry(1, 1, 1, 8), UPV = new THREE.Vector3(0, 1, 0);
+  const headG = new THREE.SphereGeometry(.42, 14, 10), headA = new THREE.TetrahedronGeometry(.62), trailG = new THREE.SphereGeometry(.15, 6, 5), trailA = new THREE.TetrahedronGeometry(.24);
+  let rv = [];
+  function seg(a, b, dashed) {
+    const g = new THREE.Group(), dir = b.clone().sub(a), len = dir.length(); g.position.copy(a); g.quaternion.setFromUnitVectors(UPV, dir.clone().normalize());
+    const fm = new THREE.MeshBasicMaterial({ color: 0x8fa3c8, transparent: true, opacity: .35 }), mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const faint = new THREE.Mesh(CYL, fm); faint.scale.set(.045, len, .045); faint.position.y = len / 2; g.add(faint);
+    const parts = [], n = dashed ? Math.max(2, Math.round(len / 1.1)) : 1;
+    for (let i = 0; i < n; i++) { const m = new THREE.Mesh(CYL, mat); m.scale.set(.14, dashed ? len / n * .55 : 1, .14); m.position.y = (i + .5) * len / n; m.visible = false; g.add(m); parts.push(m); }
+    return { g, len, a, b, mat, fm, set(p) { if (dashed) parts.forEach((m, i) => m.visible = p > 0 && (i + .5) / n <= p + 1e-6); else { const m = parts[0]; m.visible = p > .001; m.scale.y = Math.max(.001, p * len); m.position.y = p * len / 2; } } };
+  }
+  function setRuns(runs) {
+    rv.forEach(v => { scene.remove(v.g); v.g.traverse(o => { if (o.material) o.material.dispose?.(); }); v.chip.remove(); }); rv = [];
+    for (const r of runs) {
+      const g = new THREE.Group(), lift = r.slot * .55 + .9, hostile = r.hostile;
+      const ap = actorPos(r, r.slot), pts = [new THREE.Vector3(ap[0], lift, ap[2]), ...r.path.map(n => { const p = POS(n); return new THREE.Vector3(p[0], p[1] + lift, p[2]); })];
+      const am = new THREE.MeshStandardMaterial({ color: hostile ? 0xff6a5c : (r.slot ? 0xffd9a8 : 0xe6ecfa), roughness: .5, flatShading: true });
+      const actor = build(ACTOR[r.s.who], am); actor.position.set(ap[0], 0, ap[2]); g.add(actor);
+      const dev = build(DEVICE[r.s.device], new THREE.MeshStandardMaterial({ color: r.s.device === 'compromised' ? 0xff6a5c : 0x9fb3dd, roughness: .5, flatShading: true })); dev.position.set(ap[0] + 1.5, 0, ap[2] + .9); g.add(dev);
+      const segs = pts.slice(0, -1).map((a, i) => { const s = seg(a, pts[i + 1], hostile); g.add(s.g); return s; });
+      const head = new THREE.Mesh(hostile ? headA : headG, new THREE.MeshBasicMaterial({ color: 0xffffff })); g.add(head);
+      const trail = new THREE.InstancedMesh(hostile ? trailA : trailG, new THREE.MeshBasicMaterial({ color: 0xffffff }), 14); trail.frustumCulled = false; g.add(trail);
+      /* consult beams: path hop (or telemetry sources) → product doing the check */
+      const beams = r.tl.map(e => {
+        const to = POS(e.at), tv = new THREE.Vector3(to[0], to[1] + 1, to[2]);
+        const srcs = e.beams ? e.beams : e.from && PR[e.from] ? [e.from] : e.hop && e.hop !== e.at ? [e.hop] : [];
+        const ptsB = []; for (const sId of srcs) { const sp = POS(sId); ptsB.push(sp[0], sp[1] + 1, sp[2], tv.x, tv.y, tv.z); }
+        if (!ptsB.length) return null;
+        const bg = new THREE.BufferGeometry(); bg.setAttribute('position', new THREE.Float32BufferAttribute(ptsB, 3));
+        const l = new THREE.LineSegments(bg, new THREE.LineBasicMaterial({ color: LENS[e.lens].color, transparent: true, opacity: 0 })); g.add(l); return l;
+      });
+      /* verdict marker: distinct shape per verdict, not only colour */
+      const mk = new THREE.Group(), mm = new THREE.MeshBasicMaterial({ color: getComputedStyle(document.body).getPropertyValue({ ALLOW: '--ok', LIMIT: '--limit', STEPUP: '--step', BLOCK: '--block', CONTAIN: '--contain' }[r.verdict]).trim() || '#fff' });
+      const bar = (rz) => { const m = new THREE.Mesh(prim('b'), mm); m.scale.set(2.6, .28, .28); m.rotation.z = rz; mk.add(m); };
+      if (r.verdict === 'BLOCK') { bar(Math.PI / 4); bar(-Math.PI / 4); }
+      else if (r.verdict === 'CONTAIN') { const c = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(3, 3.4, 3)), new THREE.LineBasicMaterial({ color: mm.color })); c.position.y = .6; mk.add(c); }
+      else if (r.verdict === 'STEPUP') { const t = new THREE.Mesh(new THREE.TorusGeometry(1.2, .13, 8, 28), mm); mk.add(t); const k = new THREE.Mesh(prim('k'), mm); k.scale.set(.8, .9, .8); k.position.y = .1; mk.add(k); }
+      else if (r.verdict === 'LIMIT') { const t = new THREE.Mesh(new THREE.TorusGeometry(1.2, .13, 8, 28, Math.PI * 1.25), mm); mk.add(t); }
+      const at = r.stopAt >= 0 ? pts[r.stopAt + 1] : (r.verdict === 'CONTAIN' ? pts[1] : pts[pts.length - 1]);
+      mk.position.copy(at).add(new THREE.Vector3(0, r.verdict === 'CONTAIN' ? 0 : 2.6, 0)); mk.visible = false; g.add(mk);
+      const chip = document.createElement('div'); chip.className = 'tchip'; labels.appendChild(chip);
+      scene.add(g); rv.push({ r, g, pts, segs, head, trail, beams, mk, chip, hostile, lens: segs.map(s => s.len) });
+    }
+    colorRuns();
+  }
+  function colorRuns() {
+    for (const v of rv) v.segs.forEach((s, i) => {
+      const enc = v.r.segs[i].ty === 'enc';
+      if (lens === 'data') s.mat.color.set(enc ? LENS.data.color : '#9db0d6'); else if (lens !== 'trust') s.mat.color.set(v.r.slot ? '#ffd9a8' : LENS[lens].color);
+      s.fm.color.set(v.hostile ? '#ff7a6b' : '#8fa3c8');
+    });
+  }
+  const tv3 = new THREE.Vector3(), tc = new THREE.Color();
+  function frameRuns(now) {
+    for (const v of rv) {
+      const P = prog(v.r), n = v.segs.length; let L = 0;
+      const curTrust = P.k >= 0 ? v.r.tl[P.k].trust : v.r.series[0].v;
+      v.segs.forEach((s, i) => { const p = clamp(P.moves - i, 0, 1); s.set(p); L += p * s.len;
+        if (lens === 'trust') { let t = v.r.series[0].v; for (const e of v.r.tl) if (e.hi < i) t = e.trust; s.mat.color.set(trustColor(t)); } });
+      const along = d => { let i = 0; while (i < n - 1 && d > v.segs[i].len) d -= v.segs[i++].len; return tv3.copy(v.segs[i].a).lerp(v.segs[i].b, clamp(d / v.segs[i].len, 0, 1)); };
+      v.head.position.copy(along(L)); v.head.rotation.y = now * .002;
+      tc.set(lens === 'trust' ? trustColor(curTrust) : v.hostile ? '#ff7a6b' : v.r.slot ? '#ffd9a8' : '#ffffff'); v.head.material.color.copy(tc); v.trail.material.color.copy(tc);
+      for (let j = 0; j < 14; j++) { const f = RM.matches ? j / 14 : ((now * .00022 + j / 14) % 1); dummy.position.copy(along(f * L)); dummy.scale.setScalar(L > .5 ? 1 : 0); dummy.rotation.set(0, now * .003, 0); dummy.updateMatrix(); v.trail.setMatrixAt(j, dummy.matrix); }
+      v.trail.instanceMatrix.needsUpdate = true;
+      v.beams.forEach((b, k) => { if (b) b.material.opacity = k === P.cur ? .95 : k <= P.k ? (lens === v.r.tl[k].lens ? .45 : .14) : 0; });
+      v.mk.visible = P.done || (v.r.stopAt >= 0 && P.moves >= v.r.stopAt + 1); v.mk.quaternion.copy(cam.quaternion);
+      tv3.copy(v.head.position).project(cam); v.chip.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(-50%,-190%)`;
+      v.chip.style.setProperty('--c', trustColor(curTrust)); v.chip.textContent = (S.runs.length > 1 ? 'AB'[v.r.slot] + ' · ' : '') + 'trust ' + curTrust;
+      v.chip.style.opacity = lens === 'trust' ? 1 : .8;
+    }
+  }
+  function frame(now) {
+    if (tw) { const k = clamp((now - tw.t0) / tw.d, 0, 1), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      controls.target.lerpVectors(tw.ft, tw.tt, e); cam.position.lerpVectors(tw.fp, tw.tp, e); cam.zoom = tw.fz + (tw.tz - tw.fz) * e; cam.updateProjectionMatrix(); if (k >= 1) tw = null; }
+    controls.update();
+    /* ambient particles along the links the lens cares about */
+    const show = flow.length && !RM.matches;
+    for (let i = 0; i < NP; i++) {
+      if (!show) { dummy.scale.setScalar(0); } else {
+        const l = flow[i % flow.length], A = POS(l[0]), B = POS(l[1]), f = ((now * .00018 + i * .137) % 1);
+        va.set(A[0], A[1] + .5, A[2]); vb.set(B[0], B[1] + .5, B[2]); dummy.position.lerpVectors(va, vb, f); dummy.scale.setScalar(S.runs.length && lens !== 'policy' && lens !== 'threat' ? .55 : 1);
+      }
+      dummy.rotation.set(0, 0, 0); dummy.updateMatrix(); amb.setMatrixAt(i, dummy.matrix);
+    }
+    amb.instanceMatrix.needsUpdate = true;
+    for (const id in nodes) { const n = nodes[id]; if (n.dia && n.dia.visible) n.dia.rotation.y = now * .0015; }
+    frameRuns(now);
+    renderer.render(scene, cam);
+    /* project labels; every few frames hide lower-priority labels that would overlap (they stay focusable) */
+    const compact = H / (2 * VS) * cam.zoom < 12.5;
+    if (labels.classList.contains('compact') !== compact) { labels.classList.toggle('compact', compact); dirty = true; }
+    const onPath = new Set(), hit = new Set();
+    for (const v of rv) { const P = prog(v.r); v.r.path.forEach((n, i) => { onPath.add(n); if (i < P.moves) hit.add(n); }); v.r.tl.forEach((e, k) => { onPath.add(e.at); if (k <= P.k) hit.add(e.at); }); }
+    if (dirty) { for (const id in nodes) { const n = nodes[id]; n.w = n.el.offsetWidth; n.h = n.el.offsetHeight; } dirty = false; tick = 0; }
+    const items = [];
+    for (const id in nodes) {
+      const n = nodes[id]; tv3.copy(n.anchor).project(cam); n.x = (tv3.x * .5 + .5) * W; n.y = (-tv3.y * .5 + .5) * H;
+      n.el.style.transform = `translate(${n.x.toFixed(1)}px,${n.y.toFixed(1)}px) translate(-50%,-100%)`;
+      n.el.classList.toggle('hit', hit.has(id));
+      n.pr = id === selected ? 100 : hit.has(id) ? 80 : onPath.has(id) ? 70 : (filter && filter.has(id)) ? 60 : n.isP ? (n.p.roles[lens] ? 50 : 30) : 20;
+      items.push(n);
+    }
+    if (tick++ % 5 === 0) {
+      items.sort((a, b) => b.pr - a.pr); const placed = [];
+      for (const n of items) {
+        const x0 = n.x - n.w / 2 - 2, x1 = n.x + n.w / 2 + 2, y0 = n.y - n.h - 1, y1 = n.y + 1;
+        const out = x1 < 0 || x0 > W || y1 < 0 || y0 > H;
+        const clash = !out && n.pr < 100 && placed.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
+        n.el.classList.toggle('cull', out || clash); if (!out && !clash) placed.push([x0, y0, x1, y1]);
+      }
+    }
+    for (const z of zoneLbl) { tv3.copy(z.v).project(cam); z.el.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(0,-50%)`; }
+  }
+  /* picking */
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let down = null;
+  const pick = e => { const b = canvas.getBoundingClientRect(); ndc.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1); ray.setFromCamera(ndc, cam); const hit = ray.intersectObjects(pickables, false)[0]; return hit ? hit.object.userData.id : null; };
+  canvas.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; tw = null; });
+  canvas.addEventListener('pointerup', e => { if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 6) { const id = pick(e); window.__select(id, false); } down = null; });
+  canvas.addEventListener('pointermove', e => { if (e.pointerType === 'touch' || e.buttons) return tip(null); const id = pick(e), b = stage.getBoundingClientRect(); canvas.style.cursor = id ? 'pointer' : 'grab'; tip(id, e.clientX - b.left, e.clientY - b.top); });
+  canvas.addEventListener('pointerleave', () => tip(null));
+  new ResizeObserver(resize).observe(stage); resize(); home(true);
+  const screenOf = id => { const b = canvas.getBoundingClientRect(), p = POS(id); tv3.set(p[0], p[1] + .85, p[2]).project(cam); return [b.left + (tv3.x * .5 + .5) * b.width, b.top + (-tv3.y * .5 + .5) * b.height]; };
+  return { kind: 'webgl', setLens, setRuns, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
+}
+
+/* =====================================================================================
+   RENDERER — 2D SVG fallback (same data, same playback)
+   ===================================================================================== */
+function createSVG() {
+  const svg = $('#svg2d'), NS = 'http://www.w3.org/2000/svg'; svg.removeAttribute('hidden'); $('#gl').hidden = true; $('#nogl').hidden = false; $('#labels').hidden = true;
+  const HOME = { x: -47, y: -57, w: 78, h: 98 }; let vb = { ...HOME }, lens = 'data', rv = [];
+  const setVB = () => svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`); setVB();
+  const M = p => [p[0], p[1] > 5 ? p[2] * .9 - 44 : p[2]];   /* ops plane is drawn as a band above the ground map */
+  const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
+  const gZ = mk('g'), gL = mk('g'), gLL = mk('g'), gR = mk('g'), gN = mk('g');
+  for (const z of DATA.zones) { const a = M([z.x[0], z.y, z.z[0]]), b = M([z.x[1], z.y, z.z[1]]); mk('rect', { class: 'zone', x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1], rx: .8 }, gZ); mk('text', { class: 'zn', x: a[0] + .5, y: a[1] - .5 }, gZ).textContent = z.label; }
+  for (const l of DATA.links) { if (l[4] === 'suite') continue; const a = M(POS(l[0])), b = M(POS(l[1])); mk('line', { class: 'lk', x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, gL); }
+  const SH = { net: '0,-1 .87,-.5 .87,.5 0,1 -.87,.5 -.87,-.5', id: '0,-1.1 1.1,0 0,1.1 -1.1,0', netsec: '-.9,-.9 .9,-.9 .9,.9 -.9,.9', cloud: '0,-1.1 1.05,-.35 .65,.9 -.65,.9 -1.05,-.35',
+    endpoint: '-.6,-1 .6,-1 .9,0 .6,1 -.6,1 -.9,0', detect: '0,-1.1 .78,-.78 1.1,0 .78,.78 0,1.1 -.78,.78 -1.1,0 -.78,-.78', ot: '-.5,-1 .5,-1 1,1 -1,1', suite: '-1.1,-.6 1.1,-.6 1.1,.6 -1.1,.6' };
+  const nodes = {};
+  for (const id of NODE_IDS) {
+    const p = PR[id] || PL[id], isP = !!PR[id], [x, y] = M(p.p);
+    const g = mk('g', { class: 'n' + (isP ? '' : ' place'), transform: `translate(${x} ${y})`, tabindex: 0, role: 'button', 'aria-label': p.name + '. ' + p.fn, 'data-id': id }, gN);
+    mk('circle', { r: 1.8, fill: 'transparent' }, g);   /* generous hit area */
+    if (isP) mk('polygon', { class: 'sh', points: SH[p.cat] }, g); else mk(p.kind === 'loc' ? 'rect' : 'circle', p.kind === 'loc' ? { class: 'sh', x: -.9, y: -.7, width: 1.8, height: 1.4, rx: .3 } : { class: 'sh', r: .8 }, g);
+    const ring = isP ? mk('circle', { class: 'mk', r: 1.6, visibility: 'hidden' }, g) : null, dia = isP ? mk('polygon', { class: 'mk', points: '0,-2.6 .6,-2 0,-1.4 -.6,-2', visibility: 'hidden' }, g) : null;
+    mk('text', { class: isP ? '' : 'pl', y: 2.3 }, g).textContent = isP ? p.s : p.name;
+    nodes[id] = { g, ring, dia, p, isP };
+  }
+  function setLens(l) {
+    lens = l; gLL.innerHTML = '';
+    for (const id in nodes) { const n = nodes[id]; if (!n.isP) continue; n.g.classList.toggle('on', !!n.p.roles[l]);
+      n.ring.setAttribute('visibility', ringOn(n.p, l) ? 'visible' : 'hidden'); n.ring.style.stroke = LENS[l].color; n.dia.setAttribute('visibility', l === 'policy' && (n.p.pol || []).includes('author') ? 'visible' : 'hidden'); }
+    for (const [a, b] of lensLinks(l)) { const A = M(POS(a)), B = M(POS(b)); mk('line', { class: 'lk on', x1: A[0], y1: A[1], x2: B[0], y2: B[1], 'stroke-dasharray': l === 'policy' || l === 'threat' ? '.5 .4' : '' }, gLL); }
+  }
+  function setRuns(runs) {
+    gR.innerHTML = ''; rv = [];
+    for (const r of runs) {
+      const off = r.slot * .5, pts = [M(actorPos(r, r.slot)), ...r.path.map(n => M(POS(n)))].map(p => [p[0] + off, p[1] + off]);
+      mk('polyline', { points: pts.map(p => p.join(',')).join(' '), fill: 'none', stroke: r.hostile ? '#ff7a6b' : '#8fa3c8', 'stroke-opacity': .4, 'stroke-width': .12, 'stroke-dasharray': r.hostile ? '.6 .5' : '' }, gR);
+      const line = mk('polyline', { fill: 'none', 'stroke-width': .32, 'stroke-linejoin': 'round', 'stroke-dasharray': r.hostile ? '.9 .6' : '' }, gR);
+      const beams = r.tl.map(e => { const srcs = e.beams ? e.beams : e.from && PR[e.from] ? [e.from] : e.hop && e.hop !== e.at ? [e.hop] : []; const t = M(POS(e.at));
+        return srcs.map(sId => { const a = M(POS(sId)); return mk('line', { x1: a[0], y1: a[1], x2: t[0], y2: t[1], stroke: LENS[e.lens].color, 'stroke-width': .1, opacity: 0 }, gR); }); });
+      mk('circle', { cx: pts[0][0], cy: pts[0][1], r: .9, fill: r.hostile ? '#ff6a5c' : r.slot ? '#ffd9a8' : '#e6ecfa' }, gR);
+      const head = r.hostile ? mk('polygon', { points: '0,-.9 .8,.6 -.8,.6' }, gR) : mk('circle', { r: .6 }, gR);
+      const chip = mk('text', { 'font-size': 1.1 }, gR), at = r.stopAt >= 0 ? pts[r.stopAt + 1] : r.verdict === 'CONTAIN' ? pts[1] : pts[pts.length - 1];
+      const vcol = { ALLOW: '#5be3a4', LIMIT: '#8ed0ff', STEPUP: '#f4c95d', BLOCK: '#ff7a6b', CONTAIN: '#ff5fa2' }[r.verdict];
+      const mkr = mk('g', { transform: `translate(${at[0]} ${at[1]})`, visibility: 'hidden', stroke: vcol, 'stroke-width': .3, fill: 'none' }, gR);
+      if (r.verdict === 'BLOCK') mk('path', { d: 'M-1.2-1.2 1.2 1.2M1.2-1.2-1.2 1.2' }, mkr); else if (r.verdict === 'CONTAIN') mk('rect', { x: -1.7, y: -1.7, width: 3.4, height: 3.4, 'stroke-dasharray': '.5 .3' }, mkr);
+      else if (r.verdict === 'STEPUP') mk('path', { d: 'M0-1.6 1.5 1.1H-1.5z' }, mkr); else if (r.verdict === 'LIMIT') mk('path', { d: 'M-1.5 0A1.5 1.5 0 1 1 0 1.5' }, mkr);
+      rv.push({ r, pts, line, beams, head, chip, mkr });
+    }
+  }
+  function frame() {
+    for (const v of rv) {
+      const P = prog(v.r), full = Math.floor(P.moves), fr = P.moves - full, pts = v.pts.slice(0, full + 1);
+      if (fr > 0 && v.pts[full + 1]) { const a = v.pts[full], b = v.pts[full + 1]; pts.push([a[0] + (b[0] - a[0]) * fr, a[1] + (b[1] - a[1]) * fr]); }
+      const hd = pts[pts.length - 1], t = P.k >= 0 ? v.r.tl[P.k].trust : v.r.series[0].v;
+      const col = lens === 'trust' ? trustColor(t) : v.r.hostile ? '#ff7a6b' : v.r.slot ? '#ffd9a8' : LENS[lens].color;
+      v.line.setAttribute('points', pts.map(p => p[0].toFixed(2) + ',' + p[1].toFixed(2)).join(' ')); v.line.setAttribute('stroke', col);
+      v.head.setAttribute('transform', `translate(${hd[0].toFixed(2)} ${hd[1].toFixed(2)})`); v.head.setAttribute('fill', '#fff');
+      v.chip.setAttribute('x', hd[0]); v.chip.setAttribute('y', hd[1] - 1.3); v.chip.textContent = 'trust ' + t; v.chip.style.fill = trustColor(t);
+      v.beams.forEach((bs, k) => bs.forEach(b => b.setAttribute('opacity', k === P.cur ? 1 : k <= P.k ? .3 : 0)));
+      v.mkr.setAttribute('visibility', P.done ? 'visible' : 'hidden');
+    }
+  }
+  /* pan / zoom / pinch on the viewBox */
+  const ptrs = new Map(); let pd = 0, moved = 0;
+  const scale = () => vb.w / svg.clientWidth;
+  svg.addEventListener('wheel', e => { e.preventDefault(); const k = e.deltaY > 0 ? 1.12 : .89, b = svg.getBoundingClientRect(), fx = (e.clientX - b.left) / b.width, fy = (e.clientY - b.top) / b.height;
+    const w = clamp(vb.w * k, 14, 160), hh = w * vb.h / vb.w; vb.x += (vb.w - w) * fx; vb.y += (vb.h - hh) * fy; vb.w = w; vb.h = hh; setVB(); }, { passive: false });
+  svg.addEventListener('pointerdown', e => { ptrs.set(e.pointerId, [e.clientX, e.clientY]); moved = 0; if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pd = Math.hypot(a[0] - b[0], a[1] - b[1]); } });
+  svg.addEventListener('pointermove', e => {
+    const n = e.target.closest?.('.n'); if (!ptrs.size) { const b = $('#stage').getBoundingClientRect(); return tip(n ? n.dataset.id : null, e.clientX - b.left, e.clientY - b.top); }
+    const prev = ptrs.get(e.pointerId); if (!prev) return; ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+    if (ptrs.size === 1) { const s = scale(); vb.x -= (e.clientX - prev[0]) * s; vb.y -= (e.clientY - prev[1]) * s; moved += Math.abs(e.clientX - prev[0]) + Math.abs(e.clientY - prev[1]); setVB(); }
+    else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), k = clamp(pd / d, .8, 1.25), w = clamp(vb.w * k, 14, 160), hh = w * vb.h / vb.w; vb.x += (vb.w - w) / 2; vb.y += (vb.h - hh) / 2; vb.w = w; vb.h = hh; pd = d; moved = 99; setVB(); }
+  });
+  const up = e => { ptrs.delete(e.pointerId); }; svg.addEventListener('pointerup', up); svg.addEventListener('pointercancel', up); svg.addEventListener('pointerleave', e => { up(e); tip(null); });
+  svg.addEventListener('click', e => { if (moved > 6) return; const n = e.target.closest('.n'); window.__select(n ? n.dataset.id : null, false); });
+  svg.addEventListener('keydown', e => { const n = e.target.closest('.n'); if (n && e.key === 'Enter') window.__select(n.dataset.id, false); });
+  svg.addEventListener('focusin', e => { const n = e.target.closest('.n'); if (n) { const b = n.getBoundingClientRect(), s = $('#stage').getBoundingClientRect(); tip(n.dataset.id, b.left - s.left, b.bottom - s.top); } });
+  svg.addEventListener('focusout', () => tip(null));
+  return { kind: 'svg', setLens, setRuns, frame,
+    focus(id) { const [x, y] = M(POS(id)); vb = { x: x - 18, y: y - 18 * HOME.h / HOME.w, w: 36, h: 36 * HOME.h / HOME.w }; setVB(); },
+    setFilter(f) { for (const k in nodes) nodes[k].g.classList.toggle('filtered', !!f && !f.has(k)); },
+    select(id) { for (const k in nodes) nodes[k].g.classList.toggle('sel', k === id); },
+    resetView() { vb = { ...HOME }; setVB(); } };
+}
+
+/* =====================================================================================
+   BOOT
+   ===================================================================================== */
+window.__select = (id, cam) => select(id, cam);
+async function boot() {
+  $('#foot').textContent = DATA.meta.footer.replace('{date}', DATA.meta.verified);
+  $('#lenses').innerHTML = DATA.lenses.map((l, i) => `<button role="radio" data-lens="${l.id}" style="--c:${l.color}" aria-checked="false" title="${h(l.blurb)}"><i></i>${l.label}<kbd>${i + 1}</kbd></button>`).join('');
+  $('#qcat').innerHTML = '<option value="">All categories</option>' + Object.entries(DATA.categories).map(([k, v]) => `<option value="${k}">${h(v)}</option>`).join('');
+  for (const [id, n] of [['bRestart', 'restart'], ['bPlay', 'play'], ['bStep', 'step'], ['bEnd', 'end'], ['bView', 'view']]) $('#' + id).innerHTML = ico(n);
+
+  const forceSvg = /render=svg/.test(location.search + location.hash);
+  if (!forceSvg) {
+    try {
+      const THREE = await import('three'); const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
+      R = createGL(THREE, OrbitControls);
+    } catch (err) { console.warn('3D view unavailable, using 2D fallback:', err && err.message); R = null; }
+  }
+  if (!R) R = createSVG();
+
+  const hadHash = readHash();
+  $$('.modes button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === S.mode));
+  setLens(S.lens);
+  if (!hadHash) loadPreset(1); else { renderLeft(); rerun(); if (S.selected) select(S.selected, false); }
+  R.setFilter(null);
+
+  /* events */
+  $('#lenses').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { setLens(b.dataset.lens); writeHash(); } });
+  $('#labels').addEventListener('click', e => { const b = e.target.closest('.lbl[data-id]'); if (b) select(b.dataset.id, false); });
+  $('#labels').addEventListener('pointerover', e => { const b = e.target.closest('.lbl[data-id]'); if (b) { const r = b.getBoundingClientRect(), s = $('#stage').getBoundingClientRect(); tip(b.dataset.id, r.left - s.left, r.bottom - s.top - 8); } });
+  $('#labels').addEventListener('pointerout', () => tip(null));
+  $('#labels').addEventListener('focusin', e => { const b = e.target.closest('.lbl[data-id]'); if (b) { const r = b.getBoundingClientRect(), s = $('#stage').getBoundingClientRect(); tip(b.dataset.id, r.left - s.left, r.bottom - s.top - 8); } });
+  $('#labels').addEventListener('focusout', () => tip(null));
+  $('#bPlay').onclick = () => { if (S.runs.every(r => r.pb.done)) restart(); else S.playing = !S.playing; lastSig = ''; };
+  $('#bRestart').onclick = () => { restart(); lastSig = ''; };
+  $('#bStep').onclick = () => { stepOnce(); lastSig = ''; };
+  $('#bEnd').onclick = () => { finish(); lastSig = ''; };
+  $('#bView').onclick = () => R.resetView();
+  $('#speed').onchange = e => S.speed = +e.target.value;
+  $('#q').addEventListener('input', doSearch); $('#qcat').addEventListener('change', doSearch);
+  $('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { const f = $('#qres button[data-id]'); if (f) f.click(); } if (e.key === 'Escape') { $('#q').value = ''; doSearch(); } });
+  $('#qres').addEventListener('click', e => { const b = e.target.closest('button[data-id]'); if (b) { select(b.dataset.id, true); $('#qres').hidden = true; } });
+  document.addEventListener('click', e => { if (!e.target.closest('.search')) $('#qres').hidden = true; });
+  $('#mobnav').addEventListener('click', e => { const b = e.target.closest('button'); if (b) sheet(document.body.dataset.sheet === b.dataset.sheet ? 'none' : b.dataset.sheet); });
+  document.addEventListener('keydown', e => {
+    const t = e.target, typing = t.matches('input,select,textarea');
+    if (e.key === 'Escape') { if (S.selected) select(null); else sheet('none'); return; }
+    if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key >= '1' && e.key <= '5') { setLens(DATA.lenses[+e.key - 1].id); writeHash(); return; }
+    if (e.key === ' ' && (!t.matches('button,a,[role=button]') || t.matches('.lbl,.n'))) { e.preventDefault(); $('#bPlay').click(); }
+  });
+  window.addEventListener('hashchange', () => { if (readHash()) { $$('.modes button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === S.mode)); setLens(S.lens); renderLeft(); rerun(); } });
+
+  /* render loop: paused while the tab is hidden */
+  let last = performance.now(), raf = 0;
+  const loop = now => { raf = requestAnimationFrame(loop); const dt = Math.min(120, now - last); last = now; if (S.playing) advance(dt); R.frame(now); syncUI(); };
+  document.addEventListener('visibilitychange', () => { cancelAnimationFrame(raf); if (!document.hidden) { last = performance.now(); raf = requestAnimationFrame(loop); } });
+  raf = requestAnimationFrame(loop);
+  /* test / automation hook: engine only, no network */
+  window.__LN = { DATA, S, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
+}
+boot();
+</script>
+</body>
+</html>
