@@ -129,7 +129,7 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr) 350px;min-height:0}
 .co{background:#0a1020ea;border:1px solid var(--line2);border-left:3px solid var(--c);border-radius:8px;padding:7px 10px;font-size:12.5px}
 .co b{color:var(--c)}
 .co em{font-style:normal;color:var(--tx3);font-size:11px;margin-right:6px}
-#transport{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:4px;align-items:center;background:#0a1020e0;border:1px solid var(--line2);border-radius:10px;padding:5px}
+#transport{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:center;width:max-content;max-width:calc(100% - 16px);background:#0a1020e0;border:1px solid var(--line2);border-radius:10px;padding:5px}
 .tp button{width:36px;height:34px;border-radius:7px;border:0;background:transparent;display:grid;place-items:center}
 .tp button:hover{background:#ffffff12}
 .tp .sep{width:1px;height:20px;background:var(--line2);margin:0 3px}
@@ -248,6 +248,7 @@ body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
   .search input{width:118px} .search select{max-width:96px}
   #legend{display:none}
   #callout{bottom:58px}
+  .tp button{width:28px} .tp select{padding:6px 3px;font-size:11px} .tp .sep{margin:0 1px} #transport{flex-wrap:nowrap;gap:2px}
 }
 @media (min-width:2200px){ body{font-size:16px} main{grid-template-columns:420px minmax(0,1fr) 480px} .lbl{font-size:13px} }
 @media (prefers-reduced-motion:reduce){ .panel{transition:none} }
@@ -292,6 +293,7 @@ body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
       <span class="sep"></span>
       <select id="speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
       <span class="sep"></span>
+      <select id="viewSel" aria-label="Camera view" title="Camera view (V)"><option value="orbit">Overview</option><option value="third">3rd person</option><option value="first">1st person</option></select>
       <button id="bView" aria-label="Reset view" title="Reset view"></button>
     </div>
     <div id="tip" role="tooltip" hidden></div>
@@ -1280,7 +1282,7 @@ function suggestions(s, run) {
 const RM = matchMedia('(prefers-reduced-motion: reduce)');
 const fromPreset = a => normalize({ who: a[0], device: a[1], loc: a[2], dest: a[3], beh: a[4] }).s;
 const S = {
-  mode: 'presets', lens: 'data', arch: 'sase', preset: 1, compare: false, active: 0, off: null, speed: 1, playing: false,
+  mode: 'presets', lens: 'data', view: 'orbit', arch: 'sase', preset: 1, compare: false, active: 0, off: null, speed: 1, playing: false,
   slots: [fromPreset(DATA.presets[0].s), fromPreset(DATA.presets[5].s)],
   runs: [], selected: null, notes: [], filter: null
 };
@@ -1346,6 +1348,7 @@ function writeHash() {
   if (S.mode === 'presets' && S.preset) q.set('p', S.preset);
   if (S.mode === 'topo') q.set('arch', S.arch);
   if (S.selected) q.set('sel', S.selected);
+  if (S.view !== 'orbit') q.set('view', S.view);
   S.hash = '#' + q.toString();
   /* sandboxed previews (srcdoc iframes) forbid touching history; the scenario still runs and can be shared */
   try { history.replaceState(null, '', S.hash); } catch (e) { }
@@ -1358,6 +1361,7 @@ function readHash() {
   S.slots[0] = unkey(q.get('a')); if (q.get('b')) S.slots[1] = unkey(q.get('b'));
   S.compare = q.get('cmp') === '1'; S.active = 0;
   S.off = PR[q.get('off')] ? q.get('off') : null; S.preset = +q.get('p') || 0;
+  S.view = ['third', 'first'].includes(q.get('view')) ? q.get('view') : 'orbit';
   S.selected = (PR[q.get('sel')] || PL[q.get('sel')]) ? q.get('sel') : null;
   return true;
 }
@@ -1380,6 +1384,13 @@ function setLens(id) {
     grad: '<defs><linearGradient id="lg"><stop stop-color="#ff5d5d"/><stop offset=".5" stop-color="#f4c95d"/><stop offset="1" stop-color="#5be3a4"/></linearGradient></defs><path d="M1 6h16" stroke="url(#lg)" stroke-width="3"/>' };
   $('#legend').innerHTML = `<b>${L.label}</b> · ${h(L.blurb)}<ul>${L.legend.map(([k, t]) => `<li><svg width="18" height="12" viewBox="0 0 18 12">${sw[k]}</svg>${h(t)}</li>`).join('')}</ul>`;
   R && R.setLens(id); markTimeline(); lastSig = '';
+}
+/* camera view: overview (orbit), 3rd person (behind the actor) or 1st person (through the actor's eyes) */
+function setView(v, quiet) {
+  if (!R.setView) v = 'orbit';
+  S.view = v; $('#viewSel').value = v; R.setView && R.setView(v);
+  if (v !== 'orbit' && !S.runs.length && !quiet) toast('Follow views need a running scenario: pick a preset or build one.');
+  if (!quiet) writeHash();
 }
 function setMode(m) {
   S.mode = m; $$('.modes button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === m));
@@ -1600,6 +1611,9 @@ function createGL(THREE, OrbitControls) {
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   const scene = new THREE.Scene(); scene.background = new THREE.Color(0x070b16);
   const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 600);   /* positive near plane: ray picking starts at the camera */
+  /* follow cameras: a perspective camera rides behind the actor (3rd person) or at its eyes (1st person) */
+  const pcam = new THREE.PerspectiveCamera(58, 1, .3, 900), camP = new THREE.Vector3(), camL = new THREE.Vector3(), tP = new THREE.Vector3(), tL = new THREE.Vector3(), tA = new THREE.Vector3();
+  let view = cam, viewMode = 'orbit', camInit = false, lastNow = 0;
   const HOME_T = new THREE.Vector3(-7, 3, 1), HOME_O = new THREE.Vector3(68, 116, 100), VS = 36;
   const controls = new OrbitControls(cam, canvas);
   controls.enableDamping = true; controls.dampingFactor = .09; controls.minZoom = .2; controls.maxZoom = 6; controls.maxPolarAngle = 1.45; controls.screenSpacePanning = true;
@@ -1614,7 +1628,7 @@ function createGL(THREE, OrbitControls) {
   function home(instant) { tween(HOME_T, HOME_T.clone().add(HOME_O), fitZoom(), instant); }
   function resize() {
     W = stage.clientWidth || 1; H = stage.clientHeight || 1; renderer.setSize(W, H, false);
-    const a = W / H; cam.left = -VS * a; cam.right = VS * a; cam.top = VS; cam.bottom = -VS; cam.updateProjectionMatrix();
+    const a = W / H; cam.left = -VS * a; cam.right = VS * a; cam.top = VS; cam.bottom = -VS; cam.updateProjectionMatrix(); pcam.aspect = a; pcam.updateProjectionMatrix();
     dirty = true; labels.classList.toggle('narrow', W < 560);
   }
   /* eased camera transition, 750 ms */
@@ -1796,6 +1810,22 @@ function createGL(THREE, OrbitControls) {
     for (let i = 0; i < n; i++) { const m = new THREE.Mesh(CYL, mat); m.scale.set(.14, dashed ? len / n * .55 : 1, .14); m.position.y = (i + .5) * len / n; m.visible = false; g.add(m); parts.push(m); }
     return { g, len, a, b, mat, fm, set(p) { if (dashed) parts.forEach((m, i) => m.visible = p > 0 && (i + .5) / n <= p + 1e-6); else { const m = parts[0]; m.visible = p > .001; m.scale.y = Math.max(.001, p * len); m.position.y = p * len / 2; } } };
   }
+  function setView(m) { viewMode = m; camInit = false; dirty = true; }
+  function updateFollow(now) {
+    const dt = Math.min(100, now - lastNow); lastNow = now;
+    const v = viewMode !== 'orbit' && rv.length ? rv[0] : null, fp = viewMode === 'first';
+    view = v ? pcam : cam; controls.enabled = !v;
+    for (const x of rv) { const own = x === v && fp; if (x.isHuman) x.actor.visible = !own; x.chip.style.display = own ? 'none' : ''; }   /* in 1st person you do not see yourself */
+    if (!v) { camInit = false; return; }
+    const sg = v.segs[v.si || 0], hs = v.isHuman ? 1 : .45, P = v.head.position;
+    tA.copy(sg.b).sub(sg.a).setY(0); if (tA.lengthSq() < 1e-6) tA.set(1, 0, 0); tA.normalize();
+    if (!v.dirS) v.dirS = tA.clone(); v.dirS.lerp(tA, RM.matches ? 1 : 1 - Math.exp(-dt * .004)).normalize();   /* turn corners smoothly */
+    const d = v.dirS;
+    if (fp) { tP.copy(P).addScaledVector(d, .9 * hs); tP.y = P.y + 6.6 * hs + (v.isHuman ? 0 : .8); tL.copy(tP).addScaledVector(d, 12); tL.y = tP.y - 2.8 * hs; }
+    else { tP.copy(P).addScaledVector(d, -30 * hs); tP.y = P.y + 21 * hs; tL.copy(P).addScaledVector(d, 12 * hs); tL.y = P.y + 3 * hs; }
+    if (!camInit || RM.matches) { camP.copy(tP); camL.copy(tL); camInit = true; } else { const k = 1 - Math.exp(-dt * .006); camP.lerp(tP, k); camL.lerp(tL, k); }
+    pcam.position.copy(camP); pcam.lookAt(camL); pcam.updateMatrixWorld();
+  }
   function setRuns(runs) {
     rv.forEach(v => { scene.remove(v.g); v.g.traverse(o => { if (o.material) o.material.dispose?.(); }); v.chip.remove(); }); rv = [];
     for (const r of runs) {
@@ -1848,7 +1878,7 @@ function createGL(THREE, OrbitControls) {
         if (lens === 'trust') { let t = v.r.series[0].v; for (const e of v.r.tl) if (e.hi < i) t = e.trust; s.mat.color.set(trustColor(t)); } });
       let si = 0;
       const along = d => { let i = 0; while (i < n - 1 && d > v.segs[i].len) d -= v.segs[i++].len; si = i; return tv3.copy(v.segs[i].a).lerp(v.segs[i].b, clamp(d / v.segs[i].len, 0, 1)); };
-      v.head.position.copy(along(L)); v.head.rotation.y = now * .002;
+      v.head.position.copy(along(L)); v.head.rotation.y = now * .002; v.si = si;
       if (v.isHuman) {   /* the figure walks the path: faces its direction of travel, limbs swing while moving */
         const sg = v.segs[si], st = v.r.steps[v.r.pb.i], moving = S.playing && st && st.t === 'move' && !RM.matches, ph = now * .012, sw = moving ? Math.sin(ph) * .75 : 0, u = v.actor.userData;
         v.actor.position.set(v.head.position.x, v.head.position.y - v.lift + (moving ? Math.abs(Math.sin(ph)) * .14 : 0), v.head.position.z);
@@ -1859,9 +1889,10 @@ function createGL(THREE, OrbitControls) {
       for (let j = 0; j < 14; j++) { const f = RM.matches ? j / 14 : ((now * .00022 + j / 14) % 1); dummy.position.copy(along(f * L)); dummy.scale.setScalar(L > .5 ? 1 : 0); dummy.rotation.set(0, now * .003, 0); dummy.updateMatrix(); v.trail.setMatrixAt(j, dummy.matrix); }
       v.trail.instanceMatrix.needsUpdate = true;
       v.beams.forEach((b, k) => { if (b) b.material.opacity = k === P.cur ? .95 : k <= P.k ? (lens === v.r.tl[k].lens ? .45 : .14) : 0; });
-      v.mk.visible = P.done || (v.r.stopAt >= 0 && P.moves >= v.r.stopAt + 1); v.mk.quaternion.copy(cam.quaternion);
-      tv3.copy(v.head.position); if (v.isHuman) tv3.y += 9.6; tv3.project(cam);
-      if (v.isHuman) { const cx = (tv3.x * .5 + .5) * W, top = (-tv3.y * .5 + .5) * H, hw = 1.5 * H / (2 * VS) * cam.zoom; tv3.copy(v.head.position).project(cam); v.box = [cx - hw, top, cx + hw, (-tv3.y * .5 + .5) * H]; tv3.copy(v.head.position); tv3.y += 9.6; tv3.project(cam); }
+      v.mk.visible = P.done || (v.r.stopAt >= 0 && P.moves >= v.r.stopAt + 1); v.mk.quaternion.copy(view.quaternion);
+      tv3.copy(v.head.position); if (v.isHuman) tv3.y += 9.6; tv3.project(view);
+      if (v.isHuman) { const cx = (tv3.x * .5 + .5) * W, top = (-tv3.y * .5 + .5) * H, bh = tv3.z > 1; tv3.copy(v.head.position).project(view); const bot = (-tv3.y * .5 + .5) * H, hw = Math.max(8, (bot - top) * .22); v.box = bh || tv3.z > 1 ? null : [cx - hw, top, cx + hw, bot]; tv3.copy(v.head.position); tv3.y += 9.6; tv3.project(view); }
+      v.chip.style.visibility = tv3.z > 1 ? 'hidden' : '';
       v.chip.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(-50%,${v.isHuman ? -105 : -190}%)`;
       v.chip.style.setProperty('--c', trustColor(curTrust));
       const txt = `<b>${S.runs.length > 1 ? 'AB'[v.r.slot] + ' · ' : ''}${h(v.name)}</b> · trust ${curTrust}`; if (v.txt !== txt) v.chip.innerHTML = v.txt = txt;
@@ -1871,9 +1902,9 @@ function createGL(THREE, OrbitControls) {
   function frame(now) {
     if (tw) { const k = clamp((now - tw.t0) / tw.d, 0, 1), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
       controls.target.lerpVectors(tw.ft, tw.tt, e); cam.position.lerpVectors(tw.fp, tw.tp, e); cam.zoom = tw.fz + (tw.tz - tw.fz) * e; cam.updateProjectionMatrix(); if (k >= 1) tw = null; }
-    controls.update();
+    controls.update(); updateFollow(now);
     /* ambient particles along the links the lens cares about */
-    const show = flow.length && !RM.matches;
+    const show = flow.length && !RM.matches && view === cam;   /* ambient traffic is an overview effect; it is distracting up close */
     for (let i = 0; i < NP; i++) {
       if (!show) { dummy.scale.setScalar(0); } else {
         const l = flow[i % flow.length], A = POS(l[0]), B = POS(l[1]), f = ((now * .00018 + i * .137) % 1);
@@ -1884,43 +1915,43 @@ function createGL(THREE, OrbitControls) {
     amb.instanceMatrix.needsUpdate = true;
     for (const id in nodes) { const n = nodes[id]; if (n.dia && n.dia.visible) n.dia.rotation.y = now * .0015; }
     frameRuns(now);
-    renderer.render(scene, cam);
+    renderer.render(scene, view);
     /* project labels; every few frames hide lower-priority labels that would overlap (they stay focusable) */
-    const compact = H / (2 * VS) * cam.zoom < 12.5;
+    const follow = view === pcam, compact = follow || H / (2 * VS) * cam.zoom < 12.5;
     if (labels.classList.contains('compact') !== compact) { labels.classList.toggle('compact', compact); dirty = true; }
     const onPath = new Set(), hit = new Set();
     for (const v of rv) { const P = prog(v.r); v.r.path.forEach((n, i) => { onPath.add(n); if (i < P.moves) hit.add(n); }); v.r.tl.forEach((e, k) => { onPath.add(e.at); if (k <= P.k) hit.add(e.at); }); }
     if (dirty) { for (const id in nodes) { const n = nodes[id]; n.w = n.el.offsetWidth; n.h = n.el.offsetHeight; } dirty = false; tick = 0; }
     const items = [];
     for (const id in nodes) {
-      const n = nodes[id]; tv3.copy(n.anchor).project(cam); n.x = (tv3.x * .5 + .5) * W; n.y = (-tv3.y * .5 + .5) * H;
+      const n = nodes[id]; tv3.copy(n.anchor).project(view); n.x = (tv3.x * .5 + .5) * W; n.y = (-tv3.y * .5 + .5) * H; n.bh = tv3.z > 1;   /* behind the camera */
       n.el.style.transform = `translate(${n.x.toFixed(1)}px,${n.y.toFixed(1)}px) translate(-50%,-100%)`;
       n.el.classList.toggle('hit', hit.has(id));
       n.pr = id === selected ? 100 : hit.has(id) ? 80 : onPath.has(id) ? 70 : (filter && filter.has(id)) ? (topo ? 100 : 60) : n.isP ? (n.p.roles[lens] ? 50 : 30) : 20;
       items.push(n);
     }
-    if (tick++ % 5 === 0) {
+    if (follow || tick++ % 5 === 0) {
       items.sort((a, b) => b.pr - a.pr); const placed = rv.filter(v => v.isHuman && v.box).map(v => v.box);   /* labels step aside for the walking figure */
       for (const n of items) {
         const x0 = n.x - n.w / 2 - 2, x1 = n.x + n.w / 2 + 2, y0 = n.y - n.h - 1, y1 = n.y + 1;
-        const out = x1 < 0 || x0 > W || y1 < 0 || y0 > H;
+        const out = n.bh || x1 < 0 || x0 > W || y1 < 0 || y0 > H;
         const clash = !out && (n.pr < 100 || topo === null && rv.length) && n.pr <= 100 && placed.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
         n.el.classList.toggle('cull', out || clash); if (!out && !clash) placed.push([x0, y0, x1, y1]);
       }
     }
-    for (const z of topoChips) { tv3.copy(z.v).project(cam); z.el.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(-50%,-50%)`; }
-    for (const z of zoneLbl) { tv3.copy(z.v).project(cam); z.el.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(0,-50%)`; }
+    for (const z of topoChips) { tv3.copy(z.v).project(view); z.el.style.visibility = tv3.z > 1 ? 'hidden' : ''; z.el.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(-50%,-50%)`; }
+    for (const z of zoneLbl) { tv3.copy(z.v).project(view); z.el.style.visibility = tv3.z > 1 ? 'hidden' : ''; z.el.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(0,-50%)`; }
   }
   /* picking */
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let down = null;
-  const pick = e => { const b = canvas.getBoundingClientRect(); ndc.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1); ray.setFromCamera(ndc, cam); const hit = ray.intersectObjects(pickables, false)[0]; return hit ? hit.object.userData.id : null; };
+  const pick = e => { const b = canvas.getBoundingClientRect(); ndc.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1); ray.setFromCamera(ndc, view); const hit = ray.intersectObjects(pickables, false)[0]; return hit ? hit.object.userData.id : null; };
   canvas.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; tw = null; });
   canvas.addEventListener('pointerup', e => { if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 6) { const id = pick(e); window.__select(id, false); } down = null; });
   canvas.addEventListener('pointermove', e => { if (e.pointerType === 'touch' || e.buttons) return tip(null); const id = pick(e), b = stage.getBoundingClientRect(); canvas.style.cursor = id ? 'pointer' : 'grab'; tip(id, e.clientX - b.left, e.clientY - b.top); });
   canvas.addEventListener('pointerleave', () => tip(null));
   new ResizeObserver(resize).observe(stage); resize(); home(true);
-  const screenOf = id => { const b = canvas.getBoundingClientRect(), p = POS(id); tv3.set(p[0], p[1] + .85, p[2]).project(cam); return [b.left + (tv3.x * .5 + .5) * b.width, b.top + (-tv3.y * .5 + .5) * b.height]; };
-  return { kind: 'webgl', setLens, setRuns, setTopo, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
+  const screenOf = id => { const b = canvas.getBoundingClientRect(), p = POS(id); tv3.set(p[0], p[1] + .85, p[2]).project(view); return [b.left + (tv3.x * .5 + .5) * b.width, b.top + (-tv3.y * .5 + .5) * b.height]; };
+  return { kind: 'webgl', setLens, setRuns, setTopo, setView, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
 }
 
 /* =====================================================================================
@@ -2049,7 +2080,10 @@ async function boot() {
   $('#bRestart').onclick = () => { restart(); lastSig = ''; };
   $('#bStep').onclick = () => { stepOnce(); lastSig = ''; };
   $('#bEnd').onclick = () => { finish(); lastSig = ''; };
-  $('#bView').onclick = () => R.resetView();
+  $('#bView').onclick = () => { setView('orbit'); R.resetView(); };
+  $('#viewSel').onchange = e => setView(e.target.value);
+  if (!R.setView) { $('#viewSel').disabled = true; $('#viewSel').title = 'Follow views need the 3D scene'; }
+  setView(S.view, true);
   $('#speed').onchange = e => S.speed = +e.target.value;
   $('#q').addEventListener('input', doSearch); $('#qcat').addEventListener('change', doSearch);
   $('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { const f = $('#qres button[data-id]'); if (f) f.click(); } if (e.key === 'Escape') { $('#q').value = ''; doSearch(); } });
@@ -2060,10 +2094,11 @@ async function boot() {
     const t = e.target, typing = t.matches('input,select,textarea');
     if (e.key === 'Escape') { if (S.selected) select(null); else sheet('none'); return; }
     if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'v' || e.key === 'V') { setView({ orbit: 'third', third: 'first', first: 'orbit' }[S.view]); return; }
     if (e.key >= '1' && e.key <= '5') { setLens(DATA.lenses[+e.key - 1].id); writeHash(); return; }
     if (e.key === ' ' && (!t.matches('button,a,[role=button]') || t.matches('.lbl,.n'))) { e.preventDefault(); $('#bPlay').click(); }
   });
-  window.addEventListener('hashchange', () => { if (readHash()) { $$('.modes button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === S.mode)); setLens(S.lens); renderLeft(); rerun(); } });
+  window.addEventListener('hashchange', () => { if (readHash()) { setView(S.view, true); $$('.modes button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === S.mode)); setLens(S.lens); renderLeft(); rerun(); } });
 
   /* render loop: paused while the tab is hidden */
   let last = performance.now(), raf = 0;
@@ -2071,7 +2106,7 @@ async function boot() {
   document.addEventListener('visibilitychange', () => { cancelAnimationFrame(raf); if (!document.hidden) { last = performance.now(); raf = requestAnimationFrame(loop); } });
   raf = requestAnimationFrame(loop);
   /* test / automation hook: engine only, no network */
-  window.__LN = { DATA, S, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
+  window.__LN = { DATA, S, setView, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
 }
 boot();
 </script>

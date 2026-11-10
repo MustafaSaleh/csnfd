@@ -21,7 +21,12 @@ with the source link beside it. The architecture list is `DATA.architectures`.
 Human actors (employee, admin, executive, contractor, guest, insider, external attacker) are walking 3D figures with
 their name and live trust score above them; the attacker is a red hooded figure on a dashed path.
 
-Keyboard: `Tab` through nodes, `Enter` opens the panel, `Space` plays/pauses, `1`–`5` switches lens, `Esc` closes.
+Three camera views, switched from the playback bar or with `V`: **Overview** (orbit, zoom, pan), **3rd person** (camera
+follows behind the actor) and **1st person** (through the actor's eyes). The follow views need a running scenario and
+the 3D scene; in compare mode they follow scenario A. The reset-view button returns to Overview.
+
+Keyboard: `Tab` through nodes, `Enter` opens the panel, `Space` plays/pauses, `1`–`5` switches lens, `V` cycles the
+camera view, `Esc` closes.
 
 ## Editing
 
