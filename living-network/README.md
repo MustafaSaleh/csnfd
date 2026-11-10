@@ -13,6 +13,14 @@ Open `index.html` (double-click from disk, internet on). One file, inline CSS an
 The only external requests are Three.js 0.170.0 and its OrbitControls from jsDelivr. If WebGL or the CDN is unavailable
 the page renders a 2D SVG map of the same data (force it with `index.html?render=svg`).
 
+Four modes: **Presets**, **Build your own**, **Free explore** and **Topology**. Topology isolates one architecture
+(SASE, Zero Trust Access, Hybrid Mesh Firewall, secure campus, data center, industrial, detection and response, AI, or
+one of the three suites), lays its building blocks out as a diagram and numbers each relationship stated on cisco.com,
+with the source link beside it. The architecture list is `DATA.architectures`.
+
+Human actors (employee, admin, executive, contractor, guest, insider, external attacker) are walking 3D figures with
+their name and live trust score above them; the attacker is a red hooded figure on a dashed path.
+
 Keyboard: `Tab` through nodes, `Enter` opens the panel, `Space` plays/pauses, `1`–`5` switches lens, `Esc` closes.
 
 ## Editing

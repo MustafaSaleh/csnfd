@@ -63,7 +63,7 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr) 350px;min-height:0}
 #right{border-left:1px solid var(--line);grid-column:3;grid-row:1}
 .panel h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);font-weight:650}
 .pad{padding:12px 14px}
-.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:10px 14px;position:sticky;top:0;background:var(--panel);z-index:5;border-bottom:1px solid var(--line)}
+.modes{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;padding:10px 14px;position:sticky;top:0;background:var(--panel);z-index:5;border-bottom:1px solid var(--line)}
 .modes button{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px 2px;font-size:11.5px;font-weight:600;color:var(--tx2);white-space:nowrap}
 .modes button[aria-selected=true]{background:var(--panel2);border-color:var(--lens);color:var(--tx)}
 
@@ -116,7 +116,7 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr) 350px;min-height:0}
 #labels.compact .lbl small{display:none}
 #labels.narrow .lbl.zone{display:none}
 #labels.compact .lbl.hit small,#labels.compact .lbl.sel small{display:block}
-.tchip{position:absolute;left:0;top:0;pointer-events:none;font:700 12px var(--font);padding:2px 7px;border-radius:999px;background:#0a1020;border:1.5px solid var(--c,#fff);color:var(--c,#fff);white-space:nowrap}
+.tchip{position:absolute;left:0;top:0;pointer-events:none;z-index:4;font:600 12px var(--font);padding:2px 7px;border-radius:999px;background:#0a1020;border:1.5px solid var(--c,#fff);color:var(--c,#fff);white-space:nowrap}
 #tip{position:absolute;z-index:20;max-width:260px;background:#0a1020f2;border:1px solid var(--line2);border-radius:8px;padding:7px 9px;font-size:12px;pointer-events:none;box-shadow:0 8px 24px #0009}
 #tip b{display:block;margin-bottom:2px}
 #tip span{color:var(--tx2)}
@@ -189,6 +189,12 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr) 350px;min-height:0}
 .tl .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;font-size:11px;color:var(--tx3)}
 .vc{font-weight:700;color:var(--vc);font-size:10.5px;letter-spacing:.06em;border:1px solid var(--vc);border-radius:4px;padding:0 4px}
 .prods{display:flex;flex-wrap:wrap;gap:4px}
+.pb{font-size:12px;background:none;border:1px solid var(--line2);border-radius:6px;padding:3px 7px}
+.pb:hover{border-color:var(--lens)}
+.lbl.gone{display:none}
+.nchip{position:absolute;left:0;top:0;pointer-events:auto;cursor:help;z-index:2;font:700 10px var(--font);min-width:17px;height:17px;line-height:15px;text-align:center;border-radius:9px;background:#0a1020;border:1px solid #fff;color:#fff}
+.nchip.sel{background:#fff;color:#0a1020;transform-origin:center;z-index:6;box-shadow:0 0 0 3px var(--lens)}
+.tchip b{color:#fff;font-weight:700}
 .prods a{font-size:12px;text-decoration:none;border:1px solid var(--line2);border-radius:6px;padding:3px 7px;color:var(--tx)}
 .prods a:hover{border-color:var(--data)}
 .prods a::after{content:" ↗";color:var(--tx3)}
@@ -266,6 +272,7 @@ body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
       <button role="tab" data-mode="presets">Presets</button>
       <button role="tab" data-mode="build">Build your own</button>
       <button role="tab" data-mode="explore">Free explore</button>
+      <button role="tab" data-mode="topo">Topology</button>
     </div>
     <div id="leftBody" class="pad"></div>
   </aside>
@@ -1028,6 +1035,35 @@ const DATA = {
       c: 'Policy distribution', r: 'Enforcement point receives the policy from Security Cloud Control' }
   ],
 
+  /* TOPOLOGY mode: architecture views. Each shows a set of products and only the relationships stated on cisco.com between them.
+     hub = a suite: show the suite and what it packages. src = product id or DATA.sources key for the page describing the architecture. */
+  architectures: [
+    { id: 'sase', name: 'SASE: network and security edge', src: 'sase', nodes: ['sa', 'sdwan', 'meraki', 'te', 'duo', 'cii', 'scc', 'umb'],
+      blurb: 'Secure Access is the cloud security edge and SD-WAN the network edge. Identity, experience monitoring and shared management attach around the pair.' },
+    { id: 'zta', name: 'Zero Trust Access', src: 'zta', nodes: ['ise', 'sa', 'duo', 'cii', 'hmf', 'ep', 'switches', 'wireless'],
+      blurb: 'Identity decides access everywhere: ISE on the network, Duo at sign-in, Secure Access per application, with Identity Intelligence supplying risk context.' },
+    { id: 'hmf', name: 'Hybrid Mesh Firewall', src: 'hmf', nodes: ['hmf', 'scc', 'fw', 'mcd', 'hs', 'wl', 'aid', 'ise', 'nexus', 'talos'],
+      blurb: 'Many enforcement points — firewalls, cloud gateways, smart switches, workload agents and AI guardrails — run one policy managed from Security Cloud Control.' },
+    { id: 'campus', name: 'Secure campus and branch', src: 'campus', nodes: ['wireless', 'switches', 'ise', 'sna', 'meraki', 'te', 'agentic', 'silicon', 'sdwan', 'umb'],
+      blurb: 'Wired and wireless access carry identity-based segmentation orchestrated by ISE, with cloud management, embedded assurance and AgenticOps on top.' },
+    { id: 'dc', name: 'Data center and cloud', src: 'nexus', nodes: ['nexus', 'silicon', 'hs', 'hmf', 'fw', 'wl', 'mcd', 'aid', 'scc', 'te'],
+      blurb: 'The Nexus fabric hosts Hypershield enforcement on smart switches; firewalls, workload segmentation and cloud gateways extend the same policy to every workload.' },
+    { id: 'ot', name: 'Industrial (OT) security', src: 'itd', nodes: ['industrial', 'cv', 'sea', 'itd', 'fw', 'ise', 'xdr', 'talos', 'meraki'],
+      blurb: 'The industrial network is the sensor: Cyber Vision inventories assets and feeds segmentation, firewalling, remote access and IT/OT detection.' },
+    { id: 'xdr', name: 'Detection and response', src: 'xdr', nodes: ['xdr', 'ep', 'email', 'sna', 'client', 'cv', 'fw', 'cii', 'talos'],
+      blurb: 'Endpoint, email, network, OT, firewall and identity telemetry converge in XDR, which correlates it into incidents; Talos supplies intelligence to the sensors.' },
+    { id: 'ai', name: 'Securing AI use', src: 'aid', nodes: ['aid', 'sa', 'hmf', 'scc', 'talos'],
+      blurb: 'AI Defense protects models and applications with guardrails, while access to third-party AI apps is governed at the Secure Access edge.' },
+    { id: 'ups', name: 'User Protection Suite', src: 'ups', hub: 'ups', nodes: ['ups', 'sa', 'duo', 'email', 'ep', 'ise', 'talos'],
+      blurb: 'What the suite packages for protecting users: secure access, authentication, email and — in the Advantage tier — endpoint and network access control.' },
+    { id: 'cps', name: 'Cloud Protection Suite', src: 'cps', hub: 'cps', nodes: ['cps', 'wl', 'hs', 'scc', 'fw', 'mcd', 'hmf'],
+      blurb: 'What the suite packages for adopting Hybrid Mesh Firewall: a Segmentation package and a Gateway package, both with Security Cloud Control.' },
+    { id: 'bps', name: 'Breach Protection Suite', src: 'bps', hub: 'bps', nodes: ['bps', 'xdr', 'email', 'ep', 'sna', 'talos'],
+      blurb: 'What the suite packages for detection and response, unified by XDR.' },
+    { id: 'all', name: 'Everything', all: true, nodes: [],
+      blurb: 'Every product in the scene with every relationship stated on the cisco.com pages reviewed (suite packaging lines omitted).' }
+  ],
+
   verdicts: {
     ALLOW: { label: 'ALLOW', sev: 0, why: 'Identity, device and context meet policy for this destination.' },
     LIMIT: { label: 'ALLOW WITH LIMITS', sev: 1 },
@@ -1204,6 +1240,12 @@ function evaluate(s, off) {
   return { s, off, path, vpath, segs, tl, gaps, series, verdict, why, stopAt, trust, products, hostile: s.who === 'attacker',
     rules: [ac.id, rt.id], fallback: !ac.when || !rt.when };
 }
+function topoOf(id) {
+  const a = DATA.architectures.find(x => x.id === id) || DATA.architectures[0];
+  const nodes = new Set(a.all ? Object.keys(PR).filter(k => PR[k].cat !== 'suite') : a.nodes);
+  const links = DATA.links.filter(l => a.hub ? (l[0] === a.hub && nodes.has(l[1])) : (l[4] !== 'suite' && nodes.has(l[0]) && nodes.has(l[1])));
+  return { a, nodes, links };
+}
 function buildSteps(r) {
   const st = [];
   for (let i = 0; i < r.path.length; i++) {
@@ -1238,27 +1280,28 @@ function suggestions(s, run) {
 const RM = matchMedia('(prefers-reduced-motion: reduce)');
 const fromPreset = a => normalize({ who: a[0], device: a[1], loc: a[2], dest: a[3], beh: a[4] }).s;
 const S = {
-  mode: 'presets', lens: 'data', preset: 1, compare: false, active: 0, off: null, speed: 1, playing: false,
+  mode: 'presets', lens: 'data', arch: 'sase', preset: 1, compare: false, active: 0, off: null, speed: 1, playing: false,
   slots: [fromPreset(DATA.presets[0].s), fromPreset(DATA.presets[5].s)],
   runs: [], selected: null, notes: [], filter: null
 };
 let R = null;   /* renderer */
 
 /* position of any scene node; ops-plane products float above */
-const POS = id => (PR[id] || PL[id]).p;
+const TOPO_POS = {};   /* topology mode lays an architecture out as a diagram; these override scene positions */
+const POS = id => TOPO_POS[id] || (PR[id] || PL[id]).p;
 const actorPos = (r, slot) => { const p = POS(r.path[0]); return [-39 + slot * 2.6, 0, p[2]]; };
 const nodeName = id => PR[id] ? PR[id].s : PL[id] ? PL[id].name : id;
 
 function rerun() {
   S.notes = [];
-  if (S.mode === 'explore') S.runs = [];
+  if (S.mode === 'explore' || S.mode === 'topo') S.runs = [];
   else S.runs = (S.compare ? [0, 1] : [S.active]).map(i => {
     const r = evaluate(S.slots[i], S.off); r.slot = i; r.base = S.off ? evaluate(S.slots[i], null) : null;
     r.steps = buildSteps(r); r.pb = { i: 0, p: 0, done: false }; r.sug = suggestions(r.s, r); return r;
   });
   if (S.off && !S.runs.some(r => r.base.products.includes(S.off))) { S.off = null; return rerun(); }
   document.body.dataset.cmp = S.runs.length > 1 ? '1' : '0';
-  R.setRuns(S.runs); renderResults(); S.playing = S.runs.length > 0; lastSig = ''; writeHash();
+  S.topo = S.mode === 'topo' ? topoOf(S.arch) : null; R.setTopo(S.topo); R.setRuns(S.runs); R.setFilter(S.topo ? S.topo.nodes : S.filter); renderResults(); S.playing = S.runs.length > 0; lastSig = ''; writeHash();
 }
 /* playback */
 const DUR = { move: 620, check: 1250, end: 1 };
@@ -1301,6 +1344,7 @@ function writeHash() {
   if (S.compare) { q.set('b', skey(S.slots[1])); q.set('cmp', '1'); }
   if (S.off) q.set('off', S.off);
   if (S.mode === 'presets' && S.preset) q.set('p', S.preset);
+  if (S.mode === 'topo') q.set('arch', S.arch);
   if (S.selected) q.set('sel', S.selected);
   S.hash = '#' + q.toString();
   /* sandboxed previews (srcdoc iframes) forbid touching history; the scenario still runs and can be shared */
@@ -1308,7 +1352,8 @@ function writeHash() {
 }
 function readHash() {
   const q = new URLSearchParams(location.hash.slice(1)); if (!q.has('a')) return false;
-  if (['presets', 'build', 'explore'].includes(q.get('mode'))) S.mode = q.get('mode');
+  if (['presets', 'build', 'explore', 'topo'].includes(q.get('mode'))) S.mode = q.get('mode');
+  if (DATA.architectures.some(a => a.id === q.get('arch'))) S.arch = q.get('arch');
   if (LENS[q.get('lens')]) S.lens = q.get('lens');
   S.slots[0] = unkey(q.get('a')); if (q.get('b')) S.slots[1] = unkey(q.get('b'));
   S.compare = q.get('cmp') === '1'; S.active = 0;
@@ -1376,6 +1421,9 @@ function renderLeft() {
       ${['who', 'device', 'loc', 'dest', 'beh'].map(group).join('')}
       <div class="slotbar"><button class="btn primary" id="runB">Run</button><button class="btn" id="shareB">Copy link</button></div>
       <p class="small">Changing any picker while a scenario runs re-evaluates it immediately.</p>`;
+  } else if (S.mode === 'topo') {
+    el.innerHTML = `<h2>Topology</h2><p class="small" style="margin:4px 0 8px">Pick an architecture to isolate its building blocks and see how they connect. Only relationships stated on cisco.com are drawn.</p>` +
+      DATA.architectures.map((a, i) => `${i === 0 ? '<div class="pg">Architectures</div>' : a.id === 'ups' ? '<div class="pg">Suites</div>' : a.all ? '<div class="pg">Whole scene</div>' : ''}<button class="preset" data-arch="${a.id}" aria-current="${S.arch === a.id}"><b>${i + 1}</b><span>${h(a.name)}</span></button>`).join('');
   } else {
     el.innerHTML = `<h2>Free explore</h2><p class="small" style="margin:4px 0 10px">Orbit, zoom and pan the scene. Select any product for its function, lenses, stated relationships and cisco.com source. Lines are relationships stated on cisco.com.</p>` +
       Object.entries(DATA.categories).map(([c, name]) => `<div class="pg">${h(name)}</div><div class="exlist">` +
@@ -1385,6 +1433,7 @@ function renderLeft() {
 $('#left').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.dataset.mode) return setMode(b.dataset.mode);
+  if (b.dataset.arch) { S.arch = b.dataset.arch; renderLeft(); rerun(); if (matchMedia('(max-width:900px)').matches) sheet('right'); return; }
   if (b.dataset.n) { loadPreset(+b.dataset.n); if (matchMedia('(max-width:900px)').matches) sheet('none'); return; }
   if (b.id === 'cmpT') { S.compare = !S.compare; S.active = 0; S.preset = 0; renderLeft(); return rerun(); }
   if (b.dataset.slot) { S.active = +b.dataset.slot; return renderLeft(); }
@@ -1444,6 +1493,18 @@ function runHTML(r) {
 }
 function renderResults() {
   const el = $('#result');
+  if (S.topo) {
+    const { a, nodes, links } = S.topo, src = a.src ? (PR[a.src] ? PR[a.src].url : DATA.sources[a.src]) : null, su = k => PR[k] ? PR[k].url : DATA.sources[k];
+    el.innerHTML = `<div class="rhead"><h2>Topology</h2><button class="btn" id="shareR">Copy link</button></div><div class="run">
+      <h3 style="font-size:15px">${h(a.name)}</h3><p style="margin:6px 0">${h(a.blurb)}</p>
+      ${src ? `<a class="src" style="margin-top:0" href="${src}" target="_blank" rel="noopener noreferrer">Source: cisco.com ↗</a>` : ''}
+      <p class="small" style="margin-top:6px">Conceptual architecture — not a validated design. Positions are illustrative.</p>
+      <h4>Building blocks (${nodes.size})</h4><div class="prods">${[...nodes].map(id => `<button class="pb" data-id="${id}">${h(PR[id].s)}</button>`).join('')}</div>
+      <h4>How they connect (${links.length})</h4>
+      <ol class="tl topo">${links.map((l, i) => `<li data-i="${i}" style="--c:#fff"><span class="n">${i + 1}</span><div><button class="p" data-id="${l[0]}">${h(PR[l[0]].s)}</button> ↔ <button class="p" data-id="${l[1]}">${h(PR[l[1]].s)}</button>
+        <div>${h(l[2])}</div><div class="meta"><a href="${su(l[3])}" target="_blank" rel="noopener noreferrer">source</a></div></div></li>`).join('') || '<li>No relationship stated.</li>'}</ol></div>`;
+    return;
+  }
   if (!S.runs.length) { el.innerHTML = `<div class="rhead"><h2>Free explore</h2></div><div class="pad"><p>Select a product in the scene or the list to see what it does and which other products cisco.com says it works with.</p><p class="small" style="margin-top:8px">${Object.keys(PR).length} products · ${DATA.links.length} stated relationships · verified ${DATA.meta.verified}.</p></div>`; return; }
   el.innerHTML = `<div class="rhead"><h2>Result</h2><button class="btn" id="cmpR" aria-pressed="${S.compare}">${S.compare ? 'Exit compare' : 'Compare'}</button><button class="btn" id="shareR">Copy link</button></div>
     <div class="runs ${S.runs.length > 1 ? 'cmp' : ''}">${S.runs.map(runHTML).join('')}</div>`;
@@ -1458,6 +1519,7 @@ $('#right').addEventListener('click', e => {
   if (b.dataset.sug) { const slot = +b.closest('.run').dataset.slot, r = S.runs.find(x => x.slot === slot); if (S.mode === 'presets') { S.mode = 'build'; $$('.modes button').forEach(x => x.setAttribute('aria-selected', x.dataset.mode === 'build')); } S.active = slot; return setScenario(slot, r.sug[+b.dataset.sug].s); }
   if (b.dataset.id) select(b.dataset.id, true);
 });
+$('#right').addEventListener('pointerover', e => { const li = e.target.closest('.topo li'); $$('.nchip.sel').forEach(x => x.classList.remove('sel')); if (li) { const c = $(`.nchip[data-i="${li.dataset.i}"]`); c && c.classList.add('sel'); } });
 $('#right').addEventListener('change', e => { if (e.target.matches('[data-off]')) { S.off = e.target.value || null; rerun(); } });
 
 /* per-frame sync of DOM to playback progress (only when something changed) */
@@ -1565,20 +1627,20 @@ function createGL(THREE, OrbitControls) {
   const sun = new THREE.DirectionalLight(0xffffff, 1.3); sun.position.set(30, 60, 20); scene.add(sun);
 
   /* zones */
-  const zoneLbl = [];
+  const zoneLbl = [], zoneG = new THREE.Group(); scene.add(zoneG);
   for (const z of DATA.zones) {
     const w = z.x[1] - z.x[0], d = z.z[1] - z.z[0], ops = z.id === 'ops';
     const g = new THREE.BoxGeometry(w, .3, d);
     const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: ops ? 0x16264a : 0x101a33, transparent: true, opacity: ops ? .42 : .92, roughness: .95, depthWrite: !ops }));
-    m.position.set((z.x[0] + z.x[1]) / 2, z.y - .35, (z.z[0] + z.z[1]) / 2); scene.add(m);
-    const e = new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({ color: ops ? 0x4a639c : 0x2a3a60 })); e.position.copy(m.position); scene.add(e);
+    m.position.set((z.x[0] + z.x[1]) / 2, z.y - .35, (z.z[0] + z.z[1]) / 2); zoneG.add(m);
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({ color: ops ? 0x4a639c : 0x2a3a60 })); e.position.copy(m.position); zoneG.add(e);
     const el = document.createElement('div'); el.className = 'lbl zone'; el.textContent = z.label; labels.appendChild(el);
     zoneLbl.push({ el, v: new THREE.Vector3(z.x[0] + .5, z.y, z.z[1] + 1.2) });
   }
   /* ops-plane tethers */
   { const pts = []; for (const [x, z] of [[-18, -8], [23, -8], [-18, 8], [23, 8]]) pts.push(x, 12.6, z, x, 0, z);
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-    scene.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x22304f, transparent: true, opacity: .7 }))); }
+    zoneG.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x22304f, transparent: true, opacity: .7 }))); }
 
   /* node geometry: one original abstract shape per category */
   const GEO = {
@@ -1610,6 +1672,34 @@ function createGL(THREE, OrbitControls) {
     iot: [['b', 1.1, .8, .8, 0, .9, 0], ['c', .5, .5, .5, 0, .9, .55, Math.PI / 2], ['c', .2, .9, .2, 0, .2, 0]], ot: [['c', 1.2, .5, 1.2, 0, .25, 0], ['b', .35, 1.5, .35, 0, 1.2, 0], ['b', 1.3, .3, .3, .5, 1.95, 0]],
     aiagent: [['o', 1.6, 1.6, 1.6, 0, 1.2, 0], ['r', 2.3, 2.3, 2.3, 0, 1.2, 0, Math.PI / 2]], attacker: [['t', 1.6, 1.6, 1.6, 0, 1.1, 0], ['t', 1.3, -1.3, 1.3, 0, 1.3, 0], ['k', .5, 1, .5, 0, 2.5, 0]]
   };
+  /* walking 3D figures for human actors: original low-poly geometry, one distinct silhouette per role */
+  const HUMAN = {
+    emp: { body: 0x5b8def }, admin: { body: 0x8f6cf0 }, exec: { body: 0x23345e, tall: 1.12 }, contractor: { body: 0xf08a24 },
+    guest: { body: 0xb9c4d8, tall: .9 }, insider: { body: 0x5b8def }, attacker: { body: 0x9c2231, legs: 0x4a1220, skin: 0x2a0d14, ring: 0xff3b30 }
+  };
+  function human(who, slot) {
+    const o = HUMAN[who], g = new THREE.Group(), M = (col, basic) => basic ? new THREE.MeshBasicMaterial({ color: col }) : new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: .35, roughness: .6, flatShading: true });
+    const body = M(o.body), skin = M(o.skin || 0xf1c9a5), legs = M(o.legs || 0x2b3550);
+    const add = (k, m, sx, sy, sz, x, y, z, parent = g, rx = 0) => { const me = new THREE.Mesh(prim(k), m); me.scale.set(sx, sy, sz); me.position.set(x, y, z); me.rotation.x = rx; parent.add(me); return me; };
+    const limb = (x, y, len, m, w) => { const pv = new THREE.Group(); pv.position.set(x, y, 0); add('b', m, w, len, w, 0, -len / 2, 0, pv); g.add(pv); return pv; };
+    const legL = limb(-.22, 1.1, 1.1, legs, .3), legR = limb(.22, 1.1, 1.1, legs, .3);
+    add('b', body, .9, 1.1, .5, 0, 1.65, 0);
+    const armL = limb(-.6, 2.15, .95, body, .24), armR = limb(.6, 2.15, .95, body, .24);
+    add('s', skin, .62, .62, .62, 0, 2.6, 0);
+    if (who === 'emp' || who === 'insider') add('b', M(0xffffff), .2, .26, .05, .24, 1.85, .27);                       /* staff badge */
+    if (who === 'admin') { add('r', M(0xf4c95d), 1.1, 1.1, 1.1, 0, 3.15, 0, g, Math.PI / 2); add('b', M(0xf4c95d), .2, .26, .05, .24, 1.85, .27); }   /* halo = privilege */
+    if (who === 'exec') { add('b', M(0xf4c95d), .14, .62, .05, 0, 1.8, .27); add('b', M(0xffffff), .5, .3, .05, 0, 2.05, .26); }      /* shirt and tie */
+    if (who === 'contractor') { add('c', M(0xffd23f), .78, .3, .78, 0, 2.95, 0); add('c', M(0xffd23f), .95, .06, .95, 0, 2.82, .1); add('b', M(0x7a4d22), .55, .38, .28, 0, -1.1, 0, armR); add('b', M(0xfff3a0), .92, .14, .52, 0, 1.6, 0); }   /* hard hat, hi-vis band, toolbox */
+    if (who === 'guest') add('r', M(0xffffff), .7, .7, .7, 0, 2.05, .2, g, 1.1);                                              /* visitor lanyard */
+    if (who === 'insider') add('k', M(0x39405a), 1.05, .75, 1.05, 0, 3.02, 0);                                                /* hood */
+    if (who === 'attacker') {                                                                                                  /* hooded figure, visor, spiked shoulders */
+      add('k', legs, 1.3, 1.25, 1.3, 0, 2.98, 0); add('b', M(0xff3b30, true), .52, .13, .1, 0, 2.62, .3);
+      add('t', M(0xff3b30), .5, .5, .5, -.62, 2.35, 0); add('t', M(0xff3b30), .5, .5, .5, .62, 2.35, 0); add('k', legs, 1.5, 1.5, .5, 0, 1.3, -.3, g, Math.PI);
+    }
+    add('r', M(slot ? 0xffd9a8 : (o.ring || 0xffffff), true), 1.9, 1.9, 1.9, 0, .04, 0, g, Math.PI / 2);                       /* ground ring so the figure is easy to find; B is tinted */
+    g.scale.set(2.8, 2.8 * (o.tall || 1), 2.8); g.userData = { legL, legR, armL, armR };
+    return g;
+  }
   const DEVICE = {
     mgd: [['b', .9, .08, .6, 0, .04, 0], ['b', .9, .6, .06, 0, .35, -.3]], stale: [['b', .9, .08, .6, 0, .04, 0], ['b', .9, .6, .06, 0, .35, -.3], ['k', .35, .35, .35, .3, .85, -.3]],
     mobile: [['b', .4, .75, .07, 0, .4, 0]], byod: [['b', .4, .75, .07, -.3, .4, 0], ['b', .7, .07, .5, .4, .04, 0]], claptop: [['b', .9, .08, .6, 0, .04, 0], ['b', .9, .6, .06, 0, .35, -.3], ['b', .3, .3, .3, .5, .16, .2]],
@@ -1636,16 +1726,16 @@ function createGL(THREE, OrbitControls) {
     }
     scene.add(g);
     const el = document.createElement('button'); el.className = 'lbl' + (isP ? '' : ' place'); el.dataset.id = id; el.setAttribute('aria-label', (isP ? p.name + '. ' : p.name + ', scene element. ') + p.fn);
-    labels.appendChild(el); nodes[id].el = el; nodes[id].anchor = new THREE.Vector3(p.p[0], p.p[1] + top, p.p[2]);
+    labels.appendChild(el); nodes[id].el = el; nodes[id].top = top; nodes[id].anchor = new THREE.Vector3(p.p[0], p.p[1] + top, p.p[2]);
   }
   /* relationship links: faint base set + brighter lens set */
   const lineSet = (pairs, mat) => { const pts = []; for (const [a, b] of pairs) { const A = POS(a), B = POS(b); pts.push(A[0], A[1] + .5, A[2], B[0], B[1] + .5, B[2]); }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); const l = new THREE.LineSegments(g, mat); if (mat.isLineDashedMaterial) l.computeLineDistances(); return l; };
   const baseLinks = lineSet(DATA.links.filter(l => l[4] !== 'suite'), new THREE.LineBasicMaterial({ color: 0x3a4d7a, transparent: true, opacity: .28 })); scene.add(baseLinks);
-  let lensLine = null, selLine = null, flow = [];
+  let lensLine = null, selLine = null, flow = [], topo = null, topoLine = null, topoChips = [];
   /* ambient traffic: one instanced mesh */
   const NP = 150, amb = new THREE.InstancedMesh(new THREE.SphereGeometry(.13, 6, 5), new THREE.MeshBasicMaterial({ color: 0xffffff }), NP); amb.frustumCulled = false; scene.add(amb);
-  const dummy = new THREE.Object3D(), va = new THREE.Vector3(), vb = new THREE.Vector3();
+  const dummy = new THREE.Object3D(), va = new THREE.Vector3(), vb = new THREE.Vector3(), tv3 = new THREE.Vector3(), tc = new THREE.Color();
   let lens = 'data', filter = null, selected = null;
 
   function setLens(l) {
@@ -1658,11 +1748,38 @@ function createGL(THREE, OrbitControls) {
     flow = lensLinks(l); const dashed = l === 'policy' || l === 'threat';
     lensLine = lineSet(flow, dashed ? new THREE.LineDashedMaterial({ color: lensCol, transparent: true, opacity: .75, dashSize: .7, gapSize: .5 }) : new THREE.LineBasicMaterial({ color: lensCol, transparent: true, opacity: .5 }));
     scene.add(lensLine); amb.material.color.copy(lensCol); colorRuns(); dirty = true;
+    if (topo) applyTopo();
   }
   function select(id) {
     selected = id; for (const k in nodes) nodes[k].el.classList.toggle('sel', k === id);
     if (selLine) { scene.remove(selLine); selLine.geometry.dispose(); selLine = null; }
     if (id && PR[id]) { selLine = lineSet(DATA.links.filter(l => l[0] === id || l[1] === id), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .85 })); scene.add(selLine); }
+  }
+  /* topology mode: isolate an architecture, draw its stated relationships and number them */
+  function applyTopo() {
+    baseLinks.visible = !topo; if (lensLine) lensLine.visible = !topo;
+    for (const id in nodes) { const n = nodes[id], on = !topo || topo.nodes.has(id); n.mat.transparent = !on; n.mat.opacity = on ? 1 : .1; n.mat.depthWrite = on; n.mat.needsUpdate = true; if (n.isP) n.ring.visible = on && ringOn(n.p, lens); }
+    flow = topo ? topo.links : lensLinks(lens);
+  }
+  function setTopo(t) {
+    const was = topo; topo = t; if (topoLine) { scene.remove(topoLine); topoLine.geometry.dispose(); topoLine = null; } topoChips.forEach(c => c.el.remove()); topoChips = [];
+    /* an architecture is re-laid-out as a diagram: most-connected block in the middle, the rest on a ring; everything else is hidden */
+    const diagram = !!t && !t.a.all; for (const k in TOPO_POS) delete TOPO_POS[k];
+    if (diagram) {
+      const ids = [...t.nodes], deg = id => t.links.filter(l => l[0] === id || l[1] === id).length;
+      const hub = t.a.hub || ids.slice().sort((a, b) => deg(b) - deg(a))[0], ring = ids.filter(id => id !== hub), R0 = ring.length > 8 ? 15 : 12.5;
+      TOPO_POS[hub] = [0, 0, 0]; ring.forEach((id, i) => { const an = i / ring.length * Math.PI * 2 - Math.PI * .75; TOPO_POS[id] = [Math.cos(an) * R0, 0, Math.sin(an) * R0]; });
+    }
+    zoneG.visible = !diagram; zoneLbl.forEach(z => z.el.style.display = diagram ? 'none' : '');
+    for (const id in nodes) { const n = nodes[id], on = !diagram || t.nodes.has(id), p = POS(id); n.g.visible = on; n.el.classList.toggle('gone', !on); n.g.position.set(p[0], p[1], p[2]); n.anchor.set(p[0], p[1] + n.top, p[2]); }
+    applyTopo(); dirty = true; if (selected) select(selected);
+    if (!t) { if (was) home(false); return; }
+    topoLine = lineSet(t.links, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .9 })); scene.add(topoLine);
+    if (t.links.length <= 30) t.links.forEach((l, i) => { const el = document.createElement('div'); el.className = 'nchip'; el.dataset.i = i; el.textContent = i + 1; el.title = `${PR[l[0]].s} ↔ ${PR[l[1]].s}: ${l[2]}`; labels.appendChild(el);
+      const A = POS(l[0]), B = POS(l[1]), k = .5 + ((i % 3) - 1) * .12; topoChips.push({ el, v: new THREE.Vector3(A[0] + (B[0] - A[0]) * k, A[1] + (B[1] - A[1]) * k + .5, A[2] + (B[2] - A[2]) * k) }); });
+    const c = new THREE.Vector3(); let r = 0; t.nodes.forEach(id => { const p = POS(id); c.add(tv3.set(p[0], p[1], p[2])); }); c.multiplyScalar(1 / t.nodes.size);
+    t.nodes.forEach(id => { const p = POS(id); r = Math.max(r, tv3.set(p[0], p[1], p[2]).distanceTo(c)); });
+    const fz = fitZoom(); tween(c, c.clone().add(HOME_O), t.a.all ? fz : clamp(fz * 40 / (r + 6), fz, 2.6));
   }
   function setFilter(f) { filter = f; for (const k in nodes) nodes[k].el.classList.toggle('filtered', !!f && !f.has(k)); }
   function focus(id) { const p = POS(id), t = new THREE.Vector3(p[0], p[1], p[2]); tween(t, t.clone().add(cam.position.clone().sub(controls.target)), Math.max(cam.zoom, 1.7)); }
@@ -1685,10 +1802,13 @@ function createGL(THREE, OrbitControls) {
       const g = new THREE.Group(), lift = r.slot * .55 + .9, hostile = r.hostile;
       const ap = actorPos(r, r.slot), pts = [new THREE.Vector3(ap[0], lift, ap[2]), ...r.path.map(n => { const p = POS(n); return new THREE.Vector3(p[0], p[1] + lift, p[2]); })];
       const am = new THREE.MeshStandardMaterial({ color: hostile ? 0xff6a5c : (r.slot ? 0xffd9a8 : 0xe6ecfa), roughness: .5, flatShading: true });
-      const actor = build(ACTOR[r.s.who], am); actor.position.set(ap[0], 0, ap[2]); g.add(actor);
-      const dev = build(DEVICE[r.s.device], new THREE.MeshStandardMaterial({ color: r.s.device === 'compromised' ? 0xff6a5c : 0x9fb3dd, roughness: .5, flatShading: true })); dev.position.set(ap[0] + 1.5, 0, ap[2] + .9); g.add(dev);
+      const isHuman = !!HUMAN[r.s.who];
+      const actor = isHuman ? human(r.s.who, r.slot) : build(ACTOR[r.s.who], am); actor.position.set(ap[0], 0, ap[2]); g.add(actor);
+      const dev = build(DEVICE[r.s.device], new THREE.MeshStandardMaterial({ color: r.s.device === 'compromised' ? 0xff6a5c : 0x9fb3dd, roughness: .5, flatShading: true }));
+      if (isHuman) { dev.scale.setScalar(.6); dev.position.set(1.0, 1.2, .35); actor.add(dev); }      /* humans carry their device as they walk */
+      else { dev.position.set(ap[0] + 1.5, 0, ap[2] + .9); g.add(dev); }
       const segs = pts.slice(0, -1).map((a, i) => { const s = seg(a, pts[i + 1], hostile); g.add(s.g); return s; });
-      const head = new THREE.Mesh(hostile ? headA : headG, new THREE.MeshBasicMaterial({ color: 0xffffff })); g.add(head);
+      const head = new THREE.Mesh(hostile ? headA : headG, new THREE.MeshBasicMaterial({ color: 0xffffff })); head.visible = !isHuman; g.add(head);
       const trail = new THREE.InstancedMesh(hostile ? trailA : trailG, new THREE.MeshBasicMaterial({ color: 0xffffff }), 14); trail.frustumCulled = false; g.add(trail);
       /* consult beams: path hop (or telemetry sources) → product doing the check */
       const beams = r.tl.map(e => {
@@ -1709,7 +1829,7 @@ function createGL(THREE, OrbitControls) {
       const at = r.stopAt >= 0 ? pts[r.stopAt + 1] : (r.verdict === 'CONTAIN' ? pts[1] : pts[pts.length - 1]);
       mk.position.copy(at).add(new THREE.Vector3(0, r.verdict === 'CONTAIN' ? 0 : 2.6, 0)); mk.visible = false; g.add(mk);
       const chip = document.createElement('div'); chip.className = 'tchip'; labels.appendChild(chip);
-      scene.add(g); rv.push({ r, g, pts, segs, head, trail, beams, mk, chip, hostile, lens: segs.map(s => s.len) });
+      scene.add(g); rv.push({ r, g, pts, segs, head, trail, beams, mk, chip, hostile, actor, isHuman, lift, name: opt('who', r.s.who).short });
     }
     colorRuns();
   }
@@ -1720,22 +1840,31 @@ function createGL(THREE, OrbitControls) {
       s.fm.color.set(v.hostile ? '#ff7a6b' : '#8fa3c8');
     });
   }
-  const tv3 = new THREE.Vector3(), tc = new THREE.Color();
-  function frameRuns(now) {
+    function frameRuns(now) {
     for (const v of rv) {
       const P = prog(v.r), n = v.segs.length; let L = 0;
       const curTrust = P.k >= 0 ? v.r.tl[P.k].trust : v.r.series[0].v;
       v.segs.forEach((s, i) => { const p = clamp(P.moves - i, 0, 1); s.set(p); L += p * s.len;
         if (lens === 'trust') { let t = v.r.series[0].v; for (const e of v.r.tl) if (e.hi < i) t = e.trust; s.mat.color.set(trustColor(t)); } });
-      const along = d => { let i = 0; while (i < n - 1 && d > v.segs[i].len) d -= v.segs[i++].len; return tv3.copy(v.segs[i].a).lerp(v.segs[i].b, clamp(d / v.segs[i].len, 0, 1)); };
+      let si = 0;
+      const along = d => { let i = 0; while (i < n - 1 && d > v.segs[i].len) d -= v.segs[i++].len; si = i; return tv3.copy(v.segs[i].a).lerp(v.segs[i].b, clamp(d / v.segs[i].len, 0, 1)); };
       v.head.position.copy(along(L)); v.head.rotation.y = now * .002;
+      if (v.isHuman) {   /* the figure walks the path: faces its direction of travel, limbs swing while moving */
+        const sg = v.segs[si], st = v.r.steps[v.r.pb.i], moving = S.playing && st && st.t === 'move' && !RM.matches, ph = now * .012, sw = moving ? Math.sin(ph) * .75 : 0, u = v.actor.userData;
+        v.actor.position.set(v.head.position.x, v.head.position.y - v.lift + (moving ? Math.abs(Math.sin(ph)) * .14 : 0), v.head.position.z);
+        v.actor.rotation.y = Math.atan2(sg.b.x - sg.a.x, sg.b.z - sg.a.z);
+        u.legL.rotation.x = sw; u.legR.rotation.x = -sw; u.armL.rotation.x = -sw * .8; u.armR.rotation.x = sw * .8;
+      }
       tc.set(lens === 'trust' ? trustColor(curTrust) : v.hostile ? '#ff7a6b' : v.r.slot ? '#ffd9a8' : '#ffffff'); v.head.material.color.copy(tc); v.trail.material.color.copy(tc);
       for (let j = 0; j < 14; j++) { const f = RM.matches ? j / 14 : ((now * .00022 + j / 14) % 1); dummy.position.copy(along(f * L)); dummy.scale.setScalar(L > .5 ? 1 : 0); dummy.rotation.set(0, now * .003, 0); dummy.updateMatrix(); v.trail.setMatrixAt(j, dummy.matrix); }
       v.trail.instanceMatrix.needsUpdate = true;
       v.beams.forEach((b, k) => { if (b) b.material.opacity = k === P.cur ? .95 : k <= P.k ? (lens === v.r.tl[k].lens ? .45 : .14) : 0; });
       v.mk.visible = P.done || (v.r.stopAt >= 0 && P.moves >= v.r.stopAt + 1); v.mk.quaternion.copy(cam.quaternion);
-      tv3.copy(v.head.position).project(cam); v.chip.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(-50%,-190%)`;
-      v.chip.style.setProperty('--c', trustColor(curTrust)); v.chip.textContent = (S.runs.length > 1 ? 'AB'[v.r.slot] + ' · ' : '') + 'trust ' + curTrust;
+      tv3.copy(v.head.position); if (v.isHuman) tv3.y += 9.6; tv3.project(cam);
+      if (v.isHuman) { const cx = (tv3.x * .5 + .5) * W, top = (-tv3.y * .5 + .5) * H, hw = 1.5 * H / (2 * VS) * cam.zoom; tv3.copy(v.head.position).project(cam); v.box = [cx - hw, top, cx + hw, (-tv3.y * .5 + .5) * H]; tv3.copy(v.head.position); tv3.y += 9.6; tv3.project(cam); }
+      v.chip.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(-50%,${v.isHuman ? -105 : -190}%)`;
+      v.chip.style.setProperty('--c', trustColor(curTrust));
+      const txt = `<b>${S.runs.length > 1 ? 'AB'[v.r.slot] + ' · ' : ''}${h(v.name)}</b> · trust ${curTrust}`; if (v.txt !== txt) v.chip.innerHTML = v.txt = txt;
       v.chip.style.opacity = lens === 'trust' ? 1 : .8;
     }
   }
@@ -1767,18 +1896,19 @@ function createGL(THREE, OrbitControls) {
       const n = nodes[id]; tv3.copy(n.anchor).project(cam); n.x = (tv3.x * .5 + .5) * W; n.y = (-tv3.y * .5 + .5) * H;
       n.el.style.transform = `translate(${n.x.toFixed(1)}px,${n.y.toFixed(1)}px) translate(-50%,-100%)`;
       n.el.classList.toggle('hit', hit.has(id));
-      n.pr = id === selected ? 100 : hit.has(id) ? 80 : onPath.has(id) ? 70 : (filter && filter.has(id)) ? 60 : n.isP ? (n.p.roles[lens] ? 50 : 30) : 20;
+      n.pr = id === selected ? 100 : hit.has(id) ? 80 : onPath.has(id) ? 70 : (filter && filter.has(id)) ? (topo ? 100 : 60) : n.isP ? (n.p.roles[lens] ? 50 : 30) : 20;
       items.push(n);
     }
     if (tick++ % 5 === 0) {
-      items.sort((a, b) => b.pr - a.pr); const placed = [];
+      items.sort((a, b) => b.pr - a.pr); const placed = rv.filter(v => v.isHuman && v.box).map(v => v.box);   /* labels step aside for the walking figure */
       for (const n of items) {
         const x0 = n.x - n.w / 2 - 2, x1 = n.x + n.w / 2 + 2, y0 = n.y - n.h - 1, y1 = n.y + 1;
         const out = x1 < 0 || x0 > W || y1 < 0 || y0 > H;
-        const clash = !out && n.pr < 100 && placed.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
+        const clash = !out && (n.pr < 100 || topo === null && rv.length) && n.pr <= 100 && placed.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
         n.el.classList.toggle('cull', out || clash); if (!out && !clash) placed.push([x0, y0, x1, y1]);
       }
     }
+    for (const z of topoChips) { tv3.copy(z.v).project(cam); z.el.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(-50%,-50%)`; }
     for (const z of zoneLbl) { tv3.copy(z.v).project(cam); z.el.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(0,-50%)`; }
   }
   /* picking */
@@ -1790,7 +1920,7 @@ function createGL(THREE, OrbitControls) {
   canvas.addEventListener('pointerleave', () => tip(null));
   new ResizeObserver(resize).observe(stage); resize(); home(true);
   const screenOf = id => { const b = canvas.getBoundingClientRect(), p = POS(id); tv3.set(p[0], p[1] + .85, p[2]).project(cam); return [b.left + (tv3.x * .5 + .5) * b.width, b.top + (-tv3.y * .5 + .5) * b.height]; };
-  return { kind: 'webgl', setLens, setRuns, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
+  return { kind: 'webgl', setLens, setRuns, setTopo, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
 }
 
 /* =====================================================================================
@@ -1802,7 +1932,7 @@ function createSVG() {
   const setVB = () => svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`); setVB();
   const M = p => [p[0], p[1] > 5 ? p[2] * .9 - 44 : p[2]];   /* ops plane is drawn as a band above the ground map */
   const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
-  const gZ = mk('g'), gL = mk('g'), gLL = mk('g'), gR = mk('g'), gN = mk('g');
+  const gZ = mk('g'), gL = mk('g'), gLL = mk('g'), gT = mk('g'), gR = mk('g'), gN = mk('g');
   for (const z of DATA.zones) { const a = M([z.x[0], z.y, z.z[0]]), b = M([z.x[1], z.y, z.z[1]]); mk('rect', { class: 'zone', x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1], rx: .8 }, gZ); mk('text', { class: 'zn', x: a[0] + .5, y: a[1] - .5 }, gZ).textContent = z.label; }
   for (const l of DATA.links) { if (l[4] === 'suite') continue; const a = M(POS(l[0])), b = M(POS(l[1])); mk('line', { class: 'lk', x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, gL); }
   const SH = { net: '0,-1 .87,-.5 .87,.5 0,1 -.87,.5 -.87,-.5', id: '0,-1.1 1.1,0 0,1.1 -1.1,0', netsec: '-.9,-.9 .9,-.9 .9,.9 -.9,.9', cloud: '0,-1.1 1.05,-.35 .65,.9 -.65,.9 -1.05,-.35',
@@ -1849,7 +1979,7 @@ function createSVG() {
       const col = lens === 'trust' ? trustColor(t) : v.r.hostile ? '#ff7a6b' : v.r.slot ? '#ffd9a8' : LENS[lens].color;
       v.line.setAttribute('points', pts.map(p => p[0].toFixed(2) + ',' + p[1].toFixed(2)).join(' ')); v.line.setAttribute('stroke', col);
       v.head.setAttribute('transform', `translate(${hd[0].toFixed(2)} ${hd[1].toFixed(2)})`); v.head.setAttribute('fill', '#fff');
-      v.chip.setAttribute('x', hd[0]); v.chip.setAttribute('y', hd[1] - 1.3); v.chip.textContent = 'trust ' + t; v.chip.style.fill = trustColor(t);
+      v.chip.setAttribute('x', hd[0]); v.chip.setAttribute('y', hd[1] - 1.3); v.chip.textContent = opt('who', v.r.s.who).short + ' · trust ' + t; v.chip.style.fill = trustColor(t);
       v.beams.forEach((bs, k) => bs.forEach(b => b.setAttribute('opacity', k === P.cur ? 1 : k <= P.k ? .3 : 0)));
       v.mkr.setAttribute('visibility', P.done ? 'visible' : 'hidden');
     }
@@ -1871,7 +2001,12 @@ function createSVG() {
   svg.addEventListener('keydown', e => { const n = e.target.closest('.n'); if (n && e.key === 'Enter') window.__select(n.dataset.id, false); });
   svg.addEventListener('focusin', e => { const n = e.target.closest('.n'); if (n) { const b = n.getBoundingClientRect(), s = $('#stage').getBoundingClientRect(); tip(n.dataset.id, b.left - s.left, b.bottom - s.top); } });
   svg.addEventListener('focusout', () => tip(null));
-  return { kind: 'svg', setLens, setRuns, frame,
+  function setTopo(t) {
+    gT.innerHTML = ''; gL.style.display = gLL.style.display = t ? 'none' : ''; if (!t) return;
+    t.links.forEach((l, i) => { const a = M(POS(l[0])), b = M(POS(l[1])); mk('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: '#fff', 'stroke-width': .1, 'stroke-opacity': .85 }, gT);
+      if (t.links.length <= 30) { const x = (a[0] + b[0]) / 2, y = (a[1] + b[1]) / 2; mk('circle', { cx: x, cy: y, r: .75, fill: '#0a1020', stroke: '#fff', 'stroke-width': .08 }, gT); mk('text', { x, y: y + .35, 'font-size': .9 }, gT).textContent = i + 1; } });
+  }
+  return { kind: 'svg', setLens, setRuns, setTopo, frame,
     focus(id) { const [x, y] = M(POS(id)); vb = { x: x - 18, y: y - 18 * HOME.h / HOME.w, w: 36, h: 36 * HOME.h / HOME.w }; setVB(); },
     setFilter(f) { for (const k in nodes) nodes[k].g.classList.toggle('filtered', !!f && !f.has(k)); },
     select(id) { for (const k in nodes) nodes[k].g.classList.toggle('sel', k === id); },
@@ -1936,7 +2071,7 @@ async function boot() {
   document.addEventListener('visibilitychange', () => { cancelAnimationFrame(raf); if (!document.hidden) { last = performance.now(); raf = requestAnimationFrame(loop); } });
   raf = requestAnimationFrame(loop);
   /* test / automation hook: engine only, no network */
-  window.__LN = { DATA, S, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
+  window.__LN = { DATA, S, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
 }
 boot();
 </script>
