@@ -1302,7 +1302,9 @@ function writeHash() {
   if (S.off) q.set('off', S.off);
   if (S.mode === 'presets' && S.preset) q.set('p', S.preset);
   if (S.selected) q.set('sel', S.selected);
-  history.replaceState(null, '', '#' + q.toString());
+  S.hash = '#' + q.toString();
+  /* sandboxed previews (srcdoc iframes) forbid touching history; the scenario still runs and can be shared */
+  try { history.replaceState(null, '', S.hash); } catch (e) { }
 }
 function readHash() {
   const q = new URLSearchParams(location.hash.slice(1)); if (!q.has('a')) return false;
@@ -1397,9 +1399,10 @@ $('#left').addEventListener('click', e => {
   if (b.dataset.id) select(b.dataset.id, true);
 });
 function share() {
-  writeHash(); const url = location.href;
-  (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => toast('Link copied — it reproduces this scenario.'),
-    () => { prompt('Copy this link:', url); });
+  writeHash(); const real = /^(https?|file):/.test(location.href), url = (real ? location.href.split('#')[0] : 'index.html') + S.hash;
+  if (!real) return toast('Scenario link: ' + url);   /* embedded preview: clipboard and dialogs are blocked */
+  let p; try { p = navigator.clipboard.writeText(url); } catch (e) { p = Promise.reject(e); }
+  p.then(() => toast('Link copied — it reproduces this scenario.'), () => { try { if (prompt('Copy this link:', url) === null) throw 0; } catch (e) { toast('Scenario link: ' + url); } });
 }
 
 /* ---- results ---- */
