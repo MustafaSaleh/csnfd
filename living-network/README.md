@@ -134,7 +134,8 @@ Nothing below is done yet. It is kept here so it can be picked up later.
 - Tested by automated checks in headless Chromium, and by hand by the owner. Not yet measured: frame rate on a range
   of real GPUs and mid-range phones (the brief asks for 60 fps desktop, 30 fps phone).
 - Safari and Firefox have not been checked systematically. Safari is the likeliest to differ on audio and some styling.
-- The rule table is a reading of public pages. It has not been reviewed by a Cisco or Splunk engineer.
+- The rule table is a reading of public pages. It has not been reviewed by a Cisco or Splunk engineer. The "Expert review prompt"
+  section below is ready to send for that review.
 - cisco.com pages have "show more" sections that were not expanded when read, so some stated relationships may be
   missing. The "verified on" date is fixed text; there is no process to re-check the pages.
 
@@ -165,6 +166,155 @@ Checked in a headless browser: zero console errors; all 30 presets play to a ver
 (about 206,000 including behaviour sets and removed controls) returns a path, a timeline and a verdict; split-view
 compare, removing controls, link sharing, the tour, and each export format work; every product panel links to its
 source page.
+
+## Expert review prompt
+
+Paste the block below into a Cisco networking model (or give it to a CCIE-level engineer) to check the scenario logic.
+It asks only about publicly documented behaviour. Each item states what this tool currently assumes ("Expect") so the
+reviewer can confirm or correct it. Bring the answers back and the rule table in `DATA` will be updated to match.
+
+````text
+ROLE
+You are a Cisco networking and security architect at CCIE level. I am checking an independent, educational
+visualization that shows how Cisco networking and security products work together. I need you to confirm or correct
+the statements below.
+
+RULES
+- Use only public information: cisco.com and splunk.com product pages, public documentation, public design guides
+  and data sheets that any customer can read. Do not use or reveal anything confidential, internal, under NDA, or
+  roadmap that has not been publicly announced.
+- If a statement cannot be confirmed from public sources, answer CANNOT CONFIRM rather than guessing.
+- Product availability changes. If something is announced but not generally available, say so.
+- I am modelling a typical zero-trust policy outcome, not guaranteed product behaviour. Judge whether each statement
+  is a fair, defensible description for partner and customer education.
+
+ANSWER FORMAT
+Answer every numbered item on its own line, in this exact shape:
+  <number> | CORRECT, PARTLY, INCORRECT or CANNOT CONFIRM | correction or nuance in at most two sentences | public source (document title or URL)
+After the list, add a short section "Most important fixes" with the three to five changes that matter most.
+
+A. NAMES AND PACKAGING
+1. Current public names are: Cisco Secure Routers, Cisco Smart Switches, Cisco Secure Firewall, Cisco Hybrid Mesh
+   Firewall, Cisco Secure Access, Cisco Identity Intelligence, Cisco XDR, Cisco AI Defense, Cisco Hypershield.
+   Expect: CORRECT.
+2. "Security Cloud Control" is still an acceptable name, although its product page is now titled "Security in Cisco
+   Cloud Control". Expect: PARTLY, with the preferred current name.
+3. Cisco Secure Equipment Access is now part of Cisco Cyber Vision. Expect: CORRECT.
+4. AgenticOps has no standalone product; Cisco AI Canvas is its workspace, inside Cisco Cloud Control. Expect: CORRECT.
+5. User Protection Suite: Essentials has Secure Access, Duo and Email Threat Defense; Advantage adds Secure Endpoint
+   and ISE. Expect: CORRECT.
+6. Cloud Protection Suite packages Secure Workload, Hypershield, Secure Firewall (virtual), Multicloud Defense and
+   Security Cloud Control, as the licensing path to Hybrid Mesh Firewall. Expect: CORRECT.
+7. Breach Protection Suite: Essentials has XDR, Email Threat Defense and Secure Endpoint; Advantage adds Secure
+   Network Analytics. Expect: CORRECT.
+
+B. CAMPUS AND BRANCH ACCESS
+8. On campus, ISE authenticates the user and device (802.1X or MAB), assigns a security group tag, and switches and
+   wireless enforce the segmentation. Expect: CORRECT.
+9. A headless IoT device is profiled by ISE and placed in a least-privilege segment. Expect: CORRECT.
+10. A guest is mapped to an internet-only segment with no path to internal resources. Expect: CORRECT.
+11. An out-of-date managed laptop on campus is given restricted access by ISE posture until remediated.
+    Expect: CORRECT, and tell me which client module performs the posture check.
+12. ISE can move a misbehaving endpoint to a quarantine segment automatically. Expect: CORRECT, and name the mechanism.
+13. Secure Network Analytics can detect scanning, lateral movement and data exfiltration from flow telemetry, including
+    in encrypted traffic without decryption, and can work with ISE to quarantine. Expect: CORRECT.
+14. A simplified campus-to-data-center path of Wi-Fi, access switch, firewall, Nexus fabric, application is a fair
+    conceptual picture. Expect: PARTLY, and tell me what important hop is missing.
+
+C. REMOTE ACCESS, SASE AND INTERNET
+15. A remote user on a managed laptop reaches a private application through Cisco Secure Client and Cisco Secure
+    Access (ZTNA or VPN as a service). Expect: CORRECT. Confirm Secure Client is the client used for Secure Access.
+16. A remote user on an unmanaged device can reach selected private applications through Secure Access without a
+    client (browser-based), with more limited access. Expect: CORRECT.
+17. A contractor can be limited to one named private application through Secure Access. Expect: CORRECT.
+18. A branch user reaches SaaS through the SD-WAN router and then Secure Access. Expect: CORRECT.
+19. My model shows both Cisco Umbrella (blocking malicious destinations at the edge) and Cisco Secure Access on the
+    same internet path. Expect: PARTLY; a customer would normally use one, since Secure Access includes DNS-layer
+    security. Tell me how to describe the relationship accurately.
+20. Secure Access can identify and block or restrict unsanctioned SaaS (shadow IT) and unapproved AI tools
+    (shadow AI). Expect: CORRECT.
+21. Secure Access can inspect uploads and AI prompts for sensitive data and block them (data loss prevention), and
+    can open risky sites in an isolated browser. Expect: CORRECT; these features were not named on the overview page
+    I read, so confirm they are publicly documented.
+22. Duo provides phishing-resistant MFA, verifies device trust before access, and resists push-bombing (MFA fatigue).
+    Expect: CORRECT, and name the feature that addresses push fatigue.
+23. Cisco Identity Intelligence flags risky sign-ins such as a valid password from an unfamiliar context or
+    impossible travel, and this can drive a step-up or block through Duo or Secure Access. Expect: CORRECT.
+
+D. DATA CENTER, CLOUD AND AI
+24. Cisco Secure Firewall can identify threats in encrypted traffic without decrypting it (Encrypted Visibility
+    Engine) and uses Talos intelligence. Expect: CORRECT.
+25. Hypershield is enforced on Nexus N9300 Smart Switches as stateful segmentation next to the workload.
+    Expect: CORRECT, with current availability.
+26. Hypershield can apply a compensating control that shields an unpatched workload from exploitation.
+    Expect: CORRECT or PARTLY, with current availability.
+27. Secure Workload enforces microsegmentation so that a workload, including an automated one, cannot open flows
+    outside its allowed policy. Expect: CORRECT.
+28. Multicloud Defense provides ingress, egress and east-west protection in public cloud, and blocks command and
+    control, exfiltration and lateral movement. Expect: CORRECT.
+29. For an internet-facing application in public cloud, placing WAAP in front and Multicloud Defense behind it is a
+    fair conceptual picture. Expect: PARTLY.
+30. Security Cloud Control manages policy for Secure Firewall, Multicloud Defense, Hypershield, Secure Access,
+    Secure Workload and AI Defense. Expect: CORRECT. Does it also manage security policy on Secure Routers / SD-WAN?
+    Expect: PARTLY.
+31. AI Defense provides runtime guardrails against prompt injection and data leakage for AI applications a customer
+    builds. Expect: CORRECT.
+32. When an employee pastes confidential data into an approved third-party AI assistant, I attribute the block to AI
+    Defense acting at the Secure Access edge. Expect: PARTLY; tell me which product should be credited (Secure Access
+    "AI Access", AI Defense, or both) and how they relate.
+
+E. INDUSTRIAL (OT)
+33. The Cyber Vision sensor runs inside Cisco industrial switches and routers and builds an OT asset inventory.
+    Expect: CORRECT.
+34. Cyber Vision shares asset context with ISE and Secure Firewall so OT assets can be segmented into zones and
+    conduits. Expect: CORRECT.
+35. A vendor reaches one factory machine through a brokered, least-privilege, recorded remote session (Secure
+    Equipment Access, now in Cyber Vision), passing through the industrial network. Expect: CORRECT.
+36. An OT device that starts communicating outside its baseline is detected by Cyber Vision and can be restricted
+    through ISE segmentation. Expect: CORRECT.
+
+F. DETECTION, RESPONSE AND SPLUNK
+37. Cisco XDR ingests telemetry from Secure Endpoint, Email Threat Defense, Secure Network Analytics, Secure
+    Firewall, Cyber Vision, Identity Intelligence and Secure Client. Expect: CORRECT; list any I missed.
+38. Cisco XDR can trigger host isolation in Secure Endpoint as a response action. Expect: CORRECT. Can it also
+    trigger an ISE quarantine? Expect: CANNOT CONFIRM from the pages I read; I did not draw an XDR to ISE link.
+39. Secure Endpoint can isolate an infected host and block or quarantine a malicious file. Expect: CORRECT.
+40. Email Threat Defense can stop threats before delivery and remove a message from mailboxes after delivery.
+    Expect: CORRECT.
+41. Which Cisco products have a publicly documented integration that sends data to Splunk? My model currently has
+    only Secure Firewall, Secure Network Analytics and Cyber Vision feeding Splunk. Expect: INCORRECT as incomplete;
+    please list the others (for example XDR, Duo, Secure Endpoint, ISE, Secure Access, Umbrella, Meraki, ThousandEyes)
+    with the public app or document name for each.
+42. In my model Splunk Enterprise Security and Splunk SOAR observe and analyse but never change the outcome.
+    Is it publicly documented that Splunk SOAR can take response actions on Cisco products (for example quarantine
+    through ISE, block on a firewall, isolate through Secure Endpoint)? Expect: CORRECT that it can, which would make
+    my "never changes the outcome" too conservative.
+43. Is there a publicly documented integration between Cisco XDR and Splunk Enterprise Security? Expect: CORRECT;
+    describe it in one sentence.
+44. ThousandEyes is integrated with Cisco wireless, Catalyst switching, Meraki, Nexus and Secure Access (experience
+    insights), and pairs with Splunk Observability Cloud and Splunk AppDynamics. Expect: CORRECT. Is there also a
+    documented ThousandEyes integration with Splunk IT Service Intelligence? Expect: CORRECT.
+
+G. THE MODEL ITSELF
+45. I show a single 0 to 100 "trust score" for a session that rises and falls with signals. I know no product
+    exposes this exact number. Is it a fair teaching device, and which real signals come closest (ISE posture, Duo
+    device health and risk-based authentication, Identity Intelligence)? Expect: PARTLY, with advice on wording.
+46. Check these typical outcomes. For each, say whether the verdict and the product credited are reasonable:
+    a. Employee, compliant managed laptop, HQ, private app in the data center: ALLOW.
+    b. Home worker on a personal laptop to sanctioned SaaS: ALLOW WITH LIMITS (Duo device trust).
+    c. Contractor trying to reach a server outside their approved application: BLOCK (Secure Access).
+    d. External attacker with a stolen password who fails MFA: BLOCK (Duo).
+    e. Employee signing in from an impossible-travel location: STEP-UP (Identity Intelligence, then Duo).
+    f. Compromised laptop scanning the campus: CONTAIN (Secure Network Analytics detects, ISE quarantines, XDR
+       correlates).
+    g. Ransomware behaviour on a managed laptop: CONTAIN (Secure Endpoint isolates the host).
+    h. Server attempting data exfiltration over an encrypted channel: CONTAIN (Secure Network Analytics and Secure
+       Firewall detect and block, XDR correlates).
+    i. IoT camera talking to an unknown internet host: CONTAIN (ISE quarantine after a profile mismatch).
+    j. Internet attack on a private data center application: BLOCK (Secure Firewall; Hypershield as a second layer).
+47. Is any capability above credited to the wrong product, or is any important product missing from a scenario where
+    a customer would expect to see it?
+````
 
 ## Products included (41)
 
