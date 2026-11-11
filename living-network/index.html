@@ -48,6 +48,8 @@ ul,ol{padding:0;list-style:none}
 .lenses button[aria-checked=true]{background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--tx);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 60%,transparent)}
 .lenses button[aria-checked=true] i{opacity:1;box-shadow:0 0 8px var(--c)}
 .search{margin-left:auto;position:relative;display:flex;gap:6px}
+#spT[aria-pressed=true]{border-color:#ff8a3d;color:#ffb37a;background:#ff8a3d1f}
+#spT[aria-pressed=false]{color:var(--tx3)}
 .search input,.search select,.tp select{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12px}
 .search input{width:170px}
 #qres{position:absolute;top:calc(100% + 4px);right:0;width:300px;max-height:320px;overflow:auto;background:var(--panel2);border:1px solid var(--line2);border-radius:var(--r);z-index:30;box-shadow:0 12px 30px #0008}
@@ -150,6 +152,8 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr) 350px;min-height:0}
 #svg2d .n.filtered{opacity:.15}
 #svg2d .n:focus-visible{outline:none}
 #svg2d .n:focus-visible .sh{stroke:#fff;stroke-width:.22}
+#svg2d.nosp .spk{display:none}
+#svg2d .zone.spk{fill:#2a1a10;stroke:#b5672f}
 #svg2d .mk{fill:none;stroke:var(--policy);stroke-width:.14}
 
 /* results */
@@ -224,7 +228,8 @@ footer{font-size:10.5px;color:var(--tx3);padding:5px 14px;background:var(--bg2);
 #mobnav{display:none}
 
 body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
-@media (max-width:1400px){ .brand p{display:none} .search input{width:140px} body[data-cmp="1"] main{grid-template-columns:270px minmax(0,1fr) 440px} }
+@media (max-width:1700px){ .brand p{display:none} }
+@media (max-width:1400px){ .search input{width:140px} body[data-cmp="1"] main{grid-template-columns:270px minmax(0,1fr) 440px} }
 @media (max-width:1180px){ body[data-cmp="1"] main{grid-template-columns:270px minmax(0,1fr) 310px} main{grid-template-columns:270px minmax(0,1fr) 310px} .runs.cmp{grid-template-columns:1fr} .runs.cmp .run+.run{border-left:0} }
 @media (max-width:900px){
   body{grid-template-rows:auto minmax(0,1fr) auto auto}
@@ -240,9 +245,10 @@ body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
   footer{font-size:9.5px;padding:3px 8px}
   #top{gap:8px;padding:6px 10px}
   .brand p{display:none}
+  #spT{padding:5px 7px;font-size:11px}
   .lenses{order:3;width:100%;gap:2px}
   .lenses button{padding:6px 2px;font-size:10px;letter-spacing:.02em;gap:4px;flex:1 1 0;min-width:0;justify-content:center}
-  .search{flex:1;min-width:0} .search input{flex:1;min-width:0;width:auto}
+  #spT{margin-left:auto} .search{flex:1 1 100%;min-width:0;margin-left:0} .search input{flex:1;min-width:0;width:auto} .search select{max-width:none;flex:1;min-width:0}
   .badge{font-size:9px;letter-spacing:.06em;right:12px;text-align:center}
   .lenses kbd{display:none}
   .search input{width:118px} .search select{max-width:96px}
@@ -261,6 +267,7 @@ body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
     <div><h1>Living Network</h1><p>Conceptual architecture · how Cisco networking and security work together</p></div>
   </div>
   <div class="lenses" id="lenses" role="radiogroup" aria-label="Lens"></div>
+  <button id="spT" class="btn" aria-pressed="true" title="Show or hide the Splunk layer (L)">Splunk layer</button>
   <div class="search" role="search">
     <input id="q" type="search" placeholder="Search products" aria-label="Search products" autocomplete="off">
     <select id="qcat" aria-label="Filter by category"></select>
@@ -315,12 +322,12 @@ body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
    DATA — everything the page shows lives here. A new scenario is a data edit.
    Product facts were read from each product's own cisco.com page on the date below.
    ===================================================================================== */
-const CX = 'https://www.cisco.com/site/us/en/';
+const CX = 'https://www.cisco.com/site/us/en/', SX = 'https://www.splunk.com/en_us/products/';
 const DATA = {
   meta: {
     verified: '10 November 2026',
     verdictNote: 'Illustrative outcome — actual result depends on configured policy and licensed products.',
-    footer: 'Independent educational visualization. Not an official Cisco product. Product names are trademarks of Cisco Systems, Inc. Content verified against cisco.com on {date}.',
+    footer: 'Independent educational visualization. Not an official Cisco product. Product names are trademarks of Cisco Systems, Inc. and Splunk LLC. Content verified against cisco.com and splunk.com on {date}.',
     sceneLabel: 'Conceptual architecture — not a validated design'
   },
 
@@ -339,7 +346,7 @@ const DATA = {
 
   categories: {
     net: 'Networking', id: 'Identity & access', netsec: 'Network security', cloud: 'Cloud & application security',
-    endpoint: 'Endpoint & email', detect: 'Detection & intelligence', ot: 'Industrial (OT) security', suite: 'Suites'
+    endpoint: 'Endpoint & email', detect: 'Detection & intelligence', ot: 'Industrial (OT) security', suite: 'Suites', splunk: 'Splunk (data, security analytics, observability)'
   },
 
   zones: [
@@ -348,7 +355,8 @@ const DATA = {
     { id: 'access', label: '3 · Access edge', x: [-20, -10], z: [-27, 28], y: 0 },
     { id: 'wan', label: '4 · WAN & SASE cloud edge', x: [-8, 6], z: [-27, 28], y: 0 },
     { id: 'dest', label: '5 · Destinations', x: [8, 27], z: [-27, 28], y: 0 },
-    { id: 'ops', label: '6 · Operations plane', x: [-18, 23], z: [-8, 8], y: 13 }
+    { id: 'ops', label: '6 · Operations plane', x: [-18, 23], z: [-8, 8], y: 13 },
+    { id: 'splunk', label: '7 · Splunk data and analytics layer', x: [-14, 19], z: [-7, 7], y: 22 }
   ],
 
   /* extra source pages used for relationships that sit on solution pages */
@@ -357,7 +365,8 @@ const DATA = {
     netsec: CX + 'products/networking/network-security/index.html',
     sase: CX + 'solutions/secure-access-service-edge-sase/index.html',
     zta: CX + 'solutions/security/zero-trust-access/index.html',
-    nexusone: CX + 'products/networking/cloud-networking/nexus-one/index.html'
+    nexusone: CX + 'products/networking/cloud-networking/nexus-one/index.html',
+    obs: CX + 'products/observability/index.html'
   },
 
   /* pol: where the product sits in the policy lifecycle. inspect: inspects traffic in the DATA lens. */
@@ -502,11 +511,43 @@ const DATA = {
     cps: { name: 'Cisco Cloud Protection Suite', s: 'Cloud Protection', cat: 'suite', zone: 'ops', p: [19, 13, -4],
       fn: 'Suite for adopting Hybrid Mesh Firewall: Secure Workload, Hypershield, Secure Firewall, Multicloud Defense and Security Cloud Control.',
       url: CX + 'products/security/cloud-protection/index.html', roles: {} },
+    splunk: { name: 'Splunk Platform (Cloud Platform / Enterprise)', s: 'Splunk Platform', cat: 'splunk', zone: 'splunk', p: [2, 22, 0],
+      fn: 'Data platform to search, analyse, visualise and act on machine data, with streaming ingestion and federated search.',
+      url: SX + 'splunk-cloud-platform.html',
+      roles: { data: 'Log and event data platform', threat: 'Search and retention for investigations' } },
+    es: { name: 'Splunk Enterprise Security', s: 'Enterprise Security', cat: 'splunk', zone: 'splunk', p: [-4, 22, -3.5],
+      fn: 'Threat detection, investigation and response platform combining SIEM, SOAR, behaviour analytics and AI-driven alert prioritisation.',
+      url: SX + 'enterprise-security.html',
+      roles: { threat: 'SIEM detection and prioritisation', trust: 'Entity risk scoring' } },
+    soar: { name: 'Splunk SOAR', s: 'Splunk SOAR', cat: 'splunk', zone: 'splunk', p: [-10, 22, -3.5],
+      fn: 'Orchestrates security workflows and automates response tasks through playbooks, integrations and case management.',
+      url: SX + 'splunk-security-orchestration-and-automation.html',
+      roles: { threat: 'Automated response playbooks' } },
+    saa: { name: 'Splunk Attack Analyzer', s: 'Attack Analyzer', cat: 'splunk', zone: 'splunk', p: [-10, 22, 3.5],
+      fn: 'Automated analysis of suspected malware and credential phishing that follows the attack chain to a verdict.',
+      url: SX + 'attack-analyzer.html',
+      roles: { threat: 'Malware and phishing analysis' } },
+    o11y: { name: 'Splunk Observability Cloud', s: 'Observability Cloud', cat: 'splunk', zone: 'splunk', p: [8, 22, -3.5],
+      fn: 'OpenTelemetry-native full-stack observability: application, infrastructure, user-experience, database and log monitoring.',
+      url: SX + 'observability-cloud.html',
+      roles: { data: 'Full-stack observability' } },
+    itsi: { name: 'Splunk IT Service Intelligence', s: 'ITSI', cat: 'splunk', zone: 'splunk', p: [14, 22, -3.5],
+      fn: 'AIOps service intelligence that correlates alerts into episodes and tracks service health against business priorities.',
+      url: SX + 'it-service-intelligence.html',
+      roles: { data: 'Service health and event correlation' } },
+    appd: { name: 'Splunk AppDynamics', s: 'AppDynamics', cat: 'splunk', zone: 'splunk', p: [14, 22, 3.5],
+      fn: 'Application observability for hybrid and on-premises apps that links performance to business metrics, with runtime application security.',
+      url: SX + 'splunk-appdynamics.html',
+      roles: { data: 'Application performance', threat: 'Runtime application security' } },
+
     bps: { name: 'Cisco Breach Protection Suite', s: 'Breach Protection', cat: 'suite', zone: 'ops', p: [19, 13, 4],
       fn: 'Suite unified by XDR with Email Threat Defense and Secure Endpoint; the Advantage tier adds Secure Network Analytics.',
       url: CX + 'products/security/breach-protection/index.html', roles: {} }
   },
 
+  /* --- SPLUNK LAYER. Product facts from each product's splunk.com page (cisco.com has no Splunk product pages);
+     relationships to Cisco products only where a Cisco or Splunk page states them. Toggled as one layer. --- */
+  splunkFeeds: ['fw', 'sna', 'cv'],   /* Cisco products whose own pages state a Splunk data integration; their checks feed the layer */
   /* non-product scene nodes */
   places: {
     hq: { name: 'HQ campus', kind: 'loc', p: [-27, 0, -20], fn: 'Corporate campus with wired and Wi-Fi access.' },
@@ -609,13 +650,32 @@ const DATA = {
     ['cps', 'mcd', 'Included in the Gateway package', 'cps', 'suite'], ['cps', 'hmf', 'The suite is the licensing path to Hybrid Mesh Firewall', 'cps', 'suite'],
     ['bps', 'xdr', 'Suite is unified by XDR', 'bps', 'suite'], ['bps', 'email', 'Included in the suite', 'bps', 'suite'],
     ['bps', 'ep', 'Included in the suite', 'bps', 'suite'], ['bps', 'sna', 'Included in the Advantage tier', 'bps', 'suite'],
-    ['bps', 'talos', 'Threat intelligence from Talos', 'bps', 'suite']
+    ['bps', 'talos', 'Threat intelligence from Talos', 'bps', 'suite'],
+    /* Splunk layer */
+    ['fw', 'splunk', 'Firewall Threat Defense customers who subscribe to Splunk can ingest extra firewall log data (terms apply)', 'fw'],
+    ['hmf', 'splunk', 'Splunk is a listed integration for additional log data', 'hmf'],
+    ['sna', 'splunk', 'Secure Network Analytics with Splunk for network monitoring and threat detection', 'sna'],
+    ['cv', 'splunk', 'Cyber Vision app for Splunk provides OT dashboards', 'cv'],
+    ['itd', 'splunk', 'Unified view of IT and OT data in Splunk', 'itd'],
+    ['aid', 'splunk', 'Splunk data can be used for additional AI security insights', 'aid'],
+    ['nexus', 'splunk', 'Nexus Dashboard integrates Splunk data; native Splunk analytics in Nexus One', 'nexusone'],
+    ['talos', 'saa', 'Talos threat intelligence is available in Splunk Attack Analyzer', 'talos'],
+    ['te', 'o11y', 'Splunk Observability and ThousandEyes are presented together as Cisco Observability', 'obs'],
+    ['te', 'appd', 'Combine application-layer and network-layer intelligence for one view of performance', 'te'],
+    ['agentic', 'itsi', 'ITSI lists a Cisco AI Canvas integration', 'itsi'],
+    ['es', 'soar', 'SOAR is integrated with Enterprise Security as one workflow', 'es'],
+    ['es', 'splunk', 'Listed as related products; federated search and analytics over platform data', 'splunk'],
+    ['saa', 'soar', 'Direct integration for automated analysis and response', 'saa'],
+    ['saa', 'es', 'Enterprise Security includes native automated threat analysis', 'saa'],
+    ['o11y', 'splunk', 'Log analytics correlates logs stored in the Splunk platform with metrics and traces', 'o11y'],
+    ['itsi', 'splunk', 'ITSI runs on Splunk Cloud Platform and Splunk Enterprise', 'itsi']
   ],
   /* subsets of the links above that the POLICY and THREAT lenses animate */
   policyFlow: [['scc', 'fw'], ['scc', 'mcd'], ['scc', 'hs'], ['scc', 'sa'], ['scc', 'wl'], ['scc', 'aid'], ['scc', 'sdwan'],
     ['ise', 'switches'], ['ise', 'wireless'], ['meraki', 'switches'], ['meraki', 'wireless'], ['meraki', 'industrial'], ['cv', 'industrial']],
   teleFlow: [['ep', 'xdr'], ['email', 'xdr'], ['sna', 'xdr'], ['client', 'xdr'], ['cv', 'xdr'], ['fw', 'xdr'], ['cii', 'xdr'],
-    ['talos', 'fw'], ['talos', 'ep'], ['talos', 'cv'], ['talos', 'aid']],
+    ['talos', 'fw'], ['talos', 'ep'], ['talos', 'cv'], ['talos', 'aid'],
+    ['fw', 'splunk'], ['sna', 'splunk'], ['cv', 'splunk'], ['talos', 'saa'], ['es', 'soar'], ['es', 'splunk']],
 
   /* DATA lens: how each path segment is carried. First match wins; default is "clear". */
   segments: [['*', 'wireless', 'enc', 'WPA3 air link'], ['client', '*', 'enc', 'Device tunnel (VPN / zero trust access)'],
@@ -1030,6 +1090,23 @@ const DATA = {
     { id: 'Z3', when: { beh: ['ransom'] }, needsTele: true, post: true, at: 'xdr', lens: 'threat',
       c: 'Recovery', r: 'Affected host can be restored from a last-known-good snapshot' },
 
+    /* --- Splunk layer: observes and analyses; in this model it never changes the verdict.
+         needsS: 'any' = a Cisco product with a stated Splunk integration (splunkFeeds) acted on this path; 'threat' = one of those raised a detection or block. --- */
+    { id: 'SP1', needsS: 'any', post: true, at: 'splunk', lens: 'data', from: '@sfeed',
+      c: 'Data platform', r: 'Logs and events from the connected Cisco sources are ingested, searchable and retained' },
+    { id: 'SP2', needsS: 'threat', post: true, at: 'es', lens: 'threat', from: 'splunk',
+      c: 'SIEM detection', r: 'Events correlated and prioritised with risk-based alerting, mapped to MITRE ATT&CK', sig: 'SIEM detection' },
+    { id: 'SP3', needsS: 'threat', post: true, at: 'soar', lens: 'threat', from: 'es',
+      c: 'Response automation', r: 'Playbook automates enrichment, case creation and response tasks for the analyst' },
+    { id: 'SP4', when: { beh: ['phish', 'malfile'] }, post: true, at: 'saa', lens: 'threat', also: ['talos'],
+      c: 'Automated threat analysis', r: 'Suspected link or file followed through its attack chain to a verdict, using Talos intelligence' },
+    { id: 'SP5', when: { beh: ['slow'] }, post: true, at: 'o11y', lens: 'data', from: 'te',
+      c: 'Full-stack observability', r: 'Application, infrastructure and user-experience telemetry reviewed alongside the ThousandEyes network view' },
+    { id: 'SP6', when: { beh: ['slow'], dest: ['dcapp', 'cloudapp'] }, post: true, at: 'appd', lens: 'data', from: 'te',
+      c: 'Application-layer view', r: 'Application performance combined with network-path data to separate app faults from network faults' },
+    { id: 'SP7', when: { beh: ['slow'] }, post: true, at: 'itsi', lens: 'data',
+      c: 'Service health', r: 'Related alerts grouped into one episode with a service health score for the affected service' },
+
     /* --- policy authoring and distribution (operations). `fan` expands into one check per enforcement point. --- */
     { id: 'O4', when: { beh: ['push'] }, post: true, at: 'scc', lens: 'policy',
       c: 'Policy authoring', r: 'Intent defined once in a single management plane' },
@@ -1062,6 +1139,10 @@ const DATA = {
       blurb: 'What the suite packages for adopting Hybrid Mesh Firewall: a Segmentation package and a Gateway package, both with Security Cloud Control.' },
     { id: 'bps', name: 'Breach Protection Suite', src: 'bps', hub: 'bps', nodes: ['bps', 'xdr', 'email', 'ep', 'sna', 'talos'],
       blurb: 'What the suite packages for detection and response, unified by XDR.' },
+    { id: 'splsec', name: 'Splunk for security operations', src: 'es', layer: 'splunk', center: 'splunk', nodes: ['splunk', 'es', 'soar', 'saa', 'fw', 'hmf', 'sna', 'cv', 'itd', 'talos', 'aid'],
+      blurb: 'Cisco firewalls, network analytics and OT sensors send data to the Splunk platform; Enterprise Security detects and prioritises, SOAR automates the response, Attack Analyzer examines samples with Talos intelligence.' },
+    { id: 'splobs', name: 'Splunk and Cisco Observability', src: 'obs', layer: 'splunk', center: 'te', nodes: ['o11y', 'itsi', 'appd', 'splunk', 'te', 'nexus', 'agentic'],
+      blurb: 'ThousandEyes sees the network path and Splunk sees applications, infrastructure and service health, so a fault can be placed in the right layer.' },
     { id: 'all', name: 'Everything', all: true, nodes: [],
       blurb: 'Every product in the scene with every relationship stated on the cisco.com pages reviewed (suite packaging lines omitted).' }
   ],
@@ -1218,15 +1299,19 @@ function evaluate(s, off) {
     cand.push({ c, order, hi });
   });
   cand.sort((a, b) => a.hi - b.hi || a.order - b.order);
-  const tl = [], gaps = [], tele = []; let stopAt = -1, top = null;
+  const tl = [], gaps = [], tele = [], sfeed = [], sthreat = []; let stopAt = -1, top = null;
   for (const { c, hi } of cand) {
     if (stopAt >= 0 && hi > stopAt && hi < 1e6) continue;           /* traffic never got this far */
     if (c.base && stopAt === hi) continue;
     if (c.needsTele && !tele.length) continue;
+    if (PR[c.at].cat === 'splunk' && !S.splunk) continue;                 /* Splunk layer switched off */
+    if (c.needsS && !(c.needsS === 'threat' ? sthreat : sfeed).length) continue;
     if (off && c.at === off) { gaps.push(c); continue; }
     trust = clamp(trust + (c.d || 0));
     const e = { id: c.id, at: c.at, hi, hop: hi < 1e6 ? path[hi] : null, lens: c.lens, c: c.c, r: c.r, d: c.d || 0, sig: c.sig, v: c.v || null, trust, from: c.from, also: c.also || [] };
     if (c.from === '@tele') e.beams = [...new Set(tele)];
+    if (c.from === '@sfeed') e.beams = [...new Set(sfeed)];
+    if (DATA.splunkFeeds.includes(c.at)) { sfeed.push(c.at); if (c.tele || c.v) sthreat.push(c.at); }
     tl.push(e);
     if (c.d) series.push({ v: trust, d: c.d, sig: c.sig || c.c, k: tl.length - 1, at: c.at });
     if (c.tele) tele.push(c.at);
@@ -1244,7 +1329,7 @@ function evaluate(s, off) {
 }
 function topoOf(id) {
   const a = DATA.architectures.find(x => x.id === id) || DATA.architectures[0];
-  const nodes = new Set(a.all ? Object.keys(PR).filter(k => PR[k].cat !== 'suite') : a.nodes);
+  const nodes = new Set(a.all ? Object.keys(PR).filter(k => PR[k].cat !== 'suite' && (S.splunk || PR[k].cat !== 'splunk')) : a.nodes);
   const links = DATA.links.filter(l => a.hub ? (l[0] === a.hub && nodes.has(l[1])) : (l[4] !== 'suite' && nodes.has(l[0]) && nodes.has(l[1])));
   return { a, nodes, links };
 }
@@ -1282,7 +1367,7 @@ function suggestions(s, run) {
 const RM = matchMedia('(prefers-reduced-motion: reduce)');
 const fromPreset = a => normalize({ who: a[0], device: a[1], loc: a[2], dest: a[3], beh: a[4] }).s;
 const S = {
-  mode: 'presets', lens: 'data', view: 'orbit', arch: 'sase', preset: 1, compare: false, active: 0, off: null, speed: 1, playing: false,
+  mode: 'presets', lens: 'data', splunk: true, view: 'orbit', arch: 'sase', preset: 1, compare: false, active: 0, off: null, speed: 1, playing: false,
   slots: [fromPreset(DATA.presets[0].s), fromPreset(DATA.presets[5].s)],
   runs: [], selected: null, notes: [], filter: null
 };
@@ -1303,7 +1388,7 @@ function rerun() {
   });
   if (S.off && !S.runs.some(r => r.base.products.includes(S.off))) { S.off = null; return rerun(); }
   document.body.dataset.cmp = S.runs.length > 1 ? '1' : '0';
-  S.topo = S.mode === 'topo' ? topoOf(S.arch) : null; R.setTopo(S.topo); R.setRuns(S.runs); R.setFilter(S.topo ? S.topo.nodes : S.filter); renderResults(); S.playing = S.runs.length > 0; lastSig = ''; writeHash();
+  S.topo = S.mode === 'topo' ? topoOf(S.arch) : null; R.setLayer(S.splunk); R.setTopo(S.topo); R.setRuns(S.runs); R.setFilter(S.topo ? S.topo.nodes : S.filter); renderResults(); S.playing = S.runs.length > 0; lastSig = ''; writeHash();
 }
 /* playback */
 const DUR = { move: 620, check: 1250, end: 1 };
@@ -1349,6 +1434,7 @@ function writeHash() {
   if (S.mode === 'topo') q.set('arch', S.arch);
   if (S.selected) q.set('sel', S.selected);
   if (S.view !== 'orbit') q.set('view', S.view);
+  if (!S.splunk) q.set('sp', '0');
   S.hash = '#' + q.toString();
   /* sandboxed previews (srcdoc iframes) forbid touching history; the scenario still runs and can be shared */
   try { history.replaceState(null, '', S.hash); } catch (e) { }
@@ -1361,6 +1447,7 @@ function readHash() {
   S.slots[0] = unkey(q.get('a')); if (q.get('b')) S.slots[1] = unkey(q.get('b'));
   S.compare = q.get('cmp') === '1'; S.active = 0;
   S.off = PR[q.get('off')] ? q.get('off') : null; S.preset = +q.get('p') || 0;
+  S.splunk = q.get('sp') !== '0';
   S.view = ['third', 'first'].includes(q.get('view')) ? q.get('view') : 'orbit';
   S.selected = (PR[q.get('sel')] || PL[q.get('sel')]) ? q.get('sel') : null;
   return true;
@@ -1391,6 +1478,11 @@ function setView(v, quiet) {
   S.view = v; $('#viewSel').value = v; R.setView && R.setView(v);
   if (v !== 'orbit' && !S.runs.length && !quiet) toast('Follow views need a running scenario: pick a preset or build one.');
   if (!quiet) writeHash();
+}
+/* Splunk layer on/off: nodes, relationships and Splunk checkpoints appear or disappear together */
+function setSplunk(on) {
+  S.splunk = on; const b = $('#spT'); b.setAttribute('aria-pressed', on); b.textContent = on ? 'Splunk layer: on' : 'Splunk layer: off';
+  if (R) { R.setLayer(on); setLens(S.lens); renderLeft(); rerun(); }
 }
 function setMode(m) {
   S.mode = m; $$('.modes button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === m));
@@ -1433,10 +1525,10 @@ function renderLeft() {
       <div class="slotbar"><button class="btn primary" id="runB">Run</button><button class="btn" id="shareB">Copy link</button></div>
       <p class="small">Changing any picker while a scenario runs re-evaluates it immediately.</p>`;
   } else if (S.mode === 'topo') {
-    el.innerHTML = `<h2>Topology</h2><p class="small" style="margin:4px 0 8px">Pick an architecture to isolate its building blocks and see how they connect. Only relationships stated on cisco.com are drawn.</p>` +
-      DATA.architectures.map((a, i) => `${i === 0 ? '<div class="pg">Architectures</div>' : a.id === 'ups' ? '<div class="pg">Suites</div>' : a.all ? '<div class="pg">Whole scene</div>' : ''}<button class="preset" data-arch="${a.id}" aria-current="${S.arch === a.id}"><b>${i + 1}</b><span>${h(a.name)}</span></button>`).join('');
+    el.innerHTML = `<h2>Topology</h2><p class="small" style="margin:4px 0 8px">Pick an architecture to isolate its building blocks and see how they connect. Only relationships stated on cisco.com or splunk.com are drawn.</p>` +
+      DATA.architectures.map((a, i) => `${i === 0 ? '<div class="pg">Architectures</div>' : a.id === 'ups' ? '<div class="pg">Suites</div>' : a.id === 'splsec' ? '<div class="pg">Splunk layer</div>' : a.all ? '<div class="pg">Whole scene</div>' : ''}<button class="preset" data-arch="${a.id}" aria-current="${S.arch === a.id}"><b>${i + 1}</b><span>${h(a.name)}</span></button>`).join('');
   } else {
-    el.innerHTML = `<h2>Free explore</h2><p class="small" style="margin:4px 0 10px">Orbit, zoom and pan the scene. Select any product for its function, lenses, stated relationships and cisco.com source. Lines are relationships stated on cisco.com.</p>` +
+    el.innerHTML = `<h2>Free explore</h2><p class="small" style="margin:4px 0 10px">Orbit, zoom and pan the scene. Select any product for its function, lenses, stated relationships and cisco.com source. Lines are relationships stated on cisco.com or splunk.com.</p>` +
       Object.entries(DATA.categories).map(([c, name]) => `<div class="pg">${h(name)}</div><div class="exlist">` +
         Object.entries(PR).filter(([, p]) => p.cat === c).map(([id, p]) => `<button data-id="${id}"><span>${h(p.name)}</span><small>${h(DATA.zones.find(z => z.id === p.zone).label.slice(4))}</small></button>`).join('') + '</div>').join('');
   }
@@ -1444,7 +1536,7 @@ function renderLeft() {
 $('#left').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.dataset.mode) return setMode(b.dataset.mode);
-  if (b.dataset.arch) { S.arch = b.dataset.arch; renderLeft(); rerun(); if (matchMedia('(max-width:900px)').matches) sheet('right'); return; }
+  if (b.dataset.arch) { S.arch = b.dataset.arch; if (DATA.architectures.find(a => a.id === S.arch).layer === 'splunk' && !S.splunk) { S.splunk = true; $('#spT').setAttribute('aria-pressed', true); $('#spT').textContent = 'Splunk layer: on'; R.setLayer(true); setLens(S.lens); } renderLeft(); rerun(); if (matchMedia('(max-width:900px)').matches) sheet('right'); return; }
   if (b.dataset.n) { loadPreset(+b.dataset.n); if (matchMedia('(max-width:900px)').matches) sheet('none'); return; }
   if (b.id === 'cmpT') { S.compare = !S.compare; S.active = 0; S.preset = 0; renderLeft(); return rerun(); }
   if (b.dataset.slot) { S.active = +b.dataset.slot; return renderLeft(); }
@@ -1495,7 +1587,7 @@ function runHTML(r) {
       <div>${h(e.r)}</div><div class="meta"><span>${LENS[e.lens].label}</span>${e.d ? `<span>trust ${e.d > 0 ? '+' : ''}${e.d} → ${e.trust}</span>` : ''}${e.v ? vchip(e.v) : ''}</div></div></li>`).join('')}</ol>
     <p class="small" style="margin-top:6px">Path: ${r.path.map(n => h(nodeName(n))).join(' → ')}${r.stopAt >= 0 ? ' (stopped at ' + h(nodeName(r.path[r.stopAt])) + ')' : ''}. Rules ${r.rules.join(', ')}${r.fallback ? ' — nearest matching rule used' : ''}.</p>
     <h4>Products involved</h4>
-    <div class="prods">${r.products.map(p => `<a href="${PR[p].url}" target="_blank" rel="noopener noreferrer" title="Source: cisco.com">${h(PR[p].s)}</a>`).join('')}</div>
+    <div class="prods">${r.products.map(p => `<a href="${PR[p].url}" target="_blank" rel="noopener noreferrer" title="Source: ${new URL(PR[p].url).host.replace('www.', '')}">${h(PR[p].s)}</a>`).join('')}</div>
     ${sug.length ? `<h4>Change one thing</h4><div class="sug">${sug.map((g, i) => `<button data-sug="${i}"><span>${h(g.l)}</span>${vchip(g.v)}</button>`).join('')}</div>` : ''}
     <h4>Without this control</h4>
     <div class="ctl"><select data-off aria-label="Disable one product and replay"><option value="">All controls active</option>${(r.base || r).products.filter(p => PR[p].cat !== 'net' || PR[p].inspect).map(p => `<option value="${p}" ${S.off === p ? 'selected' : ''}>Without ${h(PR[p].s)}</option>`).join('')}</select>
@@ -1508,7 +1600,7 @@ function renderResults() {
     const { a, nodes, links } = S.topo, src = a.src ? (PR[a.src] ? PR[a.src].url : DATA.sources[a.src]) : null, su = k => PR[k] ? PR[k].url : DATA.sources[k];
     el.innerHTML = `<div class="rhead"><h2>Topology</h2><button class="btn" id="shareR">Copy link</button></div><div class="run">
       <h3 style="font-size:15px">${h(a.name)}</h3><p style="margin:6px 0">${h(a.blurb)}</p>
-      ${src ? `<a class="src" style="margin-top:0" href="${src}" target="_blank" rel="noopener noreferrer">Source: cisco.com ↗</a>` : ''}
+      ${src ? `<a class="src" style="margin-top:0" href="${src}" target="_blank" rel="noopener noreferrer">Source: ${new URL(src).host.replace('www.', '')} ↗</a>` : ''}
       <p class="small" style="margin-top:6px">Conceptual architecture — not a validated design. Positions are illustrative.</p>
       <h4>Building blocks (${nodes.size})</h4><div class="prods">${[...nodes].map(id => `<button class="pb" data-id="${id}">${h(PR[id].s)}</button>`).join('')}</div>
       <h4>How they connect (${links.length})</h4>
@@ -1567,7 +1659,7 @@ function select(id, focusCam) {
       <dl><dt>Zone</dt><dd>${h(DATA.zones.find(z => z.id === p.zone).label)}</dd>
       <dt>Lenses</dt><dd><div class="lchips">${Object.entries(p.roles).map(([l, t]) => `<span style="--c:${LENS[l].color}" title="${h(t)}">${LENS[l].label}: ${h(t)}</span>`).join('') || '<span style="--c:#7385aa">Licensing suite — no runtime role</span>'}</div></dd>
       <dt>Works with</dt><dd class="conn">${conn.map(c => `<div class="row"><button data-id="${c.o}">${h(PR[c.o].s)}</button> <small>— ${h(c.rel)} (<a href="${srcUrl(c.src)}" target="_blank" rel="noopener noreferrer">source</a>)</small></div>`).join('') || '<span class="small">No relationship stated on the pages reviewed.</span>'}</dd></dl>
-      <a class="src" href="${p.url}" target="_blank" rel="noopener noreferrer">Source: cisco.com ↗</a><p class="small">Verified ${DATA.meta.verified}.</p>`;
+      <a class="src" href="${p.url}" target="_blank" rel="noopener noreferrer">Source: ${new URL(p.url).host.replace('www.', '')} ↗</a><p class="small">Verified ${DATA.meta.verified}.</p>`;
   } else {
     const p = PL[id];
     el.innerHTML = `<button class="x" aria-label="Close detail">×</button><div class="cat">${p.kind === 'loc' ? 'Location' : 'Destination'}</div><h3>${h(p.name)}</h3><p>${h(p.fn)}</p><p class="small">Scene element, not a product.</p>`;
@@ -1600,8 +1692,9 @@ function doSearch() {
    RENDERER — WebGL (three.js)
    ===================================================================================== */
 function trustColor(v) { return `hsl(${Math.round(v * 1.35)},72%,58%)`; }
-const lensLinks = lens => lens === 'policy' ? DATA.policyFlow : lens === 'threat' ? DATA.teleFlow
-  : DATA.links.filter(l => l[4] !== 'suite' && PR[l[0]].roles[lens] && PR[l[1]].roles[lens]).map(l => [l[0], l[1]]);
+const isSp = id => PR[id] && PR[id].cat === 'splunk';
+const lensLinks = lens => (lens === 'policy' ? DATA.policyFlow : lens === 'threat' ? DATA.teleFlow
+  : DATA.links.filter(l => l[4] !== 'suite' && PR[l[0]].roles[lens] && PR[l[1]].roles[lens]).map(l => [l[0], l[1]])).filter(l => S.splunk || !(isSp(l[0]) || isSp(l[1])));
 const ringOn = (p, lens) => lens === 'policy' ? (p.pol || []).includes('enforce') : lens === 'data' ? !!p.inspect : false;
 const NODE_IDS = [...Object.keys(PR), ...Object.keys(PL)];
 
@@ -1622,7 +1715,7 @@ function createGL(THREE, OrbitControls) {
   function fitZoom() {
     const c = new THREE.OrthographicCamera(cam.left, cam.right, cam.top, cam.bottom, -300, 600); c.position.copy(HOME_T).add(HOME_O); c.lookAt(HOME_T); c.updateMatrixWorld(); c.updateProjectionMatrix();
     let mx = 0, my = 0; const v = new THREE.Vector3();
-    for (const x of [-45, 28]) for (const y of [0, 15]) for (const z of [-28, 29]) { v.set(x, y, z).project(c); mx = Math.max(mx, Math.abs(v.x)); my = Math.max(my, Math.abs(v.y)); }
+    for (const x of [-45, 28]) for (const y of [0, 24]) for (const z of [-28, 29]) { v.set(x, y, z).project(c); mx = Math.max(mx, Math.abs(v.x)); my = Math.max(my, Math.abs(v.y)); }
     return clamp(.94 / Math.max(mx, my * 1.12), .2, 2);
   }
   function home(instant) { tween(HOME_T, HOME_T.clone().add(HOME_O), fitZoom(), instant); }
@@ -1641,15 +1734,16 @@ function createGL(THREE, OrbitControls) {
   const sun = new THREE.DirectionalLight(0xffffff, 1.3); sun.position.set(30, 60, 20); scene.add(sun);
 
   /* zones */
-  const zoneLbl = [], zoneG = new THREE.Group(); scene.add(zoneG);
+  const zoneLbl = [], spZone = [], zoneG = new THREE.Group(); scene.add(zoneG);
   for (const z of DATA.zones) {
-    const w = z.x[1] - z.x[0], d = z.z[1] - z.z[0], ops = z.id === 'ops';
+    const w = z.x[1] - z.x[0], d = z.z[1] - z.z[0], ops = z.y > 5, sp = z.id === 'splunk';
     const g = new THREE.BoxGeometry(w, .3, d);
-    const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: ops ? 0x16264a : 0x101a33, transparent: true, opacity: ops ? .42 : .92, roughness: .95, depthWrite: !ops }));
+    const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: sp ? 0x3a2414 : ops ? 0x16264a : 0x101a33, transparent: true, opacity: ops ? .42 : .92, roughness: .95, depthWrite: !ops }));
     m.position.set((z.x[0] + z.x[1]) / 2, z.y - .35, (z.z[0] + z.z[1]) / 2); zoneG.add(m);
-    const e = new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({ color: ops ? 0x4a639c : 0x2a3a60 })); e.position.copy(m.position); zoneG.add(e);
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({ color: sp ? 0xb5672f : ops ? 0x4a639c : 0x2a3a60 })); e.position.copy(m.position); zoneG.add(e);
+    if (sp) spZone.push(m, e);
     const el = document.createElement('div'); el.className = 'lbl zone'; el.textContent = z.label; labels.appendChild(el);
-    zoneLbl.push({ el, v: new THREE.Vector3(z.x[0] + .5, z.y, z.z[1] + 1.2) });
+    zoneLbl.push({ el, sp, v: new THREE.Vector3(z.x[0] + .5, z.y, z.z[1] + 1.2) });
   }
   /* ops-plane tethers */
   { const pts = []; for (const [x, z] of [[-18, -8], [23, -8], [-18, 8], [23, 8]]) pts.push(x, 12.6, z, x, 0, z);
@@ -1660,7 +1754,7 @@ function createGL(THREE, OrbitControls) {
   const GEO = {
     net: new THREE.CylinderGeometry(.95, .95, .9, 6), id: new THREE.OctahedronGeometry(.95), netsec: new THREE.BoxGeometry(1.45, 1.05, 1.45),
     cloud: new THREE.IcosahedronGeometry(.95, 0), endpoint: new THREE.CapsuleGeometry(.5, .6, 2, 8), detect: new THREE.DodecahedronGeometry(.9),
-    ot: new THREE.CylinderGeometry(.55, .98, 1.1, 8), suite: new THREE.TorusGeometry(.72, .27, 8, 20)
+    ot: new THREE.CylinderGeometry(.55, .98, 1.1, 8), suite: new THREE.TorusGeometry(.72, .27, 8, 20), splunk: new THREE.CylinderGeometry(1.05, 1.05, 1, 3)
   };
   const P = { b: () => new THREE.BoxGeometry(1, 1, 1), c: () => new THREE.CylinderGeometry(.5, .5, 1, 10), k: () => new THREE.ConeGeometry(.5, 1, 4), s: () => new THREE.SphereGeometry(.5, 12, 8),
     o: () => new THREE.OctahedronGeometry(.5), t: () => new THREE.TetrahedronGeometry(.6), r: () => new THREE.TorusGeometry(.5, .08, 6, 18), i: () => new THREE.IcosahedronGeometry(.5, 0), p: () => new THREE.CapsuleGeometry(.5, 1, 2, 8) };
@@ -1745,7 +1839,14 @@ function createGL(THREE, OrbitControls) {
   /* relationship links: faint base set + brighter lens set */
   const lineSet = (pairs, mat) => { const pts = []; for (const [a, b] of pairs) { const A = POS(a), B = POS(b); pts.push(A[0], A[1] + .5, A[2], B[0], B[1] + .5, B[2]); }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); const l = new THREE.LineSegments(g, mat); if (mat.isLineDashedMaterial) l.computeLineDistances(); return l; };
-  const baseLinks = lineSet(DATA.links.filter(l => l[4] !== 'suite'), new THREE.LineBasicMaterial({ color: 0x3a4d7a, transparent: true, opacity: .28 })); scene.add(baseLinks);
+  const baseLinks = lineSet(DATA.links.filter(l => l[4] !== 'suite' && !isSp(l[0]) && !isSp(l[1])), new THREE.LineBasicMaterial({ color: 0x3a4d7a, transparent: true, opacity: .28 })); scene.add(baseLinks);
+  const spLinks = lineSet(DATA.links.filter(l => isSp(l[0]) || isSp(l[1])), new THREE.LineBasicMaterial({ color: 0xb5672f, transparent: true, opacity: .4 })); scene.add(spLinks);
+  let layer = true, diagram = false;
+  /* a node is shown unless a topology diagram excludes it or it belongs to the hidden Splunk layer */
+  const shown = id => (!diagram || topo.nodes.has(id)) && (layer || !isSp(id) || (!!topo && topo.nodes.has(id)));
+  function refreshVis() { for (const id in nodes) { const on = shown(id); nodes[id].g.visible = on; nodes[id].el.classList.toggle('gone', !on); }
+    spZone.forEach(o => o.visible = layer); zoneLbl.forEach(z => z.el.style.display = diagram || (z.sp && !layer) ? 'none' : ''); spLinks.visible = layer && !topo; dirty = true; }
+  function setLayer(on) { layer = on; refreshVis(); }
   let lensLine = null, selLine = null, flow = [], topo = null, topoLine = null, topoChips = [];
   /* ambient traffic: one instanced mesh */
   const NP = 150, amb = new THREE.InstancedMesh(new THREE.SphereGeometry(.13, 6, 5), new THREE.MeshBasicMaterial({ color: 0xffffff }), NP); amb.frustumCulled = false; scene.add(amb);
@@ -1771,21 +1872,22 @@ function createGL(THREE, OrbitControls) {
   }
   /* topology mode: isolate an architecture, draw its stated relationships and number them */
   function applyTopo() {
-    baseLinks.visible = !topo; if (lensLine) lensLine.visible = !topo;
+    baseLinks.visible = !topo; spLinks.visible = layer && !topo; if (lensLine) lensLine.visible = !topo;
     for (const id in nodes) { const n = nodes[id], on = !topo || topo.nodes.has(id); n.mat.transparent = !on; n.mat.opacity = on ? 1 : .1; n.mat.depthWrite = on; n.mat.needsUpdate = true; if (n.isP) n.ring.visible = on && ringOn(n.p, lens); }
     flow = topo ? topo.links : lensLinks(lens);
   }
   function setTopo(t) {
     const was = topo; topo = t; if (topoLine) { scene.remove(topoLine); topoLine.geometry.dispose(); topoLine = null; } topoChips.forEach(c => c.el.remove()); topoChips = [];
     /* an architecture is re-laid-out as a diagram: most-connected block in the middle, the rest on a ring; everything else is hidden */
-    const diagram = !!t && !t.a.all; for (const k in TOPO_POS) delete TOPO_POS[k];
+    diagram = !!t && !t.a.all; for (const k in TOPO_POS) delete TOPO_POS[k];
     if (diagram) {
       const ids = [...t.nodes], deg = id => t.links.filter(l => l[0] === id || l[1] === id).length;
-      const hub = t.a.hub || ids.slice().sort((a, b) => deg(b) - deg(a))[0], ring = ids.filter(id => id !== hub), R0 = ring.length > 8 ? 15 : 12.5;
+      const hub = t.a.hub || t.a.center || ids.slice().sort((a, b) => deg(b) - deg(a))[0], ring = ids.filter(id => id !== hub), R0 = ring.length > 8 ? 15 : 12.5;
       TOPO_POS[hub] = [0, 0, 0]; ring.forEach((id, i) => { const an = i / ring.length * Math.PI * 2 - Math.PI * .75; TOPO_POS[id] = [Math.cos(an) * R0, 0, Math.sin(an) * R0]; });
     }
-    zoneG.visible = !diagram; zoneLbl.forEach(z => z.el.style.display = diagram ? 'none' : '');
-    for (const id in nodes) { const n = nodes[id], on = !diagram || t.nodes.has(id), p = POS(id); n.g.visible = on; n.el.classList.toggle('gone', !on); n.g.position.set(p[0], p[1], p[2]); n.anchor.set(p[0], p[1] + n.top, p[2]); }
+    zoneG.visible = !diagram;
+    for (const id in nodes) { const n = nodes[id], p = POS(id); n.g.position.set(p[0], p[1], p[2]); n.anchor.set(p[0], p[1] + n.top, p[2]); }
+    refreshVis();
     applyTopo(); dirty = true; if (selected) select(selected);
     if (!t) { if (was) home(false); return; }
     topoLine = lineSet(t.links, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .9 })); scene.add(topoLine);
@@ -1951,7 +2053,7 @@ function createGL(THREE, OrbitControls) {
   canvas.addEventListener('pointerleave', () => tip(null));
   new ResizeObserver(resize).observe(stage); resize(); home(true);
   const screenOf = id => { const b = canvas.getBoundingClientRect(), p = POS(id); tv3.set(p[0], p[1] + .85, p[2]).project(view); return [b.left + (tv3.x * .5 + .5) * b.width, b.top + (-tv3.y * .5 + .5) * b.height]; };
-  return { kind: 'webgl', setLens, setRuns, setTopo, setView, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
+  return { kind: 'webgl', setLens, setRuns, setTopo, setLayer, setView, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
 }
 
 /* =====================================================================================
@@ -1959,19 +2061,19 @@ function createGL(THREE, OrbitControls) {
    ===================================================================================== */
 function createSVG() {
   const svg = $('#svg2d'), NS = 'http://www.w3.org/2000/svg'; svg.removeAttribute('hidden'); $('#gl').hidden = true; $('#nogl').hidden = false; $('#labels').hidden = true;
-  const HOME = { x: -47, y: -57, w: 78, h: 98 }; let vb = { ...HOME }, lens = 'data', rv = [];
+  const HOME = { x: -47, y: -73, w: 78, h: 114 }; let vb = { ...HOME }, lens = 'data', rv = [];
   const setVB = () => svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`); setVB();
-  const M = p => [p[0], p[1] > 5 ? p[2] * .9 - 44 : p[2]];   /* ops plane is drawn as a band above the ground map */
+  const M = p => [p[0], p[1] > 18 ? p[2] * .9 - 62 : p[1] > 5 ? p[2] * .9 - 44 : p[2]];   /* ops plane is drawn as a band above the ground map */
   const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
   const gZ = mk('g'), gL = mk('g'), gLL = mk('g'), gT = mk('g'), gR = mk('g'), gN = mk('g');
-  for (const z of DATA.zones) { const a = M([z.x[0], z.y, z.z[0]]), b = M([z.x[1], z.y, z.z[1]]); mk('rect', { class: 'zone', x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1], rx: .8 }, gZ); mk('text', { class: 'zn', x: a[0] + .5, y: a[1] - .5 }, gZ).textContent = z.label; }
-  for (const l of DATA.links) { if (l[4] === 'suite') continue; const a = M(POS(l[0])), b = M(POS(l[1])); mk('line', { class: 'lk', x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, gL); }
+  for (const z of DATA.zones) { const a = M([z.x[0], z.y, z.z[0]]), b = M([z.x[1], z.y, z.z[1]]); const k = z.id === 'splunk' ? ' spk' : ''; mk('rect', { class: 'zone' + k, x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1], rx: .8 }, gZ); mk('text', { class: 'zn' + k, x: a[0] + .5, y: a[1] - .5 }, gZ).textContent = z.label; }
+  for (const l of DATA.links) { if (l[4] === 'suite') continue; const a = M(POS(l[0])), b = M(POS(l[1])); mk('line', { class: 'lk' + (isSp(l[0]) || isSp(l[1]) ? ' spk' : ''), x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, gL); }
   const SH = { net: '0,-1 .87,-.5 .87,.5 0,1 -.87,.5 -.87,-.5', id: '0,-1.1 1.1,0 0,1.1 -1.1,0', netsec: '-.9,-.9 .9,-.9 .9,.9 -.9,.9', cloud: '0,-1.1 1.05,-.35 .65,.9 -.65,.9 -1.05,-.35',
-    endpoint: '-.6,-1 .6,-1 .9,0 .6,1 -.6,1 -.9,0', detect: '0,-1.1 .78,-.78 1.1,0 .78,.78 0,1.1 -.78,.78 -1.1,0 -.78,-.78', ot: '-.5,-1 .5,-1 1,1 -1,1', suite: '-1.1,-.6 1.1,-.6 1.1,.6 -1.1,.6' };
+    endpoint: '-.6,-1 .6,-1 .9,0 .6,1 -.6,1 -.9,0', detect: '0,-1.1 .78,-.78 1.1,0 .78,.78 0,1.1 -.78,.78 -1.1,0 -.78,-.78', ot: '-.5,-1 .5,-1 1,1 -1,1', suite: '-1.1,-.6 1.1,-.6 1.1,.6 -1.1,.6', splunk: '0,-1.15 1.1,.85 -1.1,.85' };
   const nodes = {};
   for (const id of NODE_IDS) {
     const p = PR[id] || PL[id], isP = !!PR[id], [x, y] = M(p.p);
-    const g = mk('g', { class: 'n' + (isP ? '' : ' place'), transform: `translate(${x} ${y})`, tabindex: 0, role: 'button', 'aria-label': p.name + '. ' + p.fn, 'data-id': id }, gN);
+    const g = mk('g', { class: 'n' + (isP ? '' : ' place') + (isSp(id) ? ' spk' : ''), transform: `translate(${x} ${y})`, tabindex: 0, role: 'button', 'aria-label': p.name + '. ' + p.fn, 'data-id': id }, gN);
     mk('circle', { r: 1.8, fill: 'transparent' }, g);   /* generous hit area */
     if (isP) mk('polygon', { class: 'sh', points: SH[p.cat] }, g); else mk(p.kind === 'loc' ? 'rect' : 'circle', p.kind === 'loc' ? { class: 'sh', x: -.9, y: -.7, width: 1.8, height: 1.4, rx: .3 } : { class: 'sh', r: .8 }, g);
     const ring = isP ? mk('circle', { class: 'mk', r: 1.6, visibility: 'hidden' }, g) : null, dia = isP ? mk('polygon', { class: 'mk', points: '0,-2.6 .6,-2 0,-1.4 -.6,-2', visibility: 'hidden' }, g) : null;
@@ -2037,7 +2139,7 @@ function createSVG() {
     t.links.forEach((l, i) => { const a = M(POS(l[0])), b = M(POS(l[1])); mk('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: '#fff', 'stroke-width': .1, 'stroke-opacity': .85 }, gT);
       if (t.links.length <= 30) { const x = (a[0] + b[0]) / 2, y = (a[1] + b[1]) / 2; mk('circle', { cx: x, cy: y, r: .75, fill: '#0a1020', stroke: '#fff', 'stroke-width': .08 }, gT); mk('text', { x, y: y + .35, 'font-size': .9 }, gT).textContent = i + 1; } });
   }
-  return { kind: 'svg', setLens, setRuns, setTopo, frame,
+  return { kind: 'svg', setLens, setRuns, setTopo, frame, setLayer(on) { svg.classList.toggle('nosp', !on); },
     focus(id) { const [x, y] = M(POS(id)); vb = { x: x - 18, y: y - 18 * HOME.h / HOME.w, w: 36, h: 36 * HOME.h / HOME.w }; setVB(); },
     setFilter(f) { for (const k in nodes) nodes[k].g.classList.toggle('filtered', !!f && !f.has(k)); },
     select(id) { for (const k in nodes) nodes[k].g.classList.toggle('sel', k === id); },
@@ -2084,6 +2186,7 @@ async function boot() {
   $('#viewSel').onchange = e => setView(e.target.value);
   if (!R.setView) { $('#viewSel').disabled = true; $('#viewSel').title = 'Follow views need the 3D scene'; }
   setView(S.view, true);
+  $('#spT').onclick = () => setSplunk(!S.splunk); $('#spT').setAttribute('aria-pressed', S.splunk); $('#spT').textContent = S.splunk ? 'Splunk layer: on' : 'Splunk layer: off';
   $('#speed').onchange = e => S.speed = +e.target.value;
   $('#q').addEventListener('input', doSearch); $('#qcat').addEventListener('change', doSearch);
   $('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { const f = $('#qres button[data-id]'); if (f) f.click(); } if (e.key === 'Escape') { $('#q').value = ''; doSearch(); } });
@@ -2094,11 +2197,12 @@ async function boot() {
     const t = e.target, typing = t.matches('input,select,textarea');
     if (e.key === 'Escape') { if (S.selected) select(null); else sheet('none'); return; }
     if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'l' || e.key === 'L') { setSplunk(!S.splunk); return; }
     if (e.key === 'v' || e.key === 'V') { setView({ orbit: 'third', third: 'first', first: 'orbit' }[S.view]); return; }
     if (e.key >= '1' && e.key <= '5') { setLens(DATA.lenses[+e.key - 1].id); writeHash(); return; }
     if (e.key === ' ' && (!t.matches('button,a,[role=button]') || t.matches('.lbl,.n'))) { e.preventDefault(); $('#bPlay').click(); }
   });
-  window.addEventListener('hashchange', () => { if (readHash()) { setView(S.view, true); $$('.modes button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === S.mode)); setLens(S.lens); renderLeft(); rerun(); } });
+  window.addEventListener('hashchange', () => { if (readHash()) { setView(S.view, true); $('#spT').setAttribute('aria-pressed', S.splunk); $('#spT').textContent = S.splunk ? 'Splunk layer: on' : 'Splunk layer: off'; $$('.modes button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === S.mode)); setLens(S.lens); renderLeft(); rerun(); } });
 
   /* render loop: paused while the tab is hidden */
   let last = performance.now(), raf = 0;
@@ -2106,7 +2210,7 @@ async function boot() {
   document.addEventListener('visibilitychange', () => { cancelAnimationFrame(raf); if (!document.hidden) { last = performance.now(); raf = requestAnimationFrame(loop); } });
   raf = requestAnimationFrame(loop);
   /* test / automation hook: engine only, no network */
-  window.__LN = { DATA, S, setView, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
+  window.__LN = { DATA, S, setSplunk, setView, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
 }
 boot();
 </script>

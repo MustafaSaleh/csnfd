@@ -5,7 +5,7 @@ where **identity** is verified, where **policy** is authored, distributed and en
 stopped, and how **trust** is re-evaluated through a session.
 
 Independent educational visualization. Not an official Cisco product. Product names are trademarks of Cisco Systems, Inc.
-No Cisco logos, icons or artwork are used. Content verified against cisco.com on 10 November 2026.
+No Cisco or Splunk logos, icons or artwork are used. Content verified against cisco.com and splunk.com on 10 November 2026.
 
 ## Run it
 
@@ -21,12 +21,20 @@ with the source link beside it. The architecture list is `DATA.architectures`.
 Human actors (employee, admin, executive, contractor, guest, insider, external attacker) are walking 3D figures with
 their name and live trust score above them; the attacker is a red hooded figure on a dashed path.
 
+**Splunk layer** (toggle in the header, or `L`): a seventh plane with the Splunk platform, Enterprise Security, SOAR,
+Attack Analyzer, Observability Cloud, ITSI and AppDynamics. When it is on, scenarios show where Splunk takes part:
+firewall, network-analytics and OT-sensor events are ingested by the platform, Enterprise Security correlates and
+prioritises detections, SOAR automates response tasks, Attack Analyzer examines phishing links and files, and the
+observability products join ThousandEyes when an application is slow. In this model Splunk observes and analyses; it
+never changes a verdict, and switching the layer off leaves every verdict the same. Two Topology views cover it:
+"Splunk for security operations" and "Splunk and Cisco Observability".
+
 Three camera views, switched from the playback bar or with `V`: **Overview** (orbit, zoom, pan), **3rd person** (camera
 follows behind the actor) and **1st person** (through the actor's eyes). The follow views need a running scenario and
 the 3D scene; in compare mode they follow scenario A. The reset-view button returns to Overview.
 
 Keyboard: `Tab` through nodes, `Enter` opens the panel, `Space` plays/pauses, `1`–`5` switches lens, `V` cycles the
-camera view, `Esc` closes.
+camera view, `L` toggles the Splunk layer, `Esc` closes.
 
 ## Editing
 
@@ -61,6 +69,18 @@ edit. The tables below were generated from that object.
 - **Data loss prevention, remote browser isolation, CASB, SWG** are not named on the pages read. Outcomes such as "sensitive
   upload denied" or "restricted session, for example isolated or read-only" are illustrative policy outcomes and are not
   presented as named product features.
+- **Splunk** has no product pages on cisco.com (the URLs tried returned 404; Cisco's product index links out to
+  splunk.com). Splunk product functions therefore come from splunk.com. Lines between Splunk and Cisco products are
+  drawn only where a Cisco or Splunk page states them: Firewall, Hybrid Mesh Firewall, Secure Network Analytics, Cyber
+  Vision, Industrial Threat Defense, AI Defense, Nexus, Talos (Attack Analyzer), ThousandEyes (Observability Cloud,
+  AppDynamics) and AI Canvas (ITSI).
+- **Not drawn for Splunk**: Cisco XDR, Duo, Secure Access, Security Cloud Control and Identity Intelligence do not
+  mention Splunk on the pages read, so there is no XDR ↔ Enterprise Security line and those products do not feed the
+  Splunk layer in scenarios. ThousandEyes ↔ ITSI appears only as an image caption and link label, so it is not drawn.
+  Secure Client's Splunk reference is only a link slug. No dedicated Cisco–Splunk integration page could be loaded
+  from splunk.com (404).
+- **Splunk checkpoints are illustrative**: which Cisco events reach Splunk, and what Enterprise Security or SOAR do
+  with them, depends on configured data sources, detections and playbooks.
 - **No performance numbers, specs or licence details** are shown anywhere.
 - **Not drawn** for lack of an explicit statement: Meraki ↔ Secure Routers, Multicloud Defense ↔ Secure Workload,
   XDR ↔ ISE, AI Defense ↔ XDR, Hypershield ↔ Secure Workload, Duo ↔ Secure Client.
@@ -75,7 +95,7 @@ Verified in a headless browser: zero console errors; all 30 presets play to a ve
 "without this control" and link sharing round-trip; every product panel links to cisco.com. Frame rate was not measured
 on real GPUs or phones.
 
-## Products included (34)
+## Products included (41)
 
 | Product | Category | Function (own words) | Source |
 |---|---|---|---|
@@ -112,9 +132,16 @@ on real GPUs or phones.
 | Cisco Secure Equipment Access | Industrial (OT) security | Zero trust remote access to industrial assets; cisco.com states it is now part of Cyber Vision. *The product page states: “Cisco Secure Equipment Access is now part of Cisco Cyber Vision.” Capabilities shown here are those listed for remote access on the Cyber Vision page.* | https://www.cisco.com/site/us/en/products/security/industrial-security/secure-equipment-access/index.html |
 | Cisco User Protection Suite | Suites | Suite packaging Secure Access, Duo and Email Threat Defense; the Advantage tier adds Secure Endpoint and ISE. | https://www.cisco.com/site/us/en/products/security/user-protection/index.html |
 | Cisco Cloud Protection Suite | Suites | Suite for adopting Hybrid Mesh Firewall: Secure Workload, Hypershield, Secure Firewall, Multicloud Defense and Security Cloud Control. | https://www.cisco.com/site/us/en/products/security/cloud-protection/index.html |
+| Splunk Platform (Cloud Platform / Enterprise) | Splunk (data, security analytics, observability) | Data platform to search, analyse, visualise and act on machine data, with streaming ingestion and federated search. | https://www.splunk.com/en_us/products/splunk-cloud-platform.html |
+| Splunk Enterprise Security | Splunk (data, security analytics, observability) | Threat detection, investigation and response platform combining SIEM, SOAR, behaviour analytics and AI-driven alert prioritisation. | https://www.splunk.com/en_us/products/enterprise-security.html |
+| Splunk SOAR | Splunk (data, security analytics, observability) | Orchestrates security workflows and automates response tasks through playbooks, integrations and case management. | https://www.splunk.com/en_us/products/splunk-security-orchestration-and-automation.html |
+| Splunk Attack Analyzer | Splunk (data, security analytics, observability) | Automated analysis of suspected malware and credential phishing that follows the attack chain to a verdict. | https://www.splunk.com/en_us/products/attack-analyzer.html |
+| Splunk Observability Cloud | Splunk (data, security analytics, observability) | OpenTelemetry-native full-stack observability: application, infrastructure, user-experience, database and log monitoring. | https://www.splunk.com/en_us/products/observability-cloud.html |
+| Splunk IT Service Intelligence | Splunk (data, security analytics, observability) | AIOps service intelligence that correlates alerts into episodes and tracks service health against business priorities. | https://www.splunk.com/en_us/products/it-service-intelligence.html |
+| Splunk AppDynamics | Splunk (data, security analytics, observability) | Application observability for hybrid and on-premises apps that links performance to business metrics, with runtime application security. | https://www.splunk.com/en_us/products/splunk-appdynamics.html |
 | Cisco Breach Protection Suite | Suites | Suite unified by XDR with Email Threat Defense and Secure Endpoint; the Advantage tier adds Secure Network Analytics. | https://www.cisco.com/site/us/en/products/security/breach-protection/index.html |
 
-## Relationships drawn (87)
+## Relationships drawn (104)
 
 Each line is a relationship stated on the cisco.com page given as its source.
 
@@ -207,6 +234,23 @@ Each line is a relationship stated on the cisco.com page given as its source.
 | Breach Protection | Secure Endpoint | Included in the suite | https://www.cisco.com/site/us/en/products/security/breach-protection/index.html |
 | Breach Protection | Network Analytics | Included in the Advantage tier | https://www.cisco.com/site/us/en/products/security/breach-protection/index.html |
 | Breach Protection | Talos | Threat intelligence from Talos | https://www.cisco.com/site/us/en/products/security/breach-protection/index.html |
+| Firewall | Splunk Platform | Firewall Threat Defense customers who subscribe to Splunk can ingest extra firewall log data (terms apply) | https://www.cisco.com/site/us/en/products/security/firewalls/index.html |
+| Hybrid Mesh Firewall | Splunk Platform | Splunk is a listed integration for additional log data | https://www.cisco.com/site/us/en/solutions/security/hybrid-mesh-firewall/index.html |
+| Network Analytics | Splunk Platform | Secure Network Analytics with Splunk for network monitoring and threat detection | https://www.cisco.com/site/us/en/products/security/security-analytics/secure-network-analytics/index.html |
+| Cyber Vision | Splunk Platform | Cyber Vision app for Splunk provides OT dashboards | https://www.cisco.com/site/us/en/products/security/industrial-security/cyber-vision/index.html |
+| Industrial Threat Defense | Splunk Platform | Unified view of IT and OT data in Splunk | https://www.cisco.com/site/us/en/products/security/industrial-security/index.html |
+| AI Defense | Splunk Platform | Splunk data can be used for additional AI security insights | https://www.cisco.com/site/us/en/products/security/ai-defense/index.html |
+| Nexus | Splunk Platform | Nexus Dashboard integrates Splunk data; native Splunk analytics in Nexus One | https://www.cisco.com/site/us/en/products/networking/cloud-networking/nexus-one/index.html |
+| Talos | Attack Analyzer | Talos threat intelligence is available in Splunk Attack Analyzer | https://www.cisco.com/site/us/en/products/security/talos/index.html |
+| ThousandEyes | Observability Cloud | Splunk Observability and ThousandEyes are presented together as Cisco Observability | https://www.cisco.com/site/us/en/products/observability/index.html |
+| ThousandEyes | AppDynamics | Combine application-layer and network-layer intelligence for one view of performance | https://www.cisco.com/site/us/en/products/networking/software/internet-cloud-intelligence/index.html |
+| AgenticOps | ITSI | ITSI lists a Cisco AI Canvas integration | https://www.splunk.com/en_us/products/it-service-intelligence.html |
+| Enterprise Security | Splunk SOAR | SOAR is integrated with Enterprise Security as one workflow | https://www.splunk.com/en_us/products/enterprise-security.html |
+| Enterprise Security | Splunk Platform | Listed as related products; federated search and analytics over platform data | https://www.splunk.com/en_us/products/splunk-cloud-platform.html |
+| Attack Analyzer | Splunk SOAR | Direct integration for automated analysis and response | https://www.splunk.com/en_us/products/attack-analyzer.html |
+| Attack Analyzer | Enterprise Security | Enterprise Security includes native automated threat analysis | https://www.splunk.com/en_us/products/attack-analyzer.html |
+| Observability Cloud | Splunk Platform | Log analytics correlates logs stored in the Splunk platform with metrics and traces | https://www.splunk.com/en_us/products/observability-cloud.html |
+| ITSI | Splunk Platform | ITSI runs on Splunk Cloud Platform and Splunk Enterprise | https://www.splunk.com/en_us/products/it-service-intelligence.html |
 
 ## Rule table
 
@@ -338,6 +382,13 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | Z1 | always; needs earlier telemetry | XDR | after path | Cross-domain correlation → Telemetry correlated into one prioritised incident with guided response | -5 (Incident opened) | — |
 | Z2 | behaviour any of {scan, ransom, exfil}; who ∉ {attacker}; needs earlier telemetry | XDR | after path | Automated response → Containment action triggered to stop lateral movement | — | CONTAIN |
 | Z3 | behaviour any of {ransom}; needs earlier telemetry | XDR | after path | Recovery → Affected host can be restored from a last-known-good snapshot | — | — |
+| SP1 | always | Splunk Platform | after path | Data platform → Logs and events from the connected Cisco sources are ingested, searchable and retained | — | — |
+| SP2 | always | Enterprise Security | after path | SIEM detection → Events correlated and prioritised with risk-based alerting, mapped to MITRE ATT&CK | — | — |
+| SP3 | always | Splunk SOAR | after path | Response automation → Playbook automates enrichment, case creation and response tasks for the analyst | — | — |
+| SP4 | behaviour any of {phish, malfile} | Attack Analyzer | after path | Automated threat analysis → Suspected link or file followed through its attack chain to a verdict, using Talos intelligence | — | — |
+| SP5 | behaviour any of {slow} | Observability Cloud | after path | Full-stack observability → Application, infrastructure and user-experience telemetry reviewed alongside the ThousandEyes network view | — | — |
+| SP6 | destination ∈ {dcapp, cloudapp}; behaviour any of {slow} | AppDynamics | after path | Application-layer view → Application performance combined with network-path data to separate app faults from network faults | — | — |
+| SP7 | behaviour any of {slow} | ITSI | after path | Service health → Related alerts grouped into one episode with a service health score for the affected service | — | — |
 | O4 | behaviour any of {push} | Security Cloud Control | after path | Policy authoring → Intent defined once in a single management plane | — | — |
 | O5-fw | behaviour any of {push} | Firewall | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — |
 | O5-mcd | behaviour any of {push} | Multicloud Defense | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — |
