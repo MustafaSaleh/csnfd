@@ -29,6 +29,11 @@ observability products join ThousandEyes when an application is slow. In this mo
 never changes a verdict, and switching the layer off leaves every verdict the same. Two Topology views cover it:
 "Splunk for security operations" and "Splunk and Cisco Observability".
 
+**Full screen** (button at the right of the playback bar, or `F`; `Esc` exits): the scene fills the window, with the
+side panels and footer hidden, and the browser enters full screen where it is allowed. The header, lenses, playback
+bar, legend and the checkpoint and verdict captions stay. In viewers that block browser full screen the layout still
+expands to the whole window.
+
 **Guided tour** (header button **Tour**, or `T`; offered once on a first visit): eleven steps that spotlight each part
 of the tool and drive it as they go — the scene, presets, playback, lenses, the result panel, removing controls, the
 builder, camera views, topology, the header switches, and share/export. Steps live in `DATA.tour`.
@@ -69,7 +74,7 @@ the 3D scene; in split view each half follows its own actor. The reset-view butt
 fallback both follow views keep the actor centred.
 
 Keyboard: `Tab` through nodes, `Enter` opens the panel, `Space` plays/pauses, `1`–`5` switches lens, arrow keys rotate the overview, `Shift`+arrows pan, `+`/`-` zoom, `0` resets, `V`
-cycles the camera view, `T` starts the tour, `L` toggles the Splunk layer, `X` visual effects, `M` sound effects, `N` music, `Esc` closes.
+cycles the camera view, `F` full screen, `T` starts the tour, `L` toggles the Splunk layer, `X` visual effects, `M` sound effects, `N` music, `Esc` closes.
 
 ## Editing
 

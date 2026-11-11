@@ -266,6 +266,11 @@ footer{font-size:10.5px;color:var(--tx3);padding:5px 14px;background:var(--bg2);
   #report table{width:100%;border-collapse:collapse;margin:4px 0} #report th,#report td{border:1px solid #bbb;padding:3px 5px;text-align:left;vertical-align:top} #report th{background:#eee} #report tr{break-inside:avoid}
   #report .fine{font-size:10px;color:#444;margin-top:12px} #report a{color:#111;word-break:break-all}
 }
+/* full screen: only the header and the scene remain */
+body.full main{grid-template-columns:minmax(0,1fr)!important}
+body.full #left, body.full #right, body.full footer, body.full #mobnav{display:none!important}
+body.full #stage{grid-column:1}
+.tp button[aria-pressed=true]{background:#ffffff1c}
 #toast{position:fixed;left:50%;bottom:128px;transform:translateX(-50%);background:#16223f;border:1px solid var(--line2);border-radius:8px;padding:7px 12px;font-size:12.5px;z-index:60;max-width:90vw}
 #mobnav{display:none}
 
@@ -348,7 +353,8 @@ body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
       <select id="speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
       <span class="sep"></span>
       <select id="viewSel" aria-label="Camera view" title="Camera view (V)"><option value="orbit">Overview</option><option value="third">3rd person</option><option value="first">1st person</option></select>
-      <button id="bView" aria-label="Reset view" title="Reset view"></button>
+      <button id="bView" aria-label="Reset view" title="Reset view (0)"></button>
+      <button id="bFull" aria-label="Full screen" aria-pressed="false" title="Full screen (F)"></button>
     </div>
     <div id="fxflash" aria-hidden="true"></div>
     <div id="fxstamp" aria-hidden="true"></div>
@@ -1639,8 +1645,9 @@ function readHash() {
 /* =====================================================================================
    UI
    ===================================================================================== */
-const ICON = { restart: 'M5 4v12M17 4 8 10l9 6z', play: 'M6 4l11 6-11 6z', pause: 'M6 4h3v12H6zM11 4h3v12h-3z', step: 'M4 4l8 6-8 6zM14 4h3v12h-3z', end: 'M3 4l6 6-6 6zM10 4l6 6-6 6z', view: 'M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5' };
-const ico = n => `<svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="${ICON[n]}" fill="${n === 'view' ? 'none' : 'currentColor'}" stroke="currentColor" stroke-width="${n === 'view' ? 1.8 : 0}" stroke-linejoin="round"/></svg>`;
+const ICON = { restart: 'M5 4v12M17 4 8 10l9 6z', play: 'M6 4l11 6-11 6z', pause: 'M6 4h3v12H6zM11 4h3v12h-3z', step: 'M4 4l8 6-8 6zM14 4h3v12h-3z', end: 'M3 4l6 6-6 6zM10 4l6 6-6 6z', view: 'M10 2v4M10 14v4M2 10h4M14 10h4M10 7.6a2.4 2.4 0 1 0 0 4.8a2.4 2.4 0 0 0 0-4.8', full: 'M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5', unfull: 'M8 3v5H3M12 3v5h5M17 12h-5v5M3 12h5v5' };
+const LINE_ICON = { view: 1, full: 1, unfull: 1 };   /* drawn as outlines rather than filled shapes */
+const ico = n => `<svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="${ICON[n]}"  fill="${LINE_ICON[n] ? 'none' : 'currentColor'}" stroke="currentColor" stroke-width="${LINE_ICON[n] ? 1.8 : 0}" stroke-linejoin="round"/></svg>`;
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 3200); }
 const vchip = v => `<span class="vc v-${v}">${DATA.verdicts[v].label}</span>`;
 
@@ -1886,6 +1893,14 @@ function tip(id, x, y) {
 }
 function sheet(n) { document.body.dataset.sheet = n; $$('#mobnav button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sheet === n)); }
 
+/* ---- full screen: the scene fills the window (side panels and footer hidden) and the browser goes full screen where it is allowed.
+   In viewers that block the Fullscreen API the layout still expands to the whole window. ---- */
+function setFull(on) {
+  document.body.classList.toggle('full', on); const b = $('#bFull'); b.setAttribute('aria-pressed', on); b.setAttribute('aria-label', on ? 'Exit full screen' : 'Full screen'); b.innerHTML = ico(on ? 'unfull' : 'full');
+  if (on) { sheet('none'); try { const el = document.documentElement, p = (el.requestFullscreen || el.webkitRequestFullscreen || (() => { })).call(el); if (p && p.catch) p.catch(() => { }); } catch (e) { } }
+  else if (document.fullscreenElement || document.webkitFullscreenElement) { try { const p = (document.exitFullscreen || document.webkitExitFullscreen).call(document); if (p && p.catch) p.catch(() => { }); } catch (e) { } }
+  if (S.view === 'orbit' && !S.topo) setTimeout(() => R.resetView(), 180);   /* re-fit the scene to the new stage size */
+}
 /* ---- guided tour ---- */
 const TOUR_ACT = {
   start() { setView('orbit', true); if (S.mode !== 'presets') setMode('presets'); loadPreset(1); },
@@ -1907,6 +1922,7 @@ function tourPlace() {
   card.style.left = clamp(x, 8, vw - cw - 8) + 'px'; card.style.top = clamp(y, 8, vh - ch - 8) + 'px';
 }
 function tourGo(i) {
+  if (document.body.classList.contains('full')) setFull(false);   /* the tour points at the side panels */
   const n = DATA.tour.length; if (i < 0) i = 0; if (i >= n) return tourEnd();
   TOUR.i = i; const st = DATA.tour[i]; $('#tourHint').hidden = true; if (st.act) TOUR_ACT[st.act]();
   if (matchMedia('(max-width:900px)').matches) sheet(st.sheet || 'none');
@@ -2593,7 +2609,7 @@ async function boot() {
   $('#foot').textContent = DATA.meta.footer.replace('{date}', DATA.meta.verified);
   $('#lenses').innerHTML = DATA.lenses.map((l, i) => `<button role="radio" data-lens="${l.id}" style="--c:${l.color}" aria-checked="false" title="${h(l.blurb)}"><i></i>${l.label}<kbd>${i + 1}</kbd></button>`).join('');
   $('#qcat').innerHTML = '<option value="">All categories</option>' + Object.entries(DATA.categories).map(([k, v]) => `<option value="${k}">${h(v)}</option>`).join('');
-  for (const [id, n] of [['bRestart', 'restart'], ['bPlay', 'play'], ['bStep', 'step'], ['bEnd', 'end'], ['bView', 'view']]) $('#' + id).innerHTML = ico(n);
+  for (const [id, n] of [['bRestart', 'restart'], ['bPlay', 'play'], ['bStep', 'step'], ['bEnd', 'end'], ['bView', 'view'], ['bFull', 'full']]) $('#' + id).innerHTML = ico(n);
 
   const forceSvg = /render=svg/.test(location.search + location.hash);
   if (!forceSvg) {
@@ -2636,6 +2652,8 @@ async function boot() {
   const wake = () => { if (SND.st.sfx || SND.st.music) SND.init(); };
   document.addEventListener('pointerdown', wake, { capture: true }); document.addEventListener('keydown', wake, { capture: true });
   document.addEventListener('click', e => { if (e.target.closest('button, .chip, select') && !e.target.closest('#sndT, #musT')) SND.play('ui'); }, { capture: true });
+  $('#bFull').onclick = () => setFull(!document.body.classList.contains('full'));
+  for (const ev of ['fullscreenchange', 'webkitfullscreenchange']) document.addEventListener(ev, () => { if (!(document.fullscreenElement || document.webkitFullscreenElement) && document.body.classList.contains('full')) setFull(false); });   /* Esc in the browser's own full screen */
   $('#tourT').onclick = () => tourGo(0); $('#tourStart').onclick = () => tourGo(0);
   $('#tourNo').onclick = () => { $('#tourHint').hidden = true; try { localStorage.setItem('ln-tour', '1'); } catch (e) { } };
   $('#tourNext').onclick = () => tourGo(TOUR.i + 1); $('#tourBack').onclick = () => tourGo(TOUR.i - 1); $('#tourSkip').onclick = tourEnd;
@@ -2655,7 +2673,7 @@ async function boot() {
       if (e.key === 'Escape') return tourEnd(); if (e.key === 'ArrowRight') { e.preventDefault(); return tourGo(TOUR.i + 1); } if (e.key === 'ArrowLeft') { e.preventDefault(); return tourGo(TOUR.i - 1); }
       if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Tab') return;
       return; }
-    if (e.key === 'Escape') { if (S.selected) select(null); else sheet('none'); return; }
+    if (e.key === 'Escape') { if (document.body.classList.contains('full')) setFull(false); else if (S.selected) select(null); else sheet('none'); return; }
     if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
     if (!t.closest('.panel') && !t.closest('#top')) {   /* camera from the keyboard: arrows rotate, Shift+arrows pan, + and - zoom, 0 resets */
       const ar = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
@@ -2664,6 +2682,7 @@ async function boot() {
       if ((e.key === '-' || e.key === '_') && R.nudge) { R.nudge('zoom', 1 / 1.18); return; }
       if (e.key === '0') { $('#bView').click(); return; }
     }
+    if (e.key === 'f' || e.key === 'F') { setFull(!document.body.classList.contains('full')); return; }
     if (e.key === 't' || e.key === 'T') { tourGo(0); return; }
     if (e.key === 'x' || e.key === 'X') { $('#fxT').click(); return; }
     if (e.key === 'm' || e.key === 'M') { $('#sndT').click(); return; }
@@ -2681,7 +2700,7 @@ async function boot() {
   document.addEventListener('visibilitychange', () => { SND.hidden(document.hidden); cancelAnimationFrame(raf); if (!document.hidden) { last = performance.now(); raf = requestAnimationFrame(loop); } });
   raf = requestAnimationFrame(loop);
   /* test / automation hook: engine only, no network */
-  window.__LN = { DATA, S, SND, VFX, TOUR, tourGo, tourEnd, exportData, exportMarkdown, reportHTML, doExport, setSplunk, setView, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
+  window.__LN = { DATA, S, SND, VFX, setFull, TOUR, tourGo, tourEnd, exportData, exportMarkdown, reportHTML, doExport, setSplunk, setView, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
 }
 boot();
 </script>
