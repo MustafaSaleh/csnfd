@@ -29,12 +29,19 @@ observability products join ThousandEyes when an application is slow. In this mo
 never changes a verdict, and switching the layer off leaves every verdict the same. Two Topology views cover it:
 "Splunk for security operations" and "Splunk and Cisco Observability".
 
+**Sound**: two header switches, **SFX** (`M`) and **Music** (`N`), remembered between visits. Every sound is synthesised
+in the browser with the Web Audio API, so there are no audio files and no extra downloads. Effects: a blip per hop, a
+tone per checkpoint pitched by its lens, rising or falling notes when trust moves, a distinct signature for each verdict
+(ALLOW, ALLOW WITH LIMITS, STEP-UP, BLOCK, CONTAIN), and cues for telemetry, the Splunk layer, lens, view and topology
+changes. Music is a generative ambient bed that turns darker when the session trust score drops. Sound starts on the
+first click or key press (browsers do not allow it earlier) and pauses while the tab is hidden.
+
 Three camera views, switched from the playback bar or with `V`: **Overview** (orbit, zoom, pan), **3rd person** (camera
 follows behind the actor) and **1st person** (through the actor's eyes). The follow views need a running scenario and
 the 3D scene; in compare mode they follow scenario A. The reset-view button returns to Overview.
 
 Keyboard: `Tab` through nodes, `Enter` opens the panel, `Space` plays/pauses, `1`–`5` switches lens, `V` cycles the
-camera view, `L` toggles the Splunk layer, `Esc` closes.
+camera view, `L` toggles the Splunk layer, `M` sound effects, `N` music, `Esc` closes.
 
 ## Editing
 
