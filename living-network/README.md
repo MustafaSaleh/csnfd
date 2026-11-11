@@ -29,12 +29,32 @@ observability products join ThousandEyes when an application is slow. In this mo
 never changes a verdict, and switching the layer off leaves every verdict the same. Two Topology views cover it:
 "Splunk for security operations" and "Splunk and Cisco Observability".
 
+**Guided tour** (header button **Tour**, or `T`; offered once on a first visit): eleven steps that spotlight each part
+of the tool and drive it as they go — the scene, presets, playback, lenses, the result panel, removing controls, the
+builder, camera views, topology, the header switches, and share/export. Steps live in `DATA.tour`.
+
+**Export** (button in the result and topology panels): a printable report for "Save as PDF" (scene image, verdict,
+trust table, decision timeline, products with source URLs, disclaimer), the scene as a PNG with its labels, the report
+as Markdown, or the run as JSON. Viewers that sandbox the page may block downloads and printing; opening the file
+directly works.
+
+**Compare** runs two scenarios in a **split view**: each half has its own viewport, labels, follow camera, effects,
+verdict stamp and verdict sound. The "Split view" button in the result header switches back to one shared scene.
+
+**Without these controls**: tap one product, several, or a whole suite to remove them and replay; the result shows
+the verdict with all controls against the verdict without them. Illustrative.
+
+**Fog and bloom**: a light depth haze and a restrained glow are on when visual effects are on, and are dropped
+automatically if the frame rate does not hold around 50 fps or better over the first seconds. Bloom is not used in
+split view.
+
 **Visual effects** (header switch **FX**, or `X`; remembered between visits; off by default when the system asks for
 reduced motion): an arrival ring at every hop, a pulse and sparks when a product checks the session, triple red rings
 on a detection, floating "+10 trust" / "-25 trust" pop-ups above the actor, and a signature for each verdict — a light
 pillar and rising sparks for ALLOW, a shield dome, shockwave and camera shake for BLOCK, imploding rings and a cage
 dome for CONTAIN, pulsing amber rings for STEP-UP — plus a stamp ("ACCESS GRANTED", "BLOCKED", "CONTAINED" …) and a
-screen-edge flash. The stamp and flash also work in the 2D fallback; the world effects need the 3D scene.
+screen-edge flash. The 2D fallback shows the stamp and flash plus simpler rings and pop-ups, and draws Topology
+architectures as the same diagram layout.
 
 **Sound**: two header switches, **SFX** (`M`) and **Music** (`N`), remembered between visits. Every sound is synthesised
 in the browser with the Web Audio API, so there are no audio files and no extra downloads. Effects: a blip per hop, a
@@ -45,10 +65,11 @@ first click or key press (browsers do not allow it earlier) and pauses while the
 
 Three camera views, switched from the playback bar or with `V`: **Overview** (orbit, zoom, pan), **3rd person** (camera
 follows behind the actor) and **1st person** (through the actor's eyes). The follow views need a running scenario and
-the 3D scene; in compare mode they follow scenario A. The reset-view button returns to Overview.
+the 3D scene; in split view each half follows its own actor. The reset-view button returns to Overview. In the 2D
+fallback both follow views keep the actor centred.
 
-Keyboard: `Tab` through nodes, `Enter` opens the panel, `Space` plays/pauses, `1`–`5` switches lens, `V` cycles the
-camera view, `L` toggles the Splunk layer, `X` visual effects, `M` sound effects, `N` music, `Esc` closes.
+Keyboard: `Tab` through nodes, `Enter` opens the panel, `Space` plays/pauses, `1`–`5` switches lens, arrow keys rotate the overview, `Shift`+arrows pan, `+`/`-` zoom, `0` resets, `V`
+cycles the camera view, `T` starts the tour, `L` toggles the Splunk layer, `X` visual effects, `M` sound effects, `N` music, `Esc` closes.
 
 ## Editing
 
@@ -63,7 +84,8 @@ edit. The tables below were generated from that object.
    location adjustments).
 3. The verdict is the most severe one argued for by a fired rule. Outcomes are a *typical zero-trust policy outcome*, not
    guaranteed product behaviour; the page says so beside every verdict.
-4. "Without this control" removes one product's rules and replays, to show the gap. It is labelled illustrative.
+4. "Without these controls" removes the rules of one or more products (or a whole suite) and replays, to show the gap.
+   It is labelled illustrative.
 
 ## Not verified, so left out or hedged
 
@@ -104,10 +126,45 @@ edit. The tables below were generated from that object.
 - Cisco.com pages have "show more" sections that were not expanded when read, so a relationship may exist on a page and
   still be missing here.
 
-Verified in a headless browser: zero console errors; all 30 presets play to a verdict; every valid picker combination
-(about 206,000 including behaviour sets and removed controls) returns a path, a timeline and a verdict; compare,
-"without this control" and link sharing round-trip; every product panel links to cisco.com. Frame rate was not measured
-on real GPUs or phones.
+## Backlog: known gaps to come back to
+
+Nothing below is done yet. It is kept here so it can be picked up later.
+
+**Verification**
+- Tested by automated checks in headless Chromium, and by hand by the owner. Not yet measured: frame rate on a range
+  of real GPUs and mid-range phones (the brief asks for 60 fps desktop, 30 fps phone).
+- Safari and Firefox have not been checked systematically. Safari is the likeliest to differ on audio and some styling.
+- The rule table is a reading of public pages. It has not been reviewed by a Cisco or Splunk engineer.
+- cisco.com pages have "show more" sections that were not expanded when read, so some stated relationships may be
+  missing. The "verified on" date is fixed text; there is no process to re-check the pages.
+
+**Content**
+- Splunk is passive: it never changes a verdict. Cisco XDR, Duo, Secure Access, Security Cloud Control and Identity
+  Intelligence do not feed the Splunk layer, because the pages read do not state those integrations.
+- No licensing view: nothing shows which suite or tier a scenario needs.
+- No "exploit" or "denial of service" behaviour, and no multi-stage attack that chains several steps in one run.
+- Products listed on cisco.com but out of scope: Secure Web Appliance, Attack Surface Management, Secure Malware
+  Analytics, Security Analytics and Logging, Telemetry Broker, Secure DDoS Protection, Vulnerability Management,
+  Meraki Systems Manager, Isovalent, Catalyst Center.
+- English only.
+
+**For real use**
+- Not published: it lives on a feature branch in a subfolder. A hosted link (for example GitHub Pages) and a pull
+  request to the default branch are still to do.
+- No video export; the PDF is produced through the browser's print dialog rather than generated directly.
+- No presenter script or speaker notes alongside the tour.
+- One large HTML file; the automated checks used during development are not committed to the repository.
+
+**Smaller limits of what is built**
+- Split view shows spark particles from both scenarios on both sides (rings, domes and pillars are per side).
+- Bloom is off in split view, and the scene image export in the 2D fallback is not available.
+- Keyboard camera control applies to the overview; the follow views are driven by the actor.
+- The 2D fallback has no rotation and no walking figures.
+
+Checked in a headless browser: zero console errors; all 30 presets play to a verdict; every valid picker combination
+(about 206,000 including behaviour sets and removed controls) returns a path, a timeline and a verdict; split-view
+compare, removing controls, link sharing, the tour, and each export format work; every product panel links to its
+source page.
 
 ## Products included (41)
 
