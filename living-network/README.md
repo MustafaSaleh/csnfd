@@ -29,6 +29,13 @@ observability products join ThousandEyes when an application is slow. In this mo
 never changes a verdict, and switching the layer off leaves every verdict the same. Two Topology views cover it:
 "Splunk for security operations" and "Splunk and Cisco Observability".
 
+**Visual effects** (header switch **FX**, or `X`; remembered between visits; off by default when the system asks for
+reduced motion): an arrival ring at every hop, a pulse and sparks when a product checks the session, triple red rings
+on a detection, floating "+10 trust" / "-25 trust" pop-ups above the actor, and a signature for each verdict — a light
+pillar and rising sparks for ALLOW, a shield dome, shockwave and camera shake for BLOCK, imploding rings and a cage
+dome for CONTAIN, pulsing amber rings for STEP-UP — plus a stamp ("ACCESS GRANTED", "BLOCKED", "CONTAINED" …) and a
+screen-edge flash. The stamp and flash also work in the 2D fallback; the world effects need the 3D scene.
+
 **Sound**: two header switches, **SFX** (`M`) and **Music** (`N`), remembered between visits. Every sound is synthesised
 in the browser with the Web Audio API, so there are no audio files and no extra downloads. Effects: a blip per hop, a
 tone per checkpoint pitched by its lens, rising or falling notes when trust moves, a distinct signature for each verdict
@@ -41,7 +48,7 @@ follows behind the actor) and **1st person** (through the actor's eyes). The fol
 the 3D scene; in compare mode they follow scenario A. The reset-view button returns to Overview.
 
 Keyboard: `Tab` through nodes, `Enter` opens the panel, `Space` plays/pauses, `1`–`5` switches lens, `V` cycles the
-camera view, `L` toggles the Splunk layer, `M` sound effects, `N` music, `Esc` closes.
+camera view, `L` toggles the Splunk layer, `X` visual effects, `M` sound effects, `N` music, `Esc` closes.
 
 ## Editing
 

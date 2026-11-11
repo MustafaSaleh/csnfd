@@ -122,6 +122,15 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr) 350px;min-height:0}
 #labels.narrow .lbl.zone{display:none}
 #labels.compact .lbl.hit small,#labels.compact .lbl.sel small{display:block}
 .tchip{position:absolute;left:0;top:0;pointer-events:none;z-index:4;font:600 12px var(--font);padding:2px 7px;border-radius:999px;background:#0a1020;border:1.5px solid var(--c,#fff);color:var(--c,#fff);white-space:nowrap}
+/* game-style effects */
+#fxflash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,transparent 45%,var(--fc,#fff) 135%)}
+#fxflash.go{animation:fxflash .9s ease-out}
+@keyframes fxflash{0%{opacity:0}12%{opacity:.85}100%{opacity:0}}
+#fxstamp{position:absolute;left:50%;top:17%;transform:translate(-50%,-50%);pointer-events:none;opacity:0;white-space:nowrap;font:800 clamp(22px,4.6vw,54px)/1 var(--font);letter-spacing:.14em;color:var(--fc,#fff);text-shadow:0 0 18px var(--fc,#fff),0 0 2px #000;padding:.25em .6em;border:3px solid var(--fc,#fff);border-radius:12px;background:#070b16b8}
+#fxstamp.go{animation:fxstamp 1.7s cubic-bezier(.2,1.4,.3,1) forwards}
+@keyframes fxstamp{0%{opacity:0;transform:translate(-50%,-50%) scale(2.6) rotate(-6deg)}16%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-2deg)}22%{transform:translate(-50%,-50%) scale(1.06) rotate(-2deg)}30%{transform:translate(-50%,-50%) scale(1) rotate(-2deg)}78%{opacity:1}100%{opacity:0;transform:translate(-50%,-62%) scale(.96) rotate(-2deg)}}
+.pop{position:absolute;left:0;top:0;pointer-events:none;z-index:7;font:800 14px var(--font);color:var(--c,#fff);text-shadow:0 0 8px var(--c,#fff),0 1px 2px #000;white-space:nowrap;animation:fxpop 1.4s ease-out forwards}
+@keyframes fxpop{0%{opacity:0;margin-top:8px;scale:.6}15%{opacity:1;scale:1.25}30%{scale:1}100%{opacity:0;margin-top:-58px}}
 #tip{position:absolute;z-index:20;max-width:260px;background:#0a1020f2;border:1px solid var(--line2);border-radius:8px;padding:7px 9px;font-size:12px;pointer-events:none;box-shadow:0 8px 24px #0009}
 #tip b{display:block;margin-bottom:2px}
 #tip span{color:var(--tx2)}
@@ -271,6 +280,7 @@ body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
   </div>
   <div class="lenses" id="lenses" role="radiogroup" aria-label="Lens"></div>
   <button id="spT" class="btn" aria-pressed="true" title="Show or hide the Splunk layer (L)">Splunk layer</button>
+ <button id="fxT" class="btn tg" aria-pressed="true" aria-label="Visual effects" title="Visual effects on or off (X)">FX</button>
   <button id="sndT" class="btn tg" aria-pressed="true" aria-label="Sound effects" title="Sound effects on or off (M)">SFX</button>
   <button id="musT" class="btn tg" aria-pressed="false" aria-label="Ambient music" title="Ambient music on or off (N)">Music</button>
   <div class="search" role="search">
@@ -308,6 +318,8 @@ body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
       <select id="viewSel" aria-label="Camera view" title="Camera view (V)"><option value="orbit">Overview</option><option value="third">3rd person</option><option value="first">1st person</option></select>
       <button id="bView" aria-label="Reset view" title="Reset view"></button>
     </div>
+    <div id="fxflash" aria-hidden="true"></div>
+    <div id="fxstamp" aria-hidden="true"></div>
     <div id="tip" role="tooltip" hidden></div>
   </section>
   <aside id="right" class="panel" aria-label="Result and product detail">
@@ -1153,11 +1165,11 @@ const DATA = {
   ],
 
   verdicts: {
-    ALLOW: { label: 'ALLOW', sev: 0, why: 'Identity, device and context meet policy for this destination.' },
-    LIMIT: { label: 'ALLOW WITH LIMITS', sev: 1 },
-    STEPUP: { label: 'STEP-UP', sev: 2 },
-    BLOCK: { label: 'BLOCK', sev: 3 },
-    CONTAIN: { label: 'CONTAIN', sev: 4 },
+    ALLOW: { label: 'ALLOW', sev: 0, stamp: 'ACCESS GRANTED', why: 'Identity, device and context meet policy for this destination.' },
+    LIMIT: { label: 'ALLOW WITH LIMITS', sev: 1, stamp: 'LIMITED ACCESS' },
+    STEPUP: { label: 'STEP-UP', sev: 2, stamp: 'VERIFY AGAIN' },
+    BLOCK: { label: 'BLOCK', sev: 3, stamp: 'BLOCKED' },
+    CONTAIN: { label: 'CONTAIN', sev: 4, stamp: 'CONTAINED' },
     noControl: 'No remaining control in this illustrative model stopped the session.'
   },
 
@@ -1313,7 +1325,7 @@ function evaluate(s, off) {
     if (c.needsS && !(c.needsS === 'threat' ? sthreat : sfeed).length) continue;
     if (off && c.at === off) { gaps.push(c); continue; }
     trust = clamp(trust + (c.d || 0));
-    const e = { id: c.id, at: c.at, hi, hop: hi < 1e6 ? path[hi] : null, lens: c.lens, c: c.c, r: c.r, d: c.d || 0, sig: c.sig, v: c.v || null, trust, from: c.from, also: c.also || [] };
+    const e = { id: c.id, at: c.at, hi, hop: hi < 1e6 ? path[hi] : null, lens: c.lens, c: c.c, r: c.r, d: c.d || 0, sig: c.sig, v: c.v || null, tele: !!c.tele, trust, from: c.from, also: c.also || [] };
     if (c.from === '@tele') e.beams = [...new Set(tele)];
     if (c.from === '@sfeed') e.beams = [...new Set(sfeed)];
     if (DATA.splunkFeeds.includes(c.at)) { sfeed.push(c.at); if (c.tele || c.v) sthreat.push(c.at); }
@@ -1507,6 +1519,24 @@ const SND = (() => {
     setSfx(on) { st.sfx = on; save(); if (on) { init(); play('toggle', true); } },
     setMusic(on) { st.music = on; save(); if (on) { if (init()) startMusic(); } else stopMusic(); },
     hidden(h) { if (!ctx) return; if (h) ctx.suspend(); else if (st.sfx || st.music) ctx.resume(); }
+  };
+})();
+
+/* =====================================================================================
+   VISUAL EFFECTS — game-style feedback for hops, checks, detections, trust changes and verdicts.
+   World effects (rings, sparks, shields, pop-ups, camera shake) are drawn by the 3D renderer; the stamp and
+   screen flash are plain DOM so they also work in the 2D fallback. One switch; off by default under reduced motion.
+   ===================================================================================== */
+const VCOL = { ALLOW: '#5be3a4', LIMIT: '#8ed0ff', STEPUP: '#f4c95d', BLOCK: '#ff7a6b', CONTAIN: '#ff5fa2' };
+const VFX = (() => {
+  const st = { on: !RM.matches, fired: 0 };
+  try { const v = localStorage.getItem('ln-fx'); if (v === '0' || v === '1') st.on = v === '1'; } catch (e) { }
+  const again = (el, col) => { el.style.setProperty('--fc', col); el.classList.remove('go'); void el.offsetWidth; el.classList.add('go'); };
+  return {
+    st,
+    set(on) { st.on = on; try { localStorage.setItem('ln-fx', on ? '1' : '0'); } catch (e) { } },
+    fire(type, o) { if (!st.on) return; st.fired++; if (R && R.fx) R.fx(type, o); },
+    stamp(v) { if (!st.on) return; const el = $('#fxstamp'); el.textContent = DATA.verdicts[v].stamp; again(el, VCOL[v]); again($('#fxflash'), VCOL[v]); }
   };
 })();
 
@@ -1726,11 +1756,17 @@ function syncUI() {
     const P = prog(r), sec = $(`.run[data-slot="${r.slot}"]`);
     /* sound follows the playback: a blip per hop, a tone per checkpoint (pitched by lens), trust up or down, then the verdict */
     const sd = r.snd || (r.snd = { i: -1, k: -1, done: false }), stp = r.steps[r.pb.i];
-    if (sd.i !== r.pb.i) { sd.i = r.pb.i; if (stp && stp.t === 'move' && !P.done) SND.play('hop', stp.e); }
+    if (sd.i !== r.pb.i) { const prev = r.steps[sd.i]; if (prev && prev.t === 'move') VFX.fire('hop', { id: r.path[prev.e], color: LENS[S.lens].color });   /* arrival ring */
+      sd.i = r.pb.i; if (stp && stp.t === 'move' && !P.done) SND.play('hop', stp.e); }
     if (P.cur >= 0 && P.cur !== sd.k) { sd.k = P.cur; const e = r.tl[P.cur];
       SND.play(PR[e.at].cat === 'splunk' ? 'splunk' : e.at === 'xdr' ? 'tele' : 'check', DATA.lenses.findIndex(l => l.id === e.lens));
-      if (e.d > 0) SND.play('up'); else if (e.d < 0) SND.play('down'); SND.mood(e.trust); }
-    if (P.done && !sd.done) { sd.done = true; SND.mood(r.trust); if (r.slot === S.runs[0].slot) SND.play(r.verdict); }
+      if (e.d > 0) SND.play('up'); else if (e.d < 0) SND.play('down'); SND.mood(e.trust);
+      const hot = e.tele || e.at === 'xdr' || (e.v && SEV[e.v] >= SEV.STEPUP), sp = PR[e.at].cat === 'splunk';
+      VFX.fire(hot ? 'detect' : 'check', { id: e.at, color: sp ? '#ff8a3d' : hot ? (e.v ? VCOL[e.v] : '#ff7a6b') : LENS[e.lens].color });
+      if (e.d) VFX.fire('trust', { slot: r.slot, text: (e.d > 0 ? '+' : '') + e.d + ' trust', color: e.d > 0 ? '#5be3a4' : '#ff7a6b' });
+      if (e.v && SEV[e.v] >= SEV.STEPUP) VFX.fire('pop', { id: e.at, text: DATA.verdicts[e.v].label, color: VCOL[e.v] }); }
+    if (P.done && !sd.done) { sd.done = true; SND.mood(r.trust); if (r.slot === S.runs[0].slot) { SND.play(r.verdict); VFX.stamp(r.verdict); }
+      VFX.fire('verdict', { v: r.verdict, id: r.stopAt >= 0 ? r.path[r.stopAt] : r.verdict === 'CONTAIN' ? r.path[0] : r.path[r.path.length - 1] }); }
     if (!sec) continue;
     sec.classList.toggle('pending', !P.done);
     $('.prog', sec).textContent = `checkpoint ${Math.max(0, P.k + 1)} of ${r.tl.length}`;
@@ -1748,7 +1784,7 @@ function select(id, focusCam) {
   S.selected = id; const el = $('#detail');
   R && R.select(id);
   if (!id) { el.hidden = true; writeHash(); return; }
-  SND.play('select');
+  SND.play('select'); VFX.fire('select', { id });
   if (PR[id]) {
     const p = PR[id];
     const conn = DATA.links.filter(l => l[0] === id || l[1] === id).map(l => ({ o: l[0] === id ? l[1] : l[0], rel: l[2], src: l[3] }));
@@ -2103,7 +2139,7 @@ function createGL(THREE, OrbitControls) {
   function frame(now) {
     if (tw) { const k = clamp((now - tw.t0) / tw.d, 0, 1), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
       controls.target.lerpVectors(tw.ft, tw.tt, e); cam.position.lerpVectors(tw.fp, tw.tp, e); cam.zoom = tw.fz + (tw.tz - tw.fz) * e; cam.updateProjectionMatrix(); if (k >= 1) tw = null; }
-    controls.update(); updateFollow(now);
+    cam.position.sub(shakeOff); shakeOff.set(0, 0, 0); controls.update(); updateFollow(now); applyShake(now); updateFx(now);
     /* ambient particles along the links the lens cares about */
     const show = flow.length && !RM.matches && view === cam;   /* ambient traffic is an overview effect; it is distracting up close */
     for (let i = 0; i < NP; i++) {
@@ -2143,6 +2179,63 @@ function createGL(THREE, OrbitControls) {
     for (const z of topoChips) { tv3.copy(z.v).project(view); z.el.style.visibility = tv3.z > 1 ? 'hidden' : ''; z.el.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(-50%,-50%)`; }
     for (const z of zoneLbl) { tv3.copy(z.v).project(view); z.el.style.visibility = tv3.z > 1 ? 'hidden' : ''; z.el.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(0,-50%)`; }
   }
+  /* ---- game-style effects: pooled so nothing is allocated while playing ---- */
+  const ADD = { transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide };
+  const pool = (n, geo, init) => Array.from({ length: n }, () => { const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial(ADD)); m.visible = false; m.frustumCulled = false; init && init(m); scene.add(m); return { m, on: false }; });
+  const fxRings = pool(34, new THREE.RingGeometry(.87, 1, 56), m => m.rotation.x = -Math.PI / 2);
+  const fxDomes = pool(4, new THREE.SphereGeometry(1, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2));
+  const fxPillars = pool(3, new THREE.CylinderGeometry(1, 1, 1, 24, 1, true));
+  let fri = 0, fdi = 0, fpi = 0, fsi = 0, fxLast = 0, sparksAlive = 0; const pulses = {}, pops = [], shake = { t0: 0, d: 0, amp: 0 }, shakeOff = new THREE.Vector3();
+  const emit = (arr, i, p, col, o) => { const e = arr[i % arr.length]; Object.assign(e, { on: true, t0: performance.now() + (o.delay || 0), d: o.d || 700, r0: o.r0 ?? .6, r1: o.r1 ?? 6, a: o.a ?? .9, h: o.h || 1 }); e.m.position.set(p[0], p[1] + (o.y ?? .3), p[2]); e.m.material.color.set(col); };
+  const ring = (p, col, o = {}) => emit(fxRings, fri++, p, col, o), dome = (p, col, o = {}) => emit(fxDomes, fdi++, p, col, o), pillar = (p, col, o = {}) => emit(fxPillars, fpi++, p, col, o);
+  const NS = 420, sparks = new THREE.InstancedMesh(new THREE.TetrahedronGeometry(.17), new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }), NS); sparks.frustumCulled = false; scene.add(sparks);
+  const sp = new Float32Array(NS * 8), white = new THREE.Color(0xffffff);   /* x y z vx vy vz life max */
+  for (let i = 0; i < NS; i++) { dummy.scale.setScalar(0); dummy.updateMatrix(); sparks.setMatrixAt(i, dummy.matrix); sparks.setColorAt(i, white); }
+  function burst(p, col, n, o = {}) {
+    for (let k = 0; k < n; k++) { const i = fsi++ % NS, j = i * 8, an = Math.random() * Math.PI * 2, s = (o.speed ?? 6) * (.35 + Math.random() * .65), life = (o.life ?? 900) * (.6 + Math.random() * .4);
+      sp[j] = p[0]; sp[j + 1] = p[1] + (o.y ?? 1); sp[j + 2] = p[2]; sp[j + 3] = Math.cos(an) * s; sp[j + 4] = (o.up ?? 5) * (.4 + Math.random()); sp[j + 5] = Math.sin(an) * s; sp[j + 6] = sp[j + 7] = life;
+      sparks.setColorAt(i, tc.set(col).lerp(white, Math.random() * .45)); }
+    sparks.instanceColor.needsUpdate = true; sparksAlive = NS;
+  }
+  const pulse = id => { if (nodes[id]) pulses[id] = performance.now(); };
+  function pop(p, text, col, dy) { const el = document.createElement('div'); el.className = 'pop'; el.textContent = text; el.style.setProperty('--c', col); labels.appendChild(el); pops.push({ el, v: new THREE.Vector3(p[0], p[1] + (dy ?? 4), p[2]), t0: performance.now() }); }
+  function fx(type, o) {
+    const p = o.id ? POS(o.id) : o.p, col = o.color || '#ffffff';
+    if (type === 'hop') ring(p, col, { r1: 3, d: 450, a: .55 });
+    else if (type === 'check') { ring(p, col, { r1: 4.4, d: 650 }); ring(p, col, { r1: 2.6, d: 520, delay: 120, a: .6 }); pulse(o.id); burst(p, col, 10, { speed: 3, up: 4, life: 600 }); }
+    else if (type === 'detect') { [0, 150, 300].forEach(delay => ring(p, col, { r1: 7.5, d: 820, delay })); pulse(o.id); burst(p, col, 24, { speed: 6, up: 5, life: 850 }); }
+    else if (type === 'select') { ring(p, '#ffffff', { r1: 3.6, d: 520, a: .7 }); pulse(o.id); }
+    else if (type === 'pop') pop(p, o.text, col, 4.5);
+    else if (type === 'trust') { const v = rv.find(x => x.r.slot === o.slot); if (v) pop([v.head.position.x, v.head.position.y, v.head.position.z], o.text, col, v.isHuman ? 12 : 3); }
+    else if (type === 'verdict') {
+      const c2 = VCOL[o.v];
+      if (o.v === 'ALLOW') { pillar(p, c2, { r0: 1.6, r1: 2.6, h: 26, d: 1500, a: .5 }); [0, 180, 360].forEach(delay => ring(p, c2, { r1: 10, d: 1100, delay })); burst(p, c2, 80, { speed: 7, up: 13, life: 1500 }); }
+      else if (o.v === 'LIMIT') { pillar(p, c2, { r0: 1.4, r1: 2, h: 12, d: 1100, a: .4 }); [0, 220].forEach(delay => ring(p, c2, { r1: 7, d: 950, delay })); burst(p, c2, 34, { speed: 5, up: 8, life: 1100 }); }
+      else if (o.v === 'STEPUP') { [0, 170, 340, 510].forEach(delay => ring(p, c2, { r1: 4.2, d: 620, delay })); burst(p, c2, 18, { speed: 3, up: 7, life: 900 }); pop(p, '?', c2, 6); }
+      else if (o.v === 'BLOCK') { dome(p, c2, { r0: 1.5, r1: 5.2, d: 800, a: .75 }); ring(p, c2, { r1: 13, d: 600 }); ring(p, c2, { r1: 8, d: 800, delay: 120 }); burst(p, c2, 95, { speed: 12, up: 4, life: 1000 }); shake.t0 = performance.now(); shake.d = 420; shake.amp = .55; }
+      else if (o.v === 'CONTAIN') { [0, 160, 320].forEach(delay => ring(p, c2, { r0: 10, r1: 1.8, d: 700, delay })); dome(p, c2, { r0: 6, r1: 3.2, d: 1300, a: .7 }); burst(p, c2, 60, { speed: 5, up: 9, life: 1200 }); shake.t0 = performance.now(); shake.d = 320; shake.amp = .35; }
+    }
+  }
+  function updateFx(now) {
+    const dt = Math.min(.1, (now - fxLast) / 1000); fxLast = now;
+    const run = (arr, f) => { for (const e of arr) { if (!e.on) continue; const k = (now - e.t0) / e.d; if (k < 0) { e.m.visible = false; continue; } if (k >= 1) { e.on = false; e.m.visible = false; continue; } e.m.visible = true; f(e, k, 1 - Math.pow(1 - k, 3)); } };
+    run(fxRings, (e, k, ez) => { e.m.scale.setScalar(e.r0 + (e.r1 - e.r0) * ez); e.m.material.opacity = e.a * (1 - k); });
+    run(fxDomes, (e, k, ez) => { e.m.scale.setScalar(e.r0 + (e.r1 - e.r0) * ez); e.m.material.opacity = e.a * (1 - k) * .6; });
+    run(fxPillars, (e, k, ez) => { const r = e.r0 + (e.r1 - e.r0) * ez, hh = e.h * Math.min(1, k * 4); e.m.scale.set(r, hh, r); e.m.position.y = hh / 2; e.m.material.opacity = e.a * (1 - k); });
+    if (sparksAlive) { let alive = 0;
+      for (let i = 0; i < NS; i++) { const j = i * 8; if (sp[j + 6] <= 0) continue; sp[j + 6] -= dt * 1000; sp[j + 4] -= 14 * dt; sp[j] += sp[j + 3] * dt; sp[j + 1] += sp[j + 4] * dt; sp[j + 2] += sp[j + 5] * dt;
+        const s = Math.max(0, sp[j + 6] / sp[j + 7]); if (s > 0) alive++; dummy.position.set(sp[j], Math.max(.1, sp[j + 1]), sp[j + 2]); dummy.scale.setScalar(s * 1.6); dummy.rotation.set(now * .004 + i, now * .003, 0); dummy.updateMatrix(); sparks.setMatrixAt(i, dummy.matrix); }
+      sparks.instanceMatrix.needsUpdate = true; sparksAlive = alive; }
+    for (const id in pulses) { const k = (now - pulses[id]) / 380; nodes[id].g.scale.setScalar(k >= 1 ? 1 : 1 + .5 * (1 - k) * (1 - k)); if (k >= 1) delete pulses[id]; }
+    for (let i = pops.length - 1; i >= 0; i--) { const q = pops[i]; if (now - q.t0 > 1400) { q.el.remove(); pops.splice(i, 1); continue; }
+      tv3.copy(q.v).project(view); q.el.style.visibility = tv3.z > 1 ? 'hidden' : ''; q.el.style.transform = `translate(${((tv3.x * .5 + .5) * W).toFixed(1)}px,${((-tv3.y * .5 + .5) * H).toFixed(1)}px) translate(-50%,-50%)`; }
+  }
+  /* camera shake for hard stops: a decaying offset, removed again on the next frame */
+  function applyShake(now) {
+    cam.position.sub(shakeOff); shakeOff.set(0, 0, 0); const k = (now - shake.t0) / shake.d; if (k < 0 || k >= 1 || RM.matches) return;
+    const a = shake.amp * (1 - k); shakeOff.set((Math.random() - .5) * a * 2, (Math.random() - .5) * a * 2, (Math.random() - .5) * a * 2);
+    if (view === cam) cam.position.add(shakeOff); else { pcam.position.add(shakeOff); shakeOff.set(0, 0, 0); pcam.updateMatrixWorld(); }
+  }
   /* picking */
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let down = null;
   const pick = e => { const b = canvas.getBoundingClientRect(); ndc.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1); ray.setFromCamera(ndc, view); const hit = ray.intersectObjects(pickables, false)[0]; return hit ? hit.object.userData.id : null; };
@@ -2152,7 +2245,7 @@ function createGL(THREE, OrbitControls) {
   canvas.addEventListener('pointerleave', () => tip(null));
   new ResizeObserver(resize).observe(stage); resize(); home(true);
   const screenOf = id => { const b = canvas.getBoundingClientRect(), p = POS(id); tv3.set(p[0], p[1] + .85, p[2]).project(view); return [b.left + (tv3.x * .5 + .5) * b.width, b.top + (-tv3.y * .5 + .5) * b.height]; };
-  return { kind: 'webgl', setLens, setRuns, setTopo, setLayer, setView, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
+  return { kind: 'webgl', fx, setLens, setRuns, setTopo, setLayer, setView, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
 }
 
 /* =====================================================================================
@@ -2293,6 +2386,7 @@ async function boot() {
   const wake = () => { if (SND.st.sfx || SND.st.music) SND.init(); };
   document.addEventListener('pointerdown', wake, { capture: true }); document.addEventListener('keydown', wake, { capture: true });
   document.addEventListener('click', e => { if (e.target.closest('button, .chip, select') && !e.target.closest('#sndT, #musT')) SND.play('ui'); }, { capture: true });
+  $('#fxT').onclick = () => { VFX.set(!VFX.st.on); $('#fxT').setAttribute('aria-pressed', VFX.st.on); toast('Visual effects ' + (VFX.st.on ? 'on' : 'off')); }; $('#fxT').setAttribute('aria-pressed', VFX.st.on);
   $('#spT').onclick = () => setSplunk(!S.splunk); $('#spT').setAttribute('aria-pressed', S.splunk); $('#spT').textContent = S.splunk ? 'Splunk layer: on' : 'Splunk layer: off';
   $('#speed').onchange = e => S.speed = +e.target.value;
   $('#q').addEventListener('input', doSearch); $('#qcat').addEventListener('change', doSearch);
@@ -2304,6 +2398,7 @@ async function boot() {
     const t = e.target, typing = t.matches('input,select,textarea');
     if (e.key === 'Escape') { if (S.selected) select(null); else sheet('none'); return; }
     if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'x' || e.key === 'X') { $('#fxT').click(); return; }
     if (e.key === 'm' || e.key === 'M') { $('#sndT').click(); return; }
     if (e.key === 'n' || e.key === 'N') { $('#musT').click(); return; }
     if (e.key === 'l' || e.key === 'L') { setSplunk(!S.splunk); return; }
@@ -2319,7 +2414,7 @@ async function boot() {
   document.addEventListener('visibilitychange', () => { SND.hidden(document.hidden); cancelAnimationFrame(raf); if (!document.hidden) { last = performance.now(); raf = requestAnimationFrame(loop); } });
   raf = requestAnimationFrame(loop);
   /* test / automation hook: engine only, no network */
-  window.__LN = { DATA, S, SND, setSplunk, setView, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
+  window.__LN = { DATA, S, SND, VFX, setSplunk, setView, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
 }
 boot();
 </script>
