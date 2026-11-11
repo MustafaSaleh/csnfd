@@ -268,9 +268,18 @@ footer{font-size:10.5px;color:var(--tx3);padding:5px 14px;background:var(--bg2);
   #report .fine{font-size:10px;color:#444;margin-top:12px} #report a{color:#111;word-break:break-all}
 }
 /* full screen: only the header and the scene remain */
-body.full main{grid-template-columns:minmax(0,1fr)!important}
-body.full #left, body.full #right, body.full footer, body.full #mobnav{display:none!important}
-body.full #stage{grid-column:1}
+body.full footer, body.full #mobnav{display:none!important}
+/* in full screen each side panel can be brought back or hidden on its own (tabs on the scene's edges) */
+@media (min-width:901px){
+  body.full main{grid-template-columns:var(--flw,0px) minmax(0,1fr) var(--frw,0px)!important}
+  body.full.fl{--flw:300px} body.full.fr{--frw:350px} body.full.fr[data-cmp="1"]{--frw:520px}
+  body.full:not(.fl) #left, body.full:not(.fr) #right{display:none!important}
+}
+.ftab{display:none;position:absolute;top:50%;z-index:8;transform:translateY(-50%);writing-mode:vertical-rl;background:#0a1020e0;border:1px solid var(--line2);color:var(--tx2);font-size:11px;font-weight:650;letter-spacing:.08em;padding:12px 5px;cursor:pointer}
+body.full .ftab{display:block}
+.ftab:hover{color:var(--tx);border-color:var(--lens)} .ftab[aria-pressed=true]{color:var(--tx);border-color:var(--lens);background:var(--panel2)}
+#fullL{left:0;border-left:0;border-radius:0 8px 8px 0} #fullR{right:0;border-right:0;border-radius:8px 0 0 8px}
+@media (max-width:900px){ .ftab{top:40px;transform:none;writing-mode:horizontal-tb;padding:6px 10px} body.full .panel{bottom:0;height:58dvh} }
 .tp button[aria-pressed=true]{background:#ffffff1c}
 .tp button.txt{width:auto;padding:0 8px;font-size:11px;font-weight:600;color:var(--tx2)} .tp button.txt[aria-pressed=true]{color:var(--lens)}
 .tp button.cue{box-shadow:0 0 0 2px var(--lens);animation:cue 1.6s ease-in-out infinite}
@@ -367,6 +376,8 @@ body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
     <div id="fxstamp" aria-hidden="true"></div>
     <div id="fxstamp2" class="fxstamp" aria-hidden="true"></div>
     <div id="splitUI" aria-hidden="true"><i></i><b>A</b><b>B</b></div>
+    <button id="fullL" class="ftab" aria-pressed="false" title="Show or hide the scenario panel ([)">Scenario</button>
+    <button id="fullR" class="ftab" aria-pressed="false" title="Show or hide the result panel (])">Result</button>
     <div id="tip" role="tooltip" hidden></div>
   </section>
   <aside id="right" class="panel" aria-label="Result and product detail">
@@ -1479,7 +1490,8 @@ function suggestions(s, run) {
 const RM = matchMedia('(prefers-reduced-motion: reduce)');
 const fromPreset = a => normalize({ who: a[0], device: a[1], loc: a[2], dest: a[3], beh: a[4] }).s;
 const S = {
-  mode: 'presets', lens: 'data', split: true, splunk: true, view: 'orbit', arch: 'sase', preset: 1, compare: false, active: 0, off: [], speed: 1, playing: false,
+  mode: 'presets', lens: 'data', split: true, splunk: true,
+  view: (() => { try { const v = localStorage.getItem('ln-view'); return ['orbit', 'third', 'first'].includes(v) ? v : 'third'; } catch (e) { return 'third'; } })(),   /* 3rd person by default */ arch: 'sase', preset: 1, compare: false, active: 0, off: [], speed: 1, playing: false,
   autoplay: (() => { try { return localStorage.getItem('ln-autoplay') === '1'; } catch (e) { return false; } })(),
   slots: [fromPreset(DATA.presets[0].s), fromPreset(DATA.presets[5].s)],
   runs: [], selected: null, notes: [], filter: null
@@ -1647,7 +1659,7 @@ function writeHash() {
   if (S.mode === 'presets' && S.preset) q.set('p', S.preset);
   if (S.mode === 'topo') q.set('arch', S.arch);
   if (S.selected) q.set('sel', S.selected);
-  if (S.view !== 'orbit') q.set('view', S.view);
+  if (S.view !== 'third') q.set('view', S.view);
   if (!S.splunk) q.set('sp', '0');
   if (S.compare && !S.split) q.set('split', '0');
   S.hash = '#' + q.toString();
@@ -1663,7 +1675,7 @@ function readHash() {
   S.compare = q.get('cmp') === '1'; S.active = 0;
   S.off = (q.get('off') || '').split(',').filter(k => PR[k]); S.preset = +q.get('p') || 0;
   S.splunk = q.get('sp') !== '0'; S.split = q.get('split') !== '0';
-  S.view = ['third', 'first'].includes(q.get('view')) ? q.get('view') : 'orbit';
+  if (['orbit', 'third', 'first'].includes(q.get('view'))) S.view = q.get('view');
   S.selected = (PR[q.get('sel')] || PL[q.get('sel')]) ? q.get('sel') : null;
   return true;
 }
@@ -1695,7 +1707,7 @@ function setView(v, quiet) {
   S.view = v; $('#viewSel').value = v; R.setView && R.setView(v);
   if (!quiet) SND.play('view');
   if (v !== 'orbit' && !S.runs.length && !quiet) toast('Follow views need a running scenario: pick a preset or build one.');
-  if (!quiet) writeHash();
+  if (!quiet) { try { localStorage.setItem('ln-view', v); } catch (e) { } writeHash(); }
 }
 /* Splunk layer on/off: nodes, relationships and Splunk checkpoints appear or disappear together */
 function setSplunk(on) {
@@ -1907,7 +1919,8 @@ function select(id, focusCam) {
     el.innerHTML = `<button class="x" aria-label="Close detail">×</button><div class="cat">${{ loc: 'Location', infra: 'Network infrastructure' }[p.kind] || 'Destination'}</div><h3>${h(p.name)}</h3><p>${h(p.fn)}</p><p class="small">Scene element, not a product.</p>`;
   }
   el.hidden = false; $('#right').scrollTop = 0;
-  if (matchMedia('(max-width:900px)').matches) sheet('right');
+  if (document.body.classList.contains('full')) setFullPanel('right', true);   /* a selected product needs its panel */
+  else if (matchMedia('(max-width:900px)').matches) sheet('right');
   if (focusCam && R) R.focus(id);
   writeHash();
 }
@@ -1918,11 +1931,23 @@ function tip(id, x, y) {
   t.hidden = false; const st = $('#stage').getBoundingClientRect();
   t.style.left = clamp(x + 14, 4, st.width - t.offsetWidth - 4) + 'px'; t.style.top = clamp(y + 14, 4, st.height - t.offsetHeight - 4) + 'px';
 }
-function sheet(n) { document.body.dataset.sheet = n; $$('#mobnav button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sheet === n)); }
+function sheet(n) { document.body.dataset.sheet = n; $$('#mobnav button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sheet === n));
+  if (document.body.classList.contains('full') && matchMedia('(max-width:900px)').matches) {   /* keep the full-screen tabs in step with the open sheet */
+    document.body.classList.toggle('fl', n === 'left'); document.body.classList.toggle('fr', n === 'right');
+    $('#fullL').setAttribute('aria-pressed', n === 'left'); $('#fullR').setAttribute('aria-pressed', n === 'right'); } }
 
 /* ---- full screen: the scene fills the window (side panels and footer hidden) and the browser goes full screen where it is allowed.
    In viewers that block the Fullscreen API the layout still expands to the whole window. ---- */
+/* side panels inside full screen: docked beside the scene on desktop, bottom sheets on phones */
+function setFullPanel(side, on) {
+  const cls = side === 'left' ? 'fl' : 'fr', phone = matchMedia('(max-width:900px)').matches;
+  if (phone) return sheet(on ? side : 'none');
+  document.body.classList.toggle(cls, on);
+  $('#fullL').setAttribute('aria-pressed', document.body.classList.contains('fl')); $('#fullR').setAttribute('aria-pressed', document.body.classList.contains('fr'));
+}
+const fullPanel = side => document.body.classList.contains(side === 'left' ? 'fl' : 'fr');
 function setFull(on) {
+  if (!on) { document.body.classList.remove('fl', 'fr'); $('#fullL').setAttribute('aria-pressed', false); $('#fullR').setAttribute('aria-pressed', false); }
   document.body.classList.toggle('full', on); const b = $('#bFull'); b.setAttribute('aria-pressed', on); b.setAttribute('aria-label', on ? 'Exit full screen' : 'Full screen'); b.innerHTML = ico(on ? 'unfull' : 'full');
   if (on) { sheet('none'); try { const el = document.documentElement, p = (el.requestFullscreen || el.webkitRequestFullscreen || (() => { })).call(el); if (p && p.catch) p.catch(() => { }); } catch (e) { } }
   else if (document.fullscreenElement || document.webkitFullscreenElement) { try { const p = (document.exitFullscreen || document.webkitExitFullscreen).call(document); if (p && p.catch) p.catch(() => { }); } catch (e) { } }
@@ -2802,6 +2827,7 @@ async function boot() {
   document.addEventListener('pointerdown', wake, { capture: true }); document.addEventListener('keydown', wake, { capture: true });
   document.addEventListener('click', e => { if (e.target.closest('button, .chip, select') && !e.target.closest('#sndT, #musT')) SND.play('ui'); }, { capture: true });
   $('#bFull').onclick = () => setFull(!document.body.classList.contains('full'));
+  $('#fullL').onclick = () => setFullPanel('left', !fullPanel('left')); $('#fullR').onclick = () => setFullPanel('right', !fullPanel('right'));
   for (const ev of ['fullscreenchange', 'webkitfullscreenchange']) document.addEventListener(ev, () => { if (!(document.fullscreenElement || document.webkitFullscreenElement) && document.body.classList.contains('full')) setFull(false); });   /* Esc in the browser's own full screen */
   $('#tourT').onclick = () => tourGo(0); $('#tourStart').onclick = () => tourGo(0);
   $('#tourNo').onclick = () => { $('#tourHint').hidden = true; try { localStorage.setItem('ln-tour', '1'); } catch (e) { } };
@@ -2832,6 +2858,7 @@ async function boot() {
       if (e.key === '0') { $('#bView').click(); return; }
     }
     if (e.key === 'f' || e.key === 'F') { setFull(!document.body.classList.contains('full')); return; }
+    if ((e.key === '[' || e.key === ']') && document.body.classList.contains('full')) { const sd = e.key === '[' ? 'left' : 'right'; setFullPanel(sd, !fullPanel(sd)); return; }
     if (e.key === 't' || e.key === 'T') { tourGo(0); return; }
     if (e.key === 'x' || e.key === 'X') { $('#fxT').click(); return; }
     if (e.key === 'm' || e.key === 'M') { $('#sndT').click(); return; }

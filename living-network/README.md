@@ -46,7 +46,9 @@ operations" and "Splunk and Cisco Observability".
 
 **Full screen** (button at the right of the playback bar, or `F`; `Esc` exits): the scene fills the window, with the
 side panels and footer hidden, and the browser enters full screen where it is allowed. The header, lenses, playback
-bar, legend and the checkpoint and verdict captions stay. In viewers that block browser full screen the layout still
+bar, legend and the checkpoint and verdict captions stay. Two tabs on the scene's edges, **Scenario** (left, `[`) and
+**Result** (right, `]`), bring each side panel back or hide it again, independently; selecting a product opens the
+result panel. On phones the tabs open the panels as bottom sheets. In viewers that block browser full screen the layout still
 expands to the whole window.
 
 **Guided tour** (header button **Tour**, or `T`; offered once on a first visit): eleven steps that spotlight each part
@@ -84,7 +86,8 @@ changes. Music is a generative ambient bed that turns darker when the session tr
 default; a switch turned off stays off on later visits. Sound starts on the first click or key press (browsers do not
 allow it earlier) and pauses while the tab is hidden.
 
-Three camera views, switched from the playback bar or with `V`: **Overview** (orbit, zoom, pan), **3rd person** (camera
+**3rd person is the default view.** The view you pick is remembered between visits, and a shared link opens in the
+view it was copied in. Three camera views, switched from the playback bar or with `V`: **Overview** (orbit, zoom, pan), **3rd person** (camera
 follows behind the actor) and **1st person** (through the actor's eyes). The follow views need a running scenario and
 the 3D scene; in split view each half follows its own actor. Dragging the scene in 3rd person switches to Overview
 from the current camera position, so the view carries on from where it was instead of jumping back; the reset-view
