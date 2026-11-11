@@ -251,7 +251,7 @@ footer{font-size:10.5px;color:var(--tx3);padding:5px 14px;background:var(--bg2);
 #tourSpot{position:fixed;z-index:70;border:2px solid var(--lens);border-radius:10px;box-shadow:0 0 0 200vmax #030610c4;pointer-events:none;transition:all .28s ease}
 #tourCard{position:fixed;z-index:71;width:min(340px,calc(100vw - 24px));background:var(--panel2);border:1px solid var(--lens);border-radius:12px;padding:14px;box-shadow:0 18px 50px #000c}
 #tourCard h3{font-size:16px;margin:2px 0 6px} #tourCard p{font-size:13px} #tourCard .row{display:flex;gap:6px;margin-top:12px;align-items:center} #tourCard .row span{flex:1}
-#tourHint{position:fixed;z-index:55;left:50%;top:64px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:var(--panel2);border:1px solid var(--lens);border-radius:10px;padding:7px 9px 7px 12px;font-size:13px;box-shadow:0 10px 30px #0009;max-width:calc(100vw - 20px)}
+#tourHint{position:fixed;z-index:55;left:50%;bottom:86px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:var(--panel2);border:1px solid var(--lens);border-radius:10px;padding:7px 9px 7px 12px;font-size:13px;box-shadow:0 10px 30px #0009;max-width:calc(100vw - 20px)}
 /* export menu */
 .exp{position:relative} .exp summary{list-style:none;cursor:pointer} .exp summary::-webkit-details-marker{display:none}
 .exp .menu{position:absolute;right:0;top:calc(100% + 4px);z-index:30;min-width:220px;background:var(--panel2);border:1px solid var(--line2);border-radius:var(--r);box-shadow:0 12px 30px #0009;padding:4px}
@@ -297,7 +297,7 @@ body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
   footer{font-size:9.5px;padding:3px 8px}
   #top{gap:8px;padding:6px 10px}
   .brand p{display:none}
-  #tourHint{top:auto;bottom:118px;font-size:12px}
+  #tourHint{bottom:118px;font-size:12px}
   #spT{padding:5px 6px;font-size:10.5px} .tg,#tourT{padding:5px 6px;font-size:10.5px}
   .lenses{order:3;width:100%;gap:2px}
   .lenses button{padding:6px 2px;font-size:10px;letter-spacing:.02em;gap:4px;flex:1 1 0;min-width:0;justify-content:center}
@@ -399,7 +399,7 @@ const DATA = {
     verified: '10 November 2026',
     verdictNote: 'Illustrative outcome — actual result depends on configured policy and licensed products.',
     footer: 'Independent educational visualization. Not an official Cisco product. Product names are trademarks of Cisco Systems, Inc. and Splunk LLC. Content verified against cisco.com and splunk.com on {date}.',
-    sceneLabel: 'Conceptual architecture — not a validated design; campus core/distribution and wireless controllers not shown'
+    sceneLabel: 'Conceptual architecture — not a validated design; wireless controllers and SD-Access fabric nodes not shown'
   },
 
   lenses: [
@@ -438,7 +438,12 @@ const DATA = {
     zta: CX + 'solutions/security/zero-trust-access/index.html',
     nexusone: CX + 'products/networking/cloud-networking/nexus-one/index.html',
     obs: CX + 'products/observability/index.html',
-    splsc: 'https://splunkbase.splunk.com/app/7404'
+    splsc: 'https://splunkbase.splunk.com/app/7404',
+    splise: 'https://splunkbase.splunk.com/app/1915',      /* Splunk Add-on for Cisco Identity Services */
+    splmeraki: 'https://splunkbase.splunk.com/app/5580',   /* Cisco Meraki Add-on for Splunk */
+    splte: 'https://splunkbase.splunk.com/app/7719',       /* Cisco ThousandEyes App for Splunk */
+    xdrds: 'https://www.cisco.com/c/en/us/products/collateral/security/xdr/xdr-ds.html',                      /* Cisco XDR data sheet */
+    sads: 'https://www.cisco.com/c/en/us/products/collateral/security/secure-access/secure-access-ds.html'   /* Cisco Secure Access data sheet */
   },
 
   /* pol: where the product sits in the policy lifecycle. inspect: inspects traffic in the DATA lens. */
@@ -618,7 +623,7 @@ const DATA = {
 
   /* --- SPLUNK LAYER. Product facts from each product's splunk.com page (cisco.com has no Splunk product pages);
      relationships to Cisco products only where a Cisco or Splunk page states them. Toggled as one layer. --- */
-  splunkFeeds: ['fw', 'sna', 'cv', 'duo', 'email', 'cii', 'mcd', 'ep', 'wl', 'aid', 'xdr'],   /* Cisco products with a stated Splunk data integration (own page or the Cisco Security Cloud app on Splunkbase); their checks feed the layer */
+  splunkFeeds: ['fw', 'sna', 'cv', 'duo', 'email', 'cii', 'mcd', 'ep', 'wl', 'aid', 'xdr', 'ise', 'te'],   /* Cisco products with a stated Splunk data integration (own page or the Cisco Security Cloud app on Splunkbase); their checks feed the layer */
   /* non-product scene nodes */
   places: {
     hq: { name: 'HQ campus', kind: 'loc', p: [-27, 0, -20], fn: 'Corporate campus with wired and Wi-Fi access.' },
@@ -638,7 +643,9 @@ const DATA = {
     pubai: { name: 'Unapproved AI tool', kind: 'dest', p: [23, 0, 13.5], fn: 'A public AI tool that has not been approved.' },
     web: { name: 'Public web', kind: 'dest', p: [23, 0, 17.5], fn: 'Public websites: safe, risky-category or known malicious.' },
     mail: { name: 'Email inbox', kind: 'dest', p: [23, 0, 21.5], fn: 'The user’s corporate mailbox.' },
-    otctl: { name: 'OT controller', kind: 'dest', p: [23, 0, 25.5], fn: 'Industrial controller on the factory floor.' }
+    otctl: { name: 'OT controller', kind: 'dest', p: [23, 0, 25.5], fn: 'Industrial controller on the factory floor.' },
+    /* generic infrastructure hops: not products, shown so the path is not misleading (expert review, item 14) */
+    core: { name: 'Campus core / distribution', kind: 'infra', p: [-12.5, 0, -25.6], fn: 'Core and distribution switching between the access layer and the data center, WAN and internet edges.' }
   },
 
   /* Relationships stated on cisco.com. [a, b, relationship, source (product id or DATA.sources key), kind] */
@@ -657,6 +664,13 @@ const DATA = {
     ['cii', 'xdr', 'Adds identity threat views and response actions to XDR', 'cii'],
     ['client', 'ep', 'Secure Endpoint is offered as a Secure Client module', 'client'],
     ['client', 'xdr', 'Integration for detection and response', 'client'],
+    ['client', 'sa', 'Secure Client is the single, unified client for Secure Access', 'sads'],
+    ['xdr', 'ise', 'ISE is a listed Cisco-managed integration of XDR', 'xdrds'],
+    ['xdr', 'duo', 'Duo is a listed Cisco-managed integration of XDR', 'xdrds'],
+    ['xdr', 'splunk', 'Splunk Cloud and Splunk Enterprise are listed XDR integrations, as a source of observations', 'xdrds'],
+    ['ise', 'splunk', 'ISE syslog data collected by the Splunk Add-on for Cisco Identity Services', 'splise'],
+    ['meraki', 'splunk', 'Meraki data collected by the Cisco Meraki Add-on for Splunk', 'splmeraki'],
+    ['te', 'splunk', 'ThousandEyes test results and logs sent by the Cisco ThousandEyes App for Splunk', 'splte'],
     ['client', 'sna', 'Paired for visibility into application use and behaviour', 'client'],
     ['sa', 'sdwan', 'SASE converges Secure Access with SD-WAN', 'sase'],
     ['sa', 'meraki', 'Secure Access integrates with Meraki SD-WAN', 'sa'],
@@ -748,7 +762,7 @@ const DATA = {
   /* subsets of the links above that the POLICY and THREAT lenses animate */
   policyFlow: [['scc', 'fw'], ['scc', 'mcd'], ['scc', 'hs'], ['scc', 'sa'], ['scc', 'wl'], ['scc', 'aid'], ['scc', 'sdwan'],
     ['ise', 'switches'], ['ise', 'wireless'], ['meraki', 'switches'], ['meraki', 'wireless'], ['meraki', 'industrial'], ['cv', 'industrial']],
-  teleFlow: [['ep', 'xdr'], ['email', 'xdr'], ['sna', 'xdr'], ['client', 'xdr'], ['cv', 'xdr'], ['fw', 'xdr'], ['cii', 'xdr'],
+  teleFlow: [['ep', 'xdr'], ['email', 'xdr'], ['sna', 'xdr'], ['client', 'xdr'], ['cv', 'xdr'], ['fw', 'xdr'], ['cii', 'xdr'], ['xdr', 'ise'], ['xdr', 'duo'], ['ise', 'splunk'],
     ['talos', 'fw'], ['talos', 'ep'], ['talos', 'cv'], ['talos', 'aid'],
     ['fw', 'splunk'], ['sna', 'splunk'], ['cv', 'splunk'], ['ep', 'splunk'], ['email', 'splunk'], ['duo', 'splunk'], ['xdr', 'es'],
     ['talos', 'saa'], ['es', 'soar'], ['es', 'splunk']],
@@ -876,8 +890,8 @@ const DATA = {
       { id: 'AC-0', nodes: ['@loc'] },
       { id: 'AC-remote', when: { loc: ['$REMOTE'] }, nodes: ['@loc'] },
       { id: 'AC-internet', when: { loc: ['internet'] }, nodes: ['internet'] },
-      { id: 'AC-hq', when: { loc: ['hq'] }, nodes: ['hq', 'wireless', 'switches'] },
-      { id: 'AC-hq-wired', when: { loc: ['hq'], device: ['headless'] }, nodes: ['hq', 'switches'] },
+      { id: 'AC-hq', when: { loc: ['hq'] }, nodes: ['hq', 'wireless', 'switches', 'core'] },
+      { id: 'AC-hq-wired', when: { loc: ['hq'], device: ['headless'] }, nodes: ['hq', 'switches', 'core'] },
       { id: 'AC-branch', when: { loc: ['branch'] }, nodes: ['branch', 'sdwan'] },
       { id: 'AC-factory', when: { loc: ['factory'] }, nodes: ['factory', 'industrial'] },
       { id: 'AC-remote-client', when: { loc: ['$REMOTE'], device: ['$MANAGED'] }, nodes: ['@loc', 'client'] },
@@ -938,7 +952,7 @@ const DATA = {
     { id: 'P2', when: { device: ['mgd', 'mobile'], loc: ['$REMOTE'], who: ['$AUTHN'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
       c: 'Device trust', r: 'Managed, healthy device confirmed', d: 5, sig: 'Trusted device' },
     { id: 'P3', when: { device: ['stale'], loc: ['$ONPREM'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'identity',
-      c: 'Device posture', r: 'Device is out of date and fails compliance policy', d: -15, sig: 'Posture non-compliant',
+      c: 'Device posture', r: 'Secure Client posture check reports the device out of date; it fails compliance policy', d: -15, sig: 'Posture non-compliant',
       v: 'LIMIT', why: 'An out-of-date device is restricted until it is remediated.' },
     { id: 'P4', when: { device: ['stale'], loc: ['$REMOTE'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
       c: 'Device trust', r: 'Device is out of date and fails the device-health policy', d: -15, sig: 'Posture non-compliant',
@@ -972,7 +986,7 @@ const DATA = {
       c: 'User authentication', r: 'MFA not completed; no session issued', d: -30, sig: 'MFA failed',
       v: 'BLOCK', why: 'Authentication was not completed, so no session is created.' },
     { id: 'M5', when: { who: ['$AUTHN'], beh: ['fatigue'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
-      c: 'Push-bombing resistance', r: 'Repeated prompts were not approved by a verified user; sign-in refused', d: -25, sig: 'MFA fatigue pattern',
+      c: 'Push-bombing resistance', r: 'Verified Duo Push needs a code from the sign-in screen, so repeated prompts cannot be approved blindly; sign-in refused', d: -25, sig: 'MFA fatigue pattern',
       v: 'BLOCK', why: 'Repeated unverified MFA prompts are treated as an attack on the identity.' },
     { id: 'M10', when: { who: ['attacker'], nbeh: ['stolen'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
       c: 'User authentication', r: 'No valid identity presented', d: -20, sig: 'Unauthenticated request',
@@ -1049,7 +1063,7 @@ const DATA = {
       c: 'DNS and internet egress control', r: 'Covert channel to the external destination blocked', d: -15, sig: 'Exfiltration behaviour',
       v: 'BLOCK', why: 'The covert outbound channel is blocked at the egress control point.' },
     { id: 'T13', when: { beh: ['exfil'], via: ['fw'], not: { who: ['attacker'] } }, hop: ['fw'], at: 'fw', lens: 'threat', tele: true,
-      c: 'Encrypted threat visibility', r: 'Malicious encrypted flow identified and blocked without decryption', d: -15, sig: 'Exfiltration behaviour',
+      c: 'Encrypted Visibility Engine', r: 'Malicious encrypted flow identified and blocked without decryption', d: -15, sig: 'Exfiltration behaviour',
       v: 'BLOCK', why: 'The covert outbound channel is blocked at the egress control point.' },
     { id: 'T14', when: { beh: ['anomaly'], via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'threat', tele: true,
       c: 'OT behaviour baseline', r: 'Communication deviates from the asset’s recorded behaviour', d: -25, sig: 'OT anomaly' },
@@ -1078,13 +1092,13 @@ const DATA = {
       c: 'Egress threat prevention', r: 'Outbound connection to a known malicious destination blocked using Talos intelligence', d: -20, sig: 'Malicious destination',
       v: 'BLOCK', why: 'The destination is known to be malicious, so the request is blocked before any connection.' },
     { id: 'W4', when: { dest: ['web_risky'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
-      c: 'Web category policy', r: 'Risky category: session permitted with restrictions', d: -5, sig: 'Risky web category',
-      v: 'LIMIT', why: 'Risky-category sites are permitted only in a restricted session, for example isolated or read-only.' },
+      c: 'Web category policy', r: 'Risky category: page opened through Remote Browser Isolation, away from the device', d: -5, sig: 'Risky web category',
+      v: 'LIMIT', why: 'Risky-category sites are opened only in an isolated remote browser.' },
     { id: 'W5', when: { dest: ['shadow'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
-      c: 'Shadow IT control', r: 'Unsanctioned application identified; use restricted', d: -10, sig: 'Unsanctioned application',
+      c: 'Shadow IT control (CASB)', r: 'Unsanctioned application identified by the cloud access security broker; use restricted', d: -10, sig: 'Unsanctioned application',
       v: 'LIMIT', why: 'Unsanctioned SaaS is restricted; sensitive actions such as uploads are not permitted.' },
     { id: 'W6', when: { beh: ['upload'], dest: ['shadow', '$WEB', 'pubai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
-      c: 'Data movement policy', r: 'Sensitive upload to an unapproved destination denied', d: -15, sig: 'Sensitive data upload',
+      c: 'Data Loss Prevention', r: 'Sensitive upload to an unapproved destination denied by the data loss prevention policy', d: -15, sig: 'Sensitive data upload',
       v: 'BLOCK', why: 'Sensitive data may not be uploaded to an unapproved destination.' },
     { id: 'W7', when: { beh: ['upload'], dest: ['saas', 'ai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
       c: 'Data movement policy', r: 'Upload to a sanctioned application evaluated and logged', d: -5, sig: 'Sensitive data upload' },
@@ -1096,7 +1110,7 @@ const DATA = {
     { id: 'A1', when: { dest: ['ai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
       c: 'AI access policy', r: 'Approved AI application permitted for this user' },
     { id: 'A2', when: { dest: ['pubai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
-      c: 'Shadow AI control', r: 'Unapproved AI application denied', d: -10, sig: 'Unapproved AI tool',
+      c: 'Shadow AI control (CASB)', r: 'Unapproved generative AI application detected and blocked', d: -10, sig: 'Unapproved AI tool',
       v: 'BLOCK', why: 'Unapproved AI tools are blocked; the approved assistant is available instead.' },
     { id: 'A3', when: { dest: ['ai', 'pubai'], beh: ['aipaste'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'threat',
       c: 'AI Access data-loss control', r: 'Confidential data detected in the prompt to a third-party AI app; prompt not sent', d: -15, sig: 'Sensitive data in prompt',
@@ -1114,7 +1128,7 @@ const DATA = {
     { id: 'B1', when: { via: ['wireless'] }, hop: ['wireless'], at: 'wireless', lens: 'data', base: true,
       c: 'Air link', r: 'WPA3-protected wireless association' },
     { id: 'B2', when: { via: ['client'] }, hop: ['client'], at: 'client', lens: 'data', base: true,
-      c: 'Device tunnel', r: 'Secure Client provides the device-side VPN / zero trust access session' },
+      c: 'Device tunnel', r: 'Secure Client, the unified client for Secure Access, opens the VPN / zero trust access session' },
     { id: 'B3', when: { via: ['sdwan'] }, hop: ['sdwan'], at: 'sdwan', lens: 'data', base: true,
       c: 'WAN transport', r: 'Traffic carried in the encrypted, segmented SD-WAN overlay' },
     { id: 'B4', when: { via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy', base: true,
@@ -1193,7 +1207,7 @@ const DATA = {
   architectures: [
     { id: 'sase', name: 'SASE: network and security edge', src: 'sase', nodes: ['sa', 'sdwan', 'meraki', 'te', 'duo', 'cii', 'scc'],
       blurb: 'Secure Access is the cloud security edge and SD-WAN the network edge. Identity, experience monitoring and shared management attach around the pair.' },
-    { id: 'zta', name: 'Zero Trust Access', src: 'zta', nodes: ['ise', 'sa', 'duo', 'cii', 'hmf', 'ep', 'switches', 'wireless'],
+    { id: 'zta', name: 'Zero Trust Access', src: 'zta', nodes: ['ise', 'sa', 'duo', 'cii', 'hmf', 'ep', 'switches', 'wireless', 'client'],
       blurb: 'Identity decides access everywhere: ISE on the network, Duo at sign-in, Secure Access per application, with Identity Intelligence supplying risk context.' },
     { id: 'hmf', name: 'Hybrid Mesh Firewall', src: 'hmf', nodes: ['hmf', 'scc', 'fw', 'mcd', 'hs', 'wl', 'aid', 'ise', 'nexus', 'talos'],
       blurb: 'Many enforcement points — firewalls, cloud gateways, smart switches, workload agents and AI guardrails — run one policy managed from Security Cloud Control.' },
@@ -1203,7 +1217,7 @@ const DATA = {
       blurb: 'The Nexus fabric hosts Hypershield enforcement on smart switches; firewalls, workload segmentation and cloud gateways extend the same policy to every workload.' },
     { id: 'ot', name: 'Industrial (OT) security', src: 'itd', nodes: ['industrial', 'cv', 'sea', 'itd', 'fw', 'ise', 'xdr', 'talos', 'meraki'],
       blurb: 'The industrial network is the sensor: Cyber Vision inventories assets and feeds segmentation, firewalling, remote access and IT/OT detection.' },
-    { id: 'xdr', name: 'Detection and response', src: 'xdr', nodes: ['xdr', 'ep', 'email', 'sna', 'client', 'cv', 'fw', 'cii', 'talos'],
+    { id: 'xdr', name: 'Detection and response', src: 'xdr', nodes: ['xdr', 'ep', 'email', 'sna', 'client', 'cv', 'fw', 'cii', 'talos', 'ise', 'duo'],
       blurb: 'Endpoint, email, network, OT, firewall and identity telemetry converge in XDR, which correlates it into incidents; Talos supplies intelligence to the sensors.' },
     { id: 'ai', name: 'Securing AI use', src: 'aid', nodes: ['aid', 'sa', 'hmf', 'scc', 'talos'],
       blurb: 'AI Defense protects models and applications with guardrails, while access to third-party AI apps is governed at the Secure Access edge.' },
@@ -1213,7 +1227,7 @@ const DATA = {
       blurb: 'What the suite packages for adopting Hybrid Mesh Firewall: a Segmentation package and a Gateway package, both with Security Cloud Control.' },
     { id: 'bps', name: 'Breach Protection Suite', src: 'bps', hub: 'bps', nodes: ['bps', 'xdr', 'email', 'ep', 'sna', 'talos'],
       blurb: 'What the suite packages for detection and response, unified by XDR.' },
-    { id: 'splsec', name: 'Splunk for security operations', src: 'es', layer: 'splunk', center: 'splunk', nodes: ['splunk', 'es', 'soar', 'saa', 'fw', 'hmf', 'sna', 'cv', 'itd', 'talos', 'aid', 'xdr', 'ep', 'duo', 'email'],
+    { id: 'splsec', name: 'Splunk for security operations', src: 'es', layer: 'splunk', center: 'splunk', nodes: ['splunk', 'es', 'soar', 'saa', 'fw', 'hmf', 'sna', 'cv', 'itd', 'talos', 'aid', 'xdr', 'ep', 'duo', 'email', 'ise'],
       blurb: 'Cisco firewalls, network analytics, endpoint, email, identity and OT sensors send data to the Splunk platform, and XDR incidents reach Enterprise Security; Enterprise Security detects and prioritises, SOAR automates the response and can act on Cisco products, Attack Analyzer examines samples with Talos intelligence.' },
     { id: 'splobs', name: 'Splunk and Cisco Observability', src: 'obs', layer: 'splunk', center: 'te', nodes: ['o11y', 'itsi', 'appd', 'splunk', 'te', 'nexus', 'agentic'],
       blurb: 'ThousandEyes sees the network path and Splunk sees applications, infrastructure and service health, so a fault can be placed in the right layer.' },
@@ -1513,13 +1527,14 @@ function restart() { S.runs.forEach(r => r.pb = { i: 0, p: 0, done: false }); S.
 function finish() { S.runs.forEach(r => r.pb = { i: r.steps.length - 1, p: 0, done: true }); S.playing = false; }
 /* how far a run has progressed: moves = path edges travelled (fractional), k = last checkpoint reached, cur = checkpoint being shown */
 function prog(r) {
-  let moves = 0, k = -1, cur = -1; const pb = r.pb;
+  const pb = r.pb, key = pb.i * 4 + pb.p + (pb.done ? 2 : 0); if (r._pk === key && r._ps === r.steps) return r._pv;
+  let moves = 0, k = -1, cur = -1;
   for (let i = 0; i <= pb.i && i < r.steps.length; i++) {
     const st = r.steps[i], full = i < pb.i || pb.done;
     if (st.t === 'move') moves += full ? 1 : pb.p;
     if (st.t === 'check') { k = st.k; if (!full) cur = st.k; }
   }
-  return { moves, k, cur, done: pb.done };
+  r._pk = key; r._ps = r.steps; return r._pv = { moves, k, cur, done: pb.done };
 }
 
 
@@ -1889,7 +1904,7 @@ function select(id, focusCam) {
       <a class="src" href="${p.url}" target="_blank" rel="noopener noreferrer">Source: ${new URL(p.url).host.replace('www.', '')} ↗</a><p class="small">Verified ${DATA.meta.verified}.</p>`;
   } else {
     const p = PL[id];
-    el.innerHTML = `<button class="x" aria-label="Close detail">×</button><div class="cat">${p.kind === 'loc' ? 'Location' : 'Destination'}</div><h3>${h(p.name)}</h3><p>${h(p.fn)}</p><p class="small">Scene element, not a product.</p>`;
+    el.innerHTML = `<button class="x" aria-label="Close detail">×</button><div class="cat">${{ loc: 'Location', infra: 'Network infrastructure' }[p.kind] || 'Destination'}</div><h3>${h(p.name)}</h3><p>${h(p.fn)}</p><p class="small">Scene element, not a product.</p>`;
   }
   el.hidden = false; $('#right').scrollTop = 0;
   if (matchMedia('(max-width:900px)').matches) sheet('right');
@@ -2029,17 +2044,19 @@ function createGL(THREE, OrbitControls, PP) {
   const HOME_T = new THREE.Vector3(-7, 3, 1), HOME_O = new THREE.Vector3(68, 116, 100), VS = 36;
   const controls = new OrbitControls(cam, canvas);
   controls.enableDamping = true; controls.dampingFactor = .09; controls.minZoom = .2; controls.maxZoom = 6; controls.maxPolarAngle = 1.45; controls.screenSpacePanning = true;
-  let W = 1, H = 1, dirty = true, tick = 0;
+  let W = 1, H = 1, dirty = true, tick = 0, labelDirty = true; const labelSig = [], labelCull = [];
   /* split view (compare): each half is its own viewport, camera and label layer. Wv = width of one view, vx = its left edge. */
   let split = false, splitWant = true, Wv = 1, vx = 0;
   const labels2 = document.createElement('div'); labels2.id = 'labels2'; labels2.style.display = 'none'; labels.appendChild(labels2);
   const sx = () => (tv3.x * .5 + .5) * Wv + vx, sy = () => (-tv3.y * .5 + .5) * H;
   /* bloom (optional post-processing) and fog are kept only while the frame rate holds */
-  let composer = null, rpass = null, gfxWant = true, gfxOK = true, gfxN = 0, gfxSum = 0, gfxPrev = 0; const gfxForce = /gfx=force/.test(location.search + location.hash);
+  let composer = null, rpass = null, gfxWant = true, gfxOK = true, gfxN = 0, gfxSum = 0, gfxPrev = 0, gfxBad = 0, gfxSkip = 0;
+  try { if (sessionStorage.getItem('ln-gfx') === '0') gfxOK = false; } catch (e) { }   /* already found too slow in this session */ const gfxForce = /gfx=force/.test(location.search + location.hash);
   if (PP) { try { composer = new PP.EffectComposer(renderer, new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: 4 })); rpass = new PP.RenderPass(scene, cam); composer.addPass(rpass);
     composer.addPass(new PP.UnrealBloomPass(new THREE.Vector2(256, 256), .5, .45, .62)); composer.addPass(new PP.OutputPass()); } catch (e) { composer = null; } }
   const gfxApply = () => { scene.fog = gfxWant && gfxOK ? fog : null; };
-  function setGfx(on) { gfxWant = on; gfxApply(); }
+  function setGfx(on) { if (on && !gfxWant) { gfxOK = true; gfxN = gfxSum = gfxBad = gfxSkip = 0; try { sessionStorage.removeItem('ln-gfx'); } catch (e) { } }   /* switching effects back on tries again */
+    gfxWant = on; gfxApply(); }
   /* zoom that fits the whole scene: project the scene's bounding box with the home orientation */
   function fitZoom() {
     const c = new THREE.OrthographicCamera(cam.left, cam.right, cam.top, cam.bottom, -300, 600); c.position.copy(HOME_T).add(HOME_O); c.lookAt(HOME_T); c.updateMatrixWorld(); c.updateProjectionMatrix();
@@ -2089,7 +2106,25 @@ function createGL(THREE, OrbitControls, PP) {
     o: () => new THREE.OctahedronGeometry(.5), t: () => new THREE.TetrahedronGeometry(.6), r: () => new THREE.TorusGeometry(.5, .08, 6, 18), i: () => new THREE.IcosahedronGeometry(.5, 0), p: () => new THREE.CapsuleGeometry(.5, 1, 2, 8) };
   const PG = {}; const prim = k => PG[k] || (PG[k] = P[k]());
   /* spec rows: [primitive, sx, sy, sz, x, y, z, rotX?, rotZ?, detail?]; detail rows use the second material */
-  function build(spec, mat, dmat) { const g = new THREE.Group(); for (const [k, sx, sy, sz, x, y, z, rx, rz, d] of spec) { const m = new THREE.Mesh(prim(k), d && dmat ? dmat : mat); m.scale.set(sx, sy, sz); m.position.set(x, y, z); if (rx) m.rotation.x = rx; if (rz) m.rotation.z = rz; g.add(m); } return g; }
+function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [k, sx, sy, sz, x, y, z, rx, rz, d] of spec) { const m = new THREE.Mesh(prim(k), d && dmat ? dmat : mat); m.scale.set(sx, sy, sz); m.position.set(x, y, z); if (rx) m.rotation.x = rx; if (rz) m.rotation.z = rz; g.add(m); } return g; }
+  /* build(): the same model merged into one geometry per material, so a model costs one or two draw calls instead of one per primitive.
+     Merged geometry is cached per spec, so re-running a scenario allocates nothing new. Flat shading derives normals in the shader. */
+  const MERGED = new Map(), flat = k => PG['~' + k] || (PG['~' + k] = prim(k).index ? prim(k).toNonIndexed() : prim(k));
+  function mergedGeo(spec, detail) {
+    const key = detail ? 'd' : 'm'; let e = MERGED.get(spec); if (!e) MERGED.set(spec, e = {}); if (key in e) return e[key];
+    const out = [], m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), eu = new THREE.Euler(), v = new THREE.Vector3(), s = new THREE.Vector3(), t = new THREE.Vector3();
+    for (const [k, sx, sy, sz, x, y, z, rx, rz, d] of spec) {
+      if (!!d !== detail) continue; const src = flat(k).attributes.position; m4.compose(t.set(x, y, z), q.setFromEuler(eu.set(rx || 0, 0, rz || 0)), s.set(sx, sy, sz));
+      for (let i = 0; i < src.count; i++) { v.fromBufferAttribute(src, i).applyMatrix4(m4); out.push(v.x, v.y, v.z); }
+    }
+    if (!out.length) return e[key] = null;
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(out, 3)); g.computeVertexNormals(); g.computeBoundingSphere(); return e[key] = g;
+  }
+  function build(spec, mat, dmat) {
+    const g = new THREE.Group(), all = !dmat;
+    if (all) { let e = MERGED.get(spec); if (!e || !('a' in e)) { const sp2 = spec.map(r => r.slice(0, 9)); MERGED.set(sp2, {}); const geo = mergedGeo(sp2, false); if (!e) MERGED.set(spec, e = {}); e.a = geo; } g.add(new THREE.Mesh(e.a, mat)); return g; }
+    const gm = mergedGeo(spec, false), gd = mergedGeo(spec, true); if (gm) g.add(new THREE.Mesh(gm, mat)); if (gd) g.add(new THREE.Mesh(gd, dmat)); return g;
+  }
   /* product models: generic, recognisable device silhouettes built from primitives (no vendor artwork) */
   const QT = Math.PI / 2, DK = 1;
   const LAPTOP = [['b', 1.7, .1, 1.1, 0, .3, .1], ['b', 1.7, 1.05, .08, 0, .85, -.45, -.15], ['b', 1.5, .85, .03, 0, .86, -.4, -.15, 0, DK]];
@@ -2141,7 +2176,8 @@ function createGL(THREE, OrbitControls, PP) {
     cloudapp: [['s', 1.5, 1.1, 1.5, -.3, .7, 0], ['s', 1.2, .9, 1.2, .55, .6, 0], ['b', 1, .5, 1, 0, 1.5, 0]], saas: [['s', 1.6, 1.1, 1.6, 0, .7, 0], ['s', 1.1, .8, 1.1, .7, .55, .2]],
     shadow: [['s', 1.6, 1.1, 1.6, 0, .7, 0], ['k', 1, .8, 1, 0, 1.6, 0]], ai: [['o', 1.7, 1.7, 1.7, 0, 1, 0]], pubai: [['o', 1.7, 1.7, 1.7, 0, 1, 0], ['k', .9, .7, .9, 0, 2.1, 0]],
     web: [['s', 1.8, 1.8, 1.8, 0, 1, 0], ['r', 2.3, 2.3, 2.3, 0, 1, 0, Math.PI / 2]], mail: [['b', 1.9, .25, 1.3, 0, .5, 0], ['k', 1.5, .5, 1, 0, .85, 0]],
-    otctl: [['b', 1.4, .8, 1.4, 0, .4, 0], ['c', .4, 1.4, .4, 0, 1.5, 0], ['b', 1.3, .3, .3, .5, 2.1, 0]]
+    otctl: [['b', 1.4, .8, 1.4, 0, .4, 0], ['c', .4, 1.4, .4, 0, 1.5, 0], ['b', 1.3, .3, .3, .5, 2.1, 0]],
+    core: [['b', 2.3, .5, 1.3, 0, .3, 0], ['b', 2.3, .5, 1.3, 0, .9, 0], ['b', 2.3, .5, 1.3, 0, 1.5, 0]]
   };
   const ACTOR = {
     emp: [['p', .8, .7, .8, 0, .85, 0], ['s', .8, .8, .8, 0, 2.1, 0]], admin: [['p', .8, .7, .8, 0, .85, 0], ['s', .8, .8, .8, 0, 2.1, 0], ['r', 1.5, 1.5, 1.5, 0, 2.75, 0, Math.PI / 2]],
@@ -2203,7 +2239,7 @@ function createGL(THREE, OrbitControls, PP) {
       const dia = new THREE.Mesh(diaG, new THREE.MeshBasicMaterial({ color: 0xf4c95d, wireframe: true })); dia.position.y = MODEL[id] ? 2.8 : 2.35; dia.visible = false; g.add(dia);
       nodes[id] = { g, mat, dmat, mesh: m, ring, dia, isP, p }; top = MODEL[id] ? 2.4 : 2.1;
     } else {
-      const b = build(PLACE[id], mat); b.children.forEach(m => { m.userData.id = id; pickables.push(m); }); g.add(b);
+      const b = (id === 'internet' || id === 'web' ? buildParts : build)(PLACE[id], mat); b.children.forEach(m => { m.userData.id = id; pickables.push(m); }); g.add(b);
       if (id === 'internet' || id === 'web') b.children[0].material = new THREE.MeshStandardMaterial({ color: p.hostile ? 0x8a4a55 : PLC, wireframe: true });
       nodes[id] = { g, mat, isP, p }; top = 3;
     }
@@ -2354,7 +2390,7 @@ function createGL(THREE, OrbitControls, PP) {
         const l = new THREE.LineSegments(bg, new THREE.LineBasicMaterial({ color: LENS[e.lens].color, transparent: true, opacity: 0 })); g.add(l); return l;
       });
       /* verdict marker: distinct shape per verdict, not only colour */
-      const mk = new THREE.Group(), mm = new THREE.MeshBasicMaterial({ color: getComputedStyle(document.body).getPropertyValue({ ALLOW: '--ok', LIMIT: '--limit', STEPUP: '--step', BLOCK: '--block', CONTAIN: '--contain' }[r.verdict]).trim() || '#fff' });
+      const mk = new THREE.Group(), mm = new THREE.MeshBasicMaterial({ color: VCOL[r.verdict] });
       const bar = (rz) => { const m = new THREE.Mesh(prim('b'), mm); m.scale.set(2.6, .28, .28); m.rotation.z = rz; mk.add(m); };
       if (r.verdict === 'BLOCK') { bar(Math.PI / 4); bar(-Math.PI / 4); }
       else if (r.verdict === 'CONTAIN') { const c = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(3, 3.4, 3)), new THREE.LineBasicMaterial({ color: mm.color })); c.position.y = .6; mk.add(c); }
@@ -2432,7 +2468,10 @@ function createGL(THREE, OrbitControls, PP) {
       controls.target.lerpVectors(tw.ft, tw.tt, e); cam.position.lerpVectors(tw.fp, tw.tp, e); cam.zoom = tw.fz + (tw.tz - tw.fz) * e; cam.updateProjectionMatrix(); if (k >= 1) tw = null; }
     controls.update(); const fol = updateFollow(now), fp = fol && viewMode === 'first'; applyWar(fol); updateFx(now); const sh = shakeVec(now);
     /* frame-rate guard: bloom and fog stay only if roughly 50 fps or better holds over two seconds */
-    if (gfxWant && gfxOK && !gfxForce && gfxN < 160) { const d = now - gfxPrev; if (gfxN > 40 && d < 250) gfxSum += d; if (++gfxN === 160 && gfxSum / 119 > 20) { gfxOK = false; gfxApply(); } } gfxPrev = now;
+    if (gfxWant && gfxOK && !gfxForce) {   /* watch the frame time in short windows (20 frames or 0.7 s, whichever comes first); two slow windows in a row, under about 45 fps, switch bloom and fog off */
+      const d = now - gfxPrev; if (d < 1000 && ++gfxSkip > 3) { gfxSum += d; gfxN++; if (gfxN >= 20 || gfxSum >= 700) { gfxBad = gfxSum / gfxN > 22 ? gfxBad + 1 : 0; gfxSum = gfxN = 0;
+        if (gfxBad >= 2) { gfxOK = false; gfxApply(); try { sessionStorage.setItem('ln-gfx', '0'); } catch (e) { } } } } }
+    gfxPrev = now; renderer.info.reset(); hoverNow();
     /* ambient particles along the links the lens cares about */
     const show = flow.length && !RM.matches && !fol;   /* ambient traffic is an overview effect; it is distracting up close */
     for (let i = 0; i < NP; i++) {
@@ -2450,9 +2489,9 @@ function createGL(THREE, OrbitControls, PP) {
     if (dirty) {   /* re-measure labels; the right-hand layer mirrors the left one's text and state */
       for (const id in nodes) { const n = nodes[id], a = n.L[0], b = n.L[1]; a.w = n.el.offsetWidth; a.h = n.el.offsetHeight;
         if (b && split) { b.el.innerHTML = n.el.innerHTML; b.el.className = n.el.className.replace(/\b(hit|cull)\b/g, ''); b.w = b.el.offsetWidth; b.h = b.el.offsetHeight; } }
-      dirty = false; tick = 0;
+      dirty = false; tick = 0; labelDirty = true;
     }
-    const cullNow = fol || tick++ % 5 === 0, passes = split ? [[rv[0]], [rv[1]]] : [rv];
+    const cullTick = fol || tick++ % 5 === 0, passes = split ? [[rv[0]], [rv[1]]] : [rv], relaid = labelDirty; labelDirty = false;
     renderer.setScissorTest(split);
     passes.forEach((runs, pi) => {
       const lead = runs[0]; vx = split ? pi * Wv : 0;
@@ -2464,8 +2503,13 @@ function createGL(THREE, OrbitControls, PP) {
       fxVisible(split && lead ? lead.r.slot : null);
       if (composer && gfxWant && gfxOK && !split) { rpass.camera = view; composer.render(); } else renderer.render(scene, view);
       for (const x of runs) chipRun(x, fp && x === lead);
-      layoutLabels(pi, runs, cullNow); popsPass(pi);
-      if (pi === 0) {
+      /* signature of everything label positions depend on: camera pose and zoom, viewport, playhead */
+      let sig = W + '|' + H + '|' + vx + '|' + (view.zoom || 0); const me = view.matrixWorld.elements; for (let i = 0; i < 16; i++) sig += '|' + me[i].toFixed(3); for (const x of rv) sig += '|' + x.r.pb.i + (x.r.pb.done ? 'd' : '') + x.head.position.x.toFixed(2) + x.head.position.z.toFixed(2);
+      const moved = relaid || sig !== labelSig[pi]; labelSig[pi] = sig; if (moved) labelCull[pi] = true;
+      const cullNow = moved ? cullTick : labelCull[pi];   /* after the last change, cull once more and then rest */
+      if (moved || cullNow) { layoutLabels(pi, runs, cullNow); if (cullNow) labelCull[pi] = false; }
+      popsPass(pi);
+      if (pi === 0 && moved) {
         for (const z of topoChips) { tv3.copy(z.v).project(view); z.el.style.visibility = tv3.z > 1 ? 'hidden' : ''; z.el.style.transform = `translate(${sx().toFixed(1)}px,${sy().toFixed(1)}px) translate(-50%,-50%)`; }
         for (const z of zoneLbl) { tv3.copy(z.v).project(view); z.el.style.visibility = tv3.z > 1 ? 'hidden' : ''; z.el.style.transform = `translate(${sx().toFixed(1)}px,${sy().toFixed(1)}px) translate(0,-50%)`; }
       }
@@ -2553,7 +2597,7 @@ function createGL(THREE, OrbitControls, PP) {
     cam.zoom = clamp(VS / (d * Math.tan(THREE.MathUtils.degToRad(pcam.fov / 2))), controls.minZoom, controls.maxZoom);
     cam.lookAt(controls.target); cam.updateProjectionMatrix(); tw = null; return true;
   }
-  let handing = null;
+  let handing = null, hoverAt = null;
   canvas.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; tw = null; });
   canvas.addEventListener('pointerup', e => { if (!handing && down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 6) { const id = pick(e); window.__select(id, false); } down = null; handing = null; });
   canvas.addEventListener('pointermove', e => {
@@ -2561,9 +2605,10 @@ function createGL(THREE, OrbitControls, PP) {
       handing = [e.clientX, e.clientY]; canvas.dispatchEvent(new CustomEvent('ln-handover')); return;
     }
     if (handing && e.buttons) { nudge('rot', -(e.clientX - handing[0]) * .006, -(e.clientY - handing[1]) * .004); handing = [e.clientX, e.clientY]; return; }
-    if (e.pointerType === 'touch' || e.buttons) return tip(null); const id = pick(e), b = stage.getBoundingClientRect(); canvas.style.cursor = id ? 'pointer' : 'grab'; tip(id, e.clientX - b.left, e.clientY - b.top); });
-  canvas.addEventListener('pointerleave', () => tip(null));
-  new ResizeObserver(resize).observe(stage); resize(); home(true); gfxApply();
+    if (e.pointerType === 'touch' || e.buttons) { hoverAt = null; return tip(null); } hoverAt = { clientX: e.clientX, clientY: e.clientY }; });   /* the ray is cast once per frame, in frame() */
+  function hoverNow() { if (!hoverAt) return; const e = hoverAt; hoverAt = null; const id = pick(e), b = stage.getBoundingClientRect(); canvas.style.cursor = id ? 'pointer' : 'grab'; tip(id, e.clientX - b.left, e.clientY - b.top); }
+  canvas.addEventListener('pointerleave', () => { hoverAt = null; tip(null); });
+  new ResizeObserver(resize).observe(stage); resize(); home(true); gfxApply(); renderer.info.autoReset = false;
   const screenOf = id => { const b = canvas.getBoundingClientRect(), p = POS(id); cam.updateMatrixWorld(); tv3.set(p[0], p[1] + .85, p[2]).project(cam); return [b.left + (tv3.x * .5 + .5) * (split ? b.width / 2 : b.width), b.top + (-tv3.y * .5 + .5) * b.height]; };
   /* scene image for export: redraw, then copy the canvas and paint the visible labels on top in the same task */
   function snapshot() {
@@ -2579,7 +2624,7 @@ function createGL(THREE, OrbitControls, PP) {
     g.globalAlpha = 1; g.textAlign = 'left'; g.fillStyle = '#a9b6d3'; g.font = '500 11px system-ui, sans-serif'; g.fillText('Living Network · ' + DATA.meta.sceneLabel + ' · independent educational visualization', 12, H - 12);
     return cv;
   }
-  return { kind: 'webgl', fx, nudge, snapshot, setSplit, setGfx, setFogWar, isSplit: () => split, gfx: () => ({ bloom: !!composer && gfxWant && gfxOK, fog: !!scene.fog, ok: gfxOK }), setLens, setRuns, setTopo, setLayer, setView, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
+  return { kind: 'webgl', stats: () => ({ calls: renderer.info.render.calls, tris: renderer.info.render.triangles, geos: renderer.info.memory.geometries }), fx, nudge, snapshot, setSplit, setGfx, setFogWar, isSplit: () => split, gfx: () => ({ bloom: !!composer && gfxWant && gfxOK, fog: !!scene.fog, ok: gfxOK }), setLens, setRuns, setTopo, setLayer, setView, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
 }
 
 /* =====================================================================================

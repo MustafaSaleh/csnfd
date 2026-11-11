@@ -123,8 +123,8 @@ edit. The tables below were generated from that object.
 - **Security Cloud Control**: kept under that name as requested; the product page is currently titled "Security in Cisco
   Cloud Control" and the panel notes it. The panel and the policy-push checkpoints also say that SD-WAN overlay policy
   stays in Catalyst SD-WAN Manager and that some products keep their own consoles.
-- **Secure Client ↔ Secure Access**: no page read states this pairing by name, so no relationship line is drawn. Traffic
-  paths from a managed remote device still pass Secure Client then Secure Access as a conceptual flow.
+- **Secure Client ↔ Secure Access** is now drawn: the Secure Access data sheet calls Secure Client "the single, unified
+  client for Secure Access".
 - **Umbrella** is retiring and is no longer in the scene. Secure Access is described as the SSE that incorporates the
   DNS-layer security and secure web gateway (SWG) capabilities that were previously the core of Umbrella and expands
   them into a full SSE platform. Its three former lines (Secure Client, Secure Endpoint, SD-WAN) were removed, and
@@ -132,9 +132,11 @@ edit. The tables below were generated from that object.
 - **WAAP** states no Cisco integration on its own page; its single line comes from the Firewall page's integration list.
 - **Talos**: its page says it powers Cisco security products in general. Lines are drawn only to products whose own pages
   name Talos (Firewall, Secure Endpoint, Cyber Vision, AI Defense, Industrial Threat Defense, two suites).
-- **Data loss prevention, remote browser isolation, CASB, SWG** are not named on the pages read. Outcomes such as "sensitive
-  upload denied" or "restricted session, for example isolated or read-only" are illustrative policy outcomes and are not
-  presented as named product features.
+- **Data Loss Prevention, Remote Browser Isolation, CASB and clientless access** are named on the public Secure Access
+  data sheet, so the rules now name them (W4, W5, W6, A2). The data sheet's AI Access text speaks of controlling source
+  code sent to generative AI; it does not use the word "prompt", so rule A3 stays an illustrative outcome.
+- **Verified Duo Push** is named in rule M5 on the strength of three reviewers agreeing; the Duo policy page was read
+  only in part, so the exact wording there is not confirmed.
 - **Splunk** has no product pages on cisco.com (the URLs tried returned 404; Cisco's product index links out to
   splunk.com). Splunk product functions therefore come from splunk.com. Lines between Splunk and Cisco products are
   drawn only where a Cisco or Splunk page states them: Firewall, Hybrid Mesh Firewall, Secure Network Analytics, Cyber
@@ -142,17 +144,22 @@ edit. The tables below were generated from that object.
   AppDynamics) and AI Canvas (ITSI). Duo, Email Threat Defense, Identity Intelligence, Multicloud Defense, Secure
   Endpoint and Secure Workload lines, and XDR ↔ Enterprise Security ("Incident Import & Promote to ES Notable"), come
   from the Cisco Security Cloud app on Splunkbase (https://splunkbase.splunk.com/app/7404).
-- **Not drawn for Splunk**: Secure Access, ISE, Meraki and ThousandEyes ↔ ITSI. Reviewers state that each has
-  its own Splunkbase app, but none is in the Cisco Security Cloud app and no app page has been checked yet. Security
-  Cloud Control does not mention Splunk on the pages read. Secure Client's Splunk reference is only a link slug.
+- **Drawn for Splunk after checking Splunkbase**: ISE (Splunk Add-on for Cisco Identity Services), Meraki (Cisco Meraki
+  Add-on for Splunk) and ThousandEyes (Cisco ThousandEyes App for Splunk), each with its app page as the source. ISE
+  and ThousandEyes now feed the Splunk layer in scenarios.
+- **Not drawn for Splunk**: Secure Access (no app page found among those checked) and ThousandEyes ↔ ITSI (the
+  ThousandEyes Splunk app documentation does not mention ITSI, and the ThousandEyes integrations page refused the
+  request). Security Cloud Control does not mention Splunk on the pages read. Secure Client's Splunk reference is only
+  a link slug.
 - **Splunk checkpoints are illustrative**: which Cisco events reach Splunk, and what Enterprise Security or SOAR do
   with them, depends on configured data sources, detections and playbooks.
 - **No performance numbers, specs or licence details** are shown anywhere.
 - **Not drawn** for lack of an explicit statement: Meraki ↔ Secure Routers, Multicloud Defense ↔ Secure Workload,
-  XDR ↔ ISE, XDR ↔ Duo, XDR ↔ Secure Access, AI Defense ↔ XDR, Hypershield ↔ Secure Workload,
-  Duo ↔ Secure Client. Two expert reviewers state XDR ↔ ISE (quarantine through Adaptive Network Control) and XDR
-  ingesting Duo and Secure Access, but the XDR product page does not name them and the XDR documentation could not be
-  loaded, so no public page has been checked.
+  XDR ↔ Secure Access, AI Defense ↔ XDR, Hypershield ↔ Secure Workload, Duo ↔ Secure Client.
+- **XDR ↔ ISE, XDR ↔ Duo and XDR ↔ Splunk** are now drawn: the public Cisco XDR data sheet lists ISE, Duo, Splunk Cloud
+  and Splunk Enterprise as integrations. The data sheet does not describe a response action through ISE, so the tool
+  still does not claim that XDR quarantines through ISE, although two reviewers state it. Secure Access is not in the
+  data sheet's list, so that line is not drawn.
 - **Hypershield availability** varies by capability; the panel says so and no dates are shown.
 - Listed on cisco.com but out of the requested scope: Secure Web Appliance, Attack Surface Management, Secure Malware
   Analytics, Security Analytics and Logging, Telemetry Broker, Secure DDoS Protection, Vulnerability Management,
@@ -175,8 +182,8 @@ Nothing below is done yet. It is kept here so it can be picked up later.
   missing. The "verified on" date is fixed text; there is no process to re-check the pages.
 
 **Content**
-- Secure Access, ISE, Meraki and ThousandEyes do not feed the Splunk layer yet; their Splunkbase app pages
-  have to be checked first. XDR ↔ ISE, XDR ↔ Duo and XDR ↔ Secure Access need a public XDR integration page.
+- Secure Access does not feed the Splunk layer and has no XDR line: no public page naming either was found.
+  ThousandEyes ↔ ITSI and an XDR response action through ISE also still need a public page.
 - No licensing view: nothing shows which suite or tier a scenario needs.
 - No "exploit" or "denial of service" behaviour, and no multi-stage attack that chains several steps in one run.
 - Products listed on cisco.com but out of scope: Secure Web Appliance, Attack Surface Management, Secure Malware
@@ -203,6 +210,51 @@ Checked in a headless browser: zero console errors; all 30 presets play to a ver
 (about 206,000 including behaviour sets and removed controls) returns a path, a timeline and a verdict; split-view
 compare, removing controls, link sharing, the tour, and each export format work; every product panel links to its
 source page.
+
+## Combined version, 11 November 2026
+
+This version merges the two lines of work (the build with tour, export, split view and full screen, and the build that
+applied the expert review) and then adds the following.
+
+Still missing after the review, now applied:
+- **Campus core / distribution hop** (review item 14, the first "most important fix" of reviewer A): a generic
+  infrastructure node between the access switch and the firewall or WAN on every HQ path. It is a scene element, not a
+  product.
+- **Second round of public page checks** for the items the review left pending:
+  - Cisco XDR data sheet: ISE, Duo, Splunk Cloud and Splunk Enterprise are listed integrations, so XDR ↔ ISE, XDR ↔ Duo
+    and XDR ↔ Splunk Platform are drawn.
+  - Splunkbase: apps exist for ISE, Meraki and ThousandEyes, so those three lines are drawn; ISE and ThousandEyes feed
+    the Splunk layer.
+  - Secure Access data sheet: Secure Client is its client (line drawn), and Data Loss Prevention, Remote Browser
+    Isolation, CASB and clientless access are named, so rules W4, W5, W6, A2 and B2 use those names.
+  - Not confirmed, so not applied: XDR ↔ Secure Access, an XDR quarantine action through ISE, ThousandEyes ↔ ITSI, a
+    Splunk app for Secure Access.
+- Rules also name the Secure Client posture check (P3), Verified Duo Push (M5) and the Encrypted Visibility Engine
+  (T13), as the reviewers agreed.
+- Topology: ISE and Duo added to "Detection and response", Secure Client to "Zero Trust Access", ISE to "Splunk for
+  security operations". The scene now has 40 products and 115 relationships.
+
+Performance:
+- **Bloom and fog guard reacts in about two seconds** instead of counting 160 frames. On a slow device the old guard
+  took roughly half a minute at a few frames per second before it switched bloom off. The result is remembered for the
+  browser session; turning visual effects off and on tries again.
+- **Models are merged**: each product model, place and device is one mesh per material instead of one mesh per
+  primitive. Draw calls in the overview fall from about 310 to about 190, with the same triangle count. Merged
+  geometry is cached, so re-running a scenario allocates nothing new.
+- **Hover picking runs once per frame** instead of on every pointer event.
+- **Labels are re-projected only when something changed** (camera, playhead, lens, selection, filter or fog), and
+  playback progress is computed once per frame instead of several times.
+- Measured in a software renderer, where the frame rate is limited by pixel fill and did not change; the gain to expect
+  is on real GPUs and phones, which were not measured.
+
+Other:
+- The first-visit tour prompt moved to the bottom of the scene so it no longer covers the legend.
+
+Checks after these changes: zero console errors; all 30 presets give the same verdicts as the reviewed version;
+204,720 scenario combinations (including removed controls) each return a path, a timeline and a verdict; no
+relationship, architecture, flow or Splunk feed points to a missing product or lacks a source; switching the Splunk
+layer off changes no preset verdict; tour, export, split view, full screen, fog of war and the 3rd-person drag
+handover work in headless Chromium.
 
 ## Changes, 11 November 2026
 
@@ -256,7 +308,9 @@ disagreed, the cisco.com page was checked. Applied:
   DNS-layer check for an IoT device calling an unknown host (47, rule W9).
 
 Not applied: ISE in a "Premier" User Protection tier (the page lists Essentials and Advantage only), CANNOT CONFIRM on
-items 3 and 7 (the pages confirm them), and XDR ↔ ISE, Duo or Secure Access lines (no public page checked yet).
+items 3 and 7 (the pages confirm them), an XDR ↔ Secure Access line, an XDR quarantine action through ISE, and
+ThousandEyes ↔ ITSI (no public page states them; see "Combined version" above for what a second round of page checks
+did confirm).
 
 Pages checked on 11 November 2026 to settle disagreements: the User Protection Suite page (two tiers; ISE in Advantage),
 the Breach Protection Suite page (Essentials, Advantage with Telemetry Broker, Premier), the Secure Access page
@@ -281,10 +335,10 @@ A and B cite document titles, not URLs. C = CORRECT, P = PARTLY, I = INCORRECT, 
 | 8–11 | C | C | C | No change. Posture is checked by the Secure Client posture module. |
 | 12 | C | C | C | Quarantine rules T3, T9 and T16 name Adaptive Network Control (applied through Change of Authorization). |
 | 13 | C | C | C | No change. |
-| 14 | P | P | P | Scene caption says campus core/distribution and wireless controllers are not shown. C's "missing ISE" is a decision point already shown as a checkpoint. |
+| 14 | P | P | P | Applied in the combined version: a generic "Campus core / distribution" hop sits between the access switch and the firewall or WAN on every HQ path. The caption says wireless controllers and SD-Access fabric nodes are not shown. C's "missing ISE" is a decision point already shown as a checkpoint. |
 | 15–18 | C | C | C | No change. |
 | 19 | P | P | P | Applied. Secure Access credited for internet-edge blocks; Umbrella rules W1, W1p, W1f removed. |
-| 20–24 | C | C | C | No change. Verified Push is the push-fatigue feature. |
+| 20–24 | C | C | C | Applied in the combined version: rules name CASB (W5, A2), Data Loss Prevention (W6), Remote Browser Isolation (W4), Verified Duo Push (M5) and the Encrypted Visibility Engine (T13). The first three were confirmed on the Secure Access data sheet. |
 | 25 | C | C | C | No change; availability note added to Hypershield. |
 | 26 | P | C | C | Reviewers disagree on availability; panel says availability varies by capability, no dates. |
 | 27–28 | C | C | C | No change. |
@@ -293,13 +347,13 @@ A and B cite document titles, not URLs. C = CORRECT, P = PARTLY, I = INCORRECT, 
 | 31 | C | C | C | No change. |
 | 32 | P | P | P | Applied. A3 credited to Secure Access AI Access; AI Defense only for internal AI apps (A4–A6). |
 | 33–36 | C | C | — | No change. |
-| 37 | C | C | — | Not drawn: XDR ↔ Duo and XDR ↔ Secure Access / Umbrella have no public page checked yet. |
-| 38 | C | C | — | Not drawn: XDR ↔ ISE quarantine has no public page checked yet. |
+| 37 | C | C | — | Applied in the combined version for ISE and Duo (named in the public XDR data sheet). XDR ↔ Secure Access not drawn: not in that list. |
+| 38 | C | C | — | Partly applied: the XDR ↔ ISE line is drawn from the XDR data sheet. A quarantine action through ISE is not claimed, because the data sheet does not describe it. |
 | 39–40 | C | C | — | No change. |
-| 41 | I | I | — | Applied. Splunk feeds added from the Cisco Security Cloud app; Secure Access, Umbrella, ISE, Meraki, ThousandEyes pending. |
+| 41 | I | I | — | Applied. Splunk feeds from the Cisco Security Cloud app, plus ISE, Meraki and ThousandEyes from their own Splunkbase apps. Secure Access still pending. |
 | 42 | C | C | — | Applied. SOAR can argue for CONTAIN (rule SP8). |
 | 43 | C | C | — | Applied. XDR ↔ Enterprise Security line. |
-| 44 | C | C | — | Not drawn: ThousandEyes ↔ ITSI has no page checked yet. |
+| 44 | C | C | — | Partly applied: ThousandEyes ↔ Splunk Platform is drawn from the ThousandEyes app on Splunkbase. ThousandEyes ↔ ITSI not drawn: the page read does not mention ITSI. |
 | 45 | P | P | — | Applied. "Illustrative trust level", real signals named. |
 | 46 | C | C | — | No change. |
 | 47 | C | P | — | Applied. Secure Access DNS-layer check for the IoT call-out (rule W9). |
@@ -470,15 +524,15 @@ G. THE MODEL ITSELF
 | Cisco Identity Services Engine (ISE) | Identity & access | Network access control that profiles endpoints, applies identity and posture context, segments access and quarantines risky devices. | https://www.cisco.com/site/us/en/products/security/identity-services-engine/index.html |
 | Cisco Identity Intelligence | Identity & access | Identity analytics that exposes risky accounts and privileges and flags high-risk access attempts for Duo, Secure Access and XDR. | https://www.cisco.com/site/us/en/solutions/security/identity-intelligence/index.html |
 | Cisco Secure Client | Identity & access | Modular endpoint client providing VPN and zero trust network access, with endpoint and roaming security modules. | https://www.cisco.com/site/us/en/products/security/secure-client/index.html |
-| Cisco Secure Access | Identity & access | SSE: Cisco Secure Access incorporates the DNS-layer security and secure web gateway (SWG) capabilities that were previously the core of Umbrella, but it expands them into a full SSE platform with zero trust and VPN access to private apps, SaaS and AI use. | https://www.cisco.com/site/us/en/products/security/secure-access/index.html |
+| Cisco Secure Access | Identity & access | SSE: Cisco Secure Access incorporates the DNS-layer security and secure web gateway (SWG) capabilities that were previously the core of Umbrella, but it expands them into a full SSE platform with zero trust and VPN access to private apps, SaaS and AI use. *DNS-layer security is also offered on its own as “Secure Access DNS Defense”, and the AI Access feature set covers third-party AI apps. Umbrella is retiring, so it is not shown as a separate product; Secure Access is credited for every internet-edge block.* | https://www.cisco.com/site/us/en/products/security/secure-access/index.html |
 | Cisco Secure Firewall | Network security | Firewalls that inspect traffic, use Talos intelligence and detect threats in encrypted flows without decrypting them. | https://www.cisco.com/site/us/en/products/security/firewalls/index.html |
 | Cisco Hybrid Mesh Firewall | Network security | Solution that unifies distributed enforcement points — firewalls, smart switches, agents and AI guardrails — under one management plane. | https://www.cisco.com/site/us/en/solutions/security/hybrid-mesh-firewall/index.html |
 | Cisco Multicloud Defense | Network security | Cloud firewalling from one control plane with ingress, egress and east-west protection across public and private clouds. | https://www.cisco.com/site/us/en/products/security/multicloud-defense/index.html |
-| Cisco Security Cloud Control | Network security | Unified management that authors policy once and applies it across Cisco and third-party enforcement points. *The cisco.com product page is currently titled “Security in Cisco Cloud Control”.* | https://www.cisco.com/site/us/en/products/security/security-cloud-control/index.html |
-| Cisco Hypershield | Cloud & application security | Distributed security fabric giving stateful segmentation close to workloads, enforced on Nexus N9300 Smart Switches. | https://www.cisco.com/site/us/en/products/security/hypershield/index.html |
+| Cisco Security Cloud Control | Network security | Unified management that authors policy once and applies it across Cisco and third-party enforcement points. *The cisco.com product page is currently titled “Security in Cisco Cloud Control”. It manages security policy; SD-WAN overlay policy stays in Catalyst SD-WAN Manager, and some products, such as Secure Access and Secure Workload, keep their own consoles alongside it.* | https://www.cisco.com/site/us/en/products/security/security-cloud-control/index.html |
+| Cisco Hypershield | Cloud & application security | Distributed security fabric giving stateful segmentation close to workloads, enforced on Nexus N9300 Smart Switches. *Availability varies by capability and enforcement point; check the product page before presenting a capability as generally available.* | https://www.cisco.com/site/us/en/products/security/hypershield/index.html |
 | Cisco Secure Workload | Cloud & application security | Zero trust microsegmentation for workloads in any environment, with visibility into flows and policy recommendations. | https://www.cisco.com/site/us/en/products/security/secure-workload/index.html |
 | Cisco AI Defense | Cloud & application security | Discovers AI assets, tests models for vulnerabilities and applies runtime guardrails against prompt injection and data leakage. | https://www.cisco.com/site/us/en/products/security/ai-defense/index.html |
-| Cisco Web Application and API Protection (WAAP) | Cloud & application security | Application, API and bot protection that uses behavioural analysis to identify threats before they reach the application. | https://www.cisco.com/c/en/us/products/security/secure-web-application-firewall/index.html |
+| Cisco Web Application and API Protection (WAAP) | Cloud & application security | Application, API and bot protection that uses behavioural analysis to identify threats before they reach the application. *Multicloud Defense also provides ingress web application firewalling, so a separate WAAP in front of it is optional and depends on the requirement.* | https://www.cisco.com/c/en/us/products/security/secure-web-application-firewall/index.html |
 | Cisco Secure Endpoint | Endpoint & email | Endpoint detection and response that blocks malware and can isolate an infected host with one action. | https://www.cisco.com/site/us/en/products/security/endpoint-security/secure-endpoint/index.html |
 | Cisco Secure Email Threat Defense | Endpoint & email | Cloud email security that stops threats before delivery and remediates messages after delivery through APIs. | https://www.cisco.com/site/us/en/products/security/secure-email/index.html |
 | Cisco XDR | Detection & intelligence | Correlates telemetry from network, endpoint, email, cloud and identity into prioritised incidents with guided and automated response. | https://www.cisco.com/site/us/en/products/security/xdr/index.html |
@@ -498,9 +552,9 @@ G. THE MODEL ITSELF
 | Splunk AppDynamics | Splunk (data, security analytics, observability) | Application observability for hybrid and on-premises apps that links performance to business metrics, with runtime application security. | https://www.splunk.com/en_us/products/splunk-appdynamics.html |
 | Cisco Breach Protection Suite | Suites | Suite unified by XDR with Email Threat Defense and Secure Endpoint; the Advantage tier adds Secure Network Analytics and Telemetry Broker, and a Premier tier adds managed XDR and Talos Incident Response. | https://www.cisco.com/site/us/en/products/security/breach-protection/index.html |
 
-## Relationships drawn (108)
+## Relationships drawn (115)
 
-Each line is a relationship stated on the cisco.com, splunk.com or Splunkbase page given as its source.
+Each line is a relationship stated on the cisco.com page given as its source.
 
 | A | B | Stated relationship | Source page |
 |---|---|---|---|
@@ -518,6 +572,13 @@ Each line is a relationship stated on the cisco.com, splunk.com or Splunkbase pa
 | Identity Intelligence | XDR | Adds identity threat views and response actions to XDR | https://www.cisco.com/site/us/en/solutions/security/identity-intelligence/index.html |
 | Secure Client | Secure Endpoint | Secure Endpoint is offered as a Secure Client module | https://www.cisco.com/site/us/en/products/security/secure-client/index.html |
 | Secure Client | XDR | Integration for detection and response | https://www.cisco.com/site/us/en/products/security/secure-client/index.html |
+| Secure Client | Secure Access | Secure Client is the single, unified client for Secure Access | https://www.cisco.com/c/en/us/products/collateral/security/secure-access/secure-access-ds.html |
+| XDR | ISE | ISE is a listed Cisco-managed integration of XDR | https://www.cisco.com/c/en/us/products/collateral/security/xdr/xdr-ds.html |
+| XDR | Duo | Duo is a listed Cisco-managed integration of XDR | https://www.cisco.com/c/en/us/products/collateral/security/xdr/xdr-ds.html |
+| XDR | Splunk Platform | Splunk Cloud and Splunk Enterprise are listed XDR integrations, as a source of observations | https://www.cisco.com/c/en/us/products/collateral/security/xdr/xdr-ds.html |
+| ISE | Splunk Platform | ISE syslog data collected by the Splunk Add-on for Cisco Identity Services | https://splunkbase.splunk.com/app/1915 |
+| Meraki dashboard | Splunk Platform | Meraki data collected by the Cisco Meraki Add-on for Splunk | https://splunkbase.splunk.com/app/5580 |
+| ThousandEyes | Splunk Platform | ThousandEyes test results and logs sent by the Cisco ThousandEyes App for Splunk | https://splunkbase.splunk.com/app/7719 |
 | Secure Client | Network Analytics | Paired for visibility into application use and behaviour | https://www.cisco.com/site/us/en/products/security/secure-client/index.html |
 | Secure Access | Secure Routers · SD-WAN | SASE converges Secure Access with SD-WAN | https://www.cisco.com/site/us/en/solutions/secure-access-service-edge-sase/index.html |
 | Secure Access | Meraki dashboard | Secure Access integrates with Meraki SD-WAN | https://www.cisco.com/site/us/en/products/security/secure-access/index.html |
@@ -626,8 +687,8 @@ The most specific matching rule wins (ties: the later rule). `@loc` / `@dest` ar
 | AC-0 (access) | always | @loc |
 | AC-remote (access) | location ∈ {home, public, travel} | @loc |
 | AC-internet (access) | location ∈ {internet} | internet |
-| AC-hq (access) | location ∈ {hq} | hq → wireless → switches |
-| AC-hq-wired (access) | device ∈ {headless}; location ∈ {hq} | hq → switches |
+| AC-hq (access) | location ∈ {hq} | hq → wireless → switches → core |
+| AC-hq-wired (access) | device ∈ {headless}; location ∈ {hq} | hq → switches → core |
 | AC-branch (access) | location ∈ {branch} | branch → sdwan |
 | AC-factory (access) | location ∈ {factory} | factory → industrial |
 | AC-remote-client (access) | device ∈ {mgd, stale, mobile, compromised}; location ∈ {home, public, travel} | @loc → client |
@@ -663,7 +724,7 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | N7 | who ∈ {ot}; destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail}; path includes {industrial} | Cyber Vision | industrial | Zones and conduits → No conduit is defined from this OT zone to the internet | -10 (Out-of-zone destination) | BLOCK |
 | P1 | device ∈ {mgd, mobile}; location ∈ {hq, branch, factory}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Device posture → Managed device meets compliance policy | +5 (Posture compliant) | — |
 | P2 | who ∈ {emp, admin, exec, contractor, insider, attacker}; device ∈ {mgd, mobile}; location ∈ {home, public, travel} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Device trust → Managed, healthy device confirmed | +5 (Trusted device) | — |
-| P3 | device ∈ {stale}; location ∈ {hq, branch, factory}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Device posture → Device is out of date and fails compliance policy | -15 (Posture non-compliant) | ALLOW WITH LIMITS |
+| P3 | device ∈ {stale}; location ∈ {hq, branch, factory}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Device posture → Secure Client posture check reports the device out of date; it fails compliance policy | -15 (Posture non-compliant) | ALLOW WITH LIMITS |
 | P4 | device ∈ {stale}; location ∈ {home, public, travel} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Device trust → Device is out of date and fails the device-health policy | -15 (Posture non-compliant) | ALLOW WITH LIMITS |
 | P5 | who ∈ {emp, admin, exec, contractor, insider}; device ∈ {byod, claptop} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Device trust → Device is not managed by the organisation; trust not established | -10 (Unmanaged device) | ALLOW WITH LIMITS |
 | M6 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {fatigue} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Identity analytics → Abnormal authentication pattern flagged on the account | -10 (Identity risk raised) | STEP-UP |
@@ -675,7 +736,7 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | M2 | who ∈ {admin}; behaviour any of {mfa_ok}; behaviour none of {stolen} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Privileged authentication → Administrator verified with fresh phishing-resistant MFA | +10 (MFA passed) | — |
 | M3 | who ∈ {admin}; behaviour none of {mfa_ok, mfa_fail, fatigue} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Privileged session → Privileged access requires fresh strong authentication | -5 (Fresh authentication required) | STEP-UP |
 | M4 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {mfa_fail} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → MFA not completed; no session issued | -30 (MFA failed) | BLOCK |
-| M5 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {fatigue} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Push-bombing resistance → Repeated prompts were not approved by a verified user; sign-in refused | -25 (MFA fatigue pattern) | BLOCK |
+| M5 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {fatigue} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Push-bombing resistance → Verified Duo Push needs a code from the sign-in screen, so repeated prompts cannot be approved blindly; sign-in refused | -25 (MFA fatigue pattern) | BLOCK |
 | M10 | who ∈ {attacker}; behaviour none of {stolen} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → No valid identity presented | -20 (Unauthenticated request) | BLOCK |
 | S1 | who ∈ {contractor}; destination ∈ {dcapp, cloudapp}; path includes {sa} | Secure Access | sa | Zero trust access → Access granted to the one approved application, not to the network | — | ALLOW WITH LIMITS |
 | S1b | who ∈ {contractor}; destination ∈ {dcapp, cloudapp}; path includes {switches, industrial, sdwan}; path lacks {sa} | ISE | switches / industrial / sdwan | Contractor segmentation → Contractor segment permits only the approved application | — | ALLOW WITH LIMITS |
@@ -700,7 +761,7 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | T7 | behaviour any of {scan, exfil}; path includes {mcd} | Multicloud Defense | mcd | Cloud east-west and egress control → Lateral-movement or exfiltration traffic blocked at the cloud gateway | -15 (Malicious cloud traffic) | BLOCK |
 | T11 | behaviour any of {exfil}; path includes {switches, nexus} | Network Analytics | switches / nexus | Encrypted traffic analytics → Exfiltration pattern identified in encrypted traffic without decryption | -25 (Exfiltration behaviour) | — |
 | T12 | behaviour any of {exfil}; path includes {sa} | Secure Access | sa | DNS and internet egress control → Covert channel to the external destination blocked | -15 (Exfiltration behaviour) | BLOCK |
-| T13 | behaviour any of {exfil}; who ∉ {attacker}; path includes {fw} | Firewall | fw | Encrypted threat visibility → Malicious encrypted flow identified and blocked without decryption | -15 (Exfiltration behaviour) | BLOCK |
+| T13 | behaviour any of {exfil}; who ∉ {attacker}; path includes {fw} | Firewall | fw | Encrypted Visibility Engine → Malicious encrypted flow identified and blocked without decryption | -15 (Exfiltration behaviour) | BLOCK |
 | T14 | behaviour any of {anomaly}; path includes {industrial} | Cyber Vision | industrial | OT behaviour baseline → Communication deviates from the asset’s recorded behaviour | -25 (OT anomaly) | — |
 | W9 | destination ∈ {web_safe, web_risky, web_mal}; behaviour any of {anomaly}; path includes {sa} | Secure Access | switches / industrial / sdwan | DNS-layer security → Lookup of an unknown internet host flagged and the connection denied before it is made | -10 (Suspicious destination) | BLOCK |
 | T15 | behaviour any of {anomaly}; path includes {switches} | Network Analytics | switches | Behavioural analytics → Device traffic no longer matches its expected behaviour | -20 (IoT anomaly) | — |
@@ -710,19 +771,19 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | W2p | behaviour any of {phish}; path includes {sa} | Secure Access | sa | Secure internet access → Phishing destination denied by threat policy | -15 (Phishing link clicked) | BLOCK |
 | W2f | destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail}; behaviour any of {malfile}; path includes {sa} | Secure Access | sa | Secure internet access → Malicious download denied by threat policy | -15 (Malicious download) | BLOCK |
 | W3 | destination ∈ {web_mal}; path includes {fw}; path lacks {sa} | Firewall | fw | Egress threat prevention → Outbound connection to a known malicious destination blocked using Talos intelligence | -20 (Malicious destination) | BLOCK |
-| W4 | destination ∈ {web_risky}; path includes {sa} | Secure Access | sa | Web category policy → Risky category: session permitted with restrictions | -5 (Risky web category) | ALLOW WITH LIMITS |
-| W5 | destination ∈ {shadow}; path includes {sa} | Secure Access | sa | Shadow IT control → Unsanctioned application identified; use restricted | -10 (Unsanctioned application) | ALLOW WITH LIMITS |
-| W6 | destination ∈ {shadow, web_safe, web_risky, web_mal, pubai}; behaviour any of {upload}; path includes {sa} | Secure Access | sa | Data movement policy → Sensitive upload to an unapproved destination denied | -15 (Sensitive data upload) | BLOCK |
+| W4 | destination ∈ {web_risky}; path includes {sa} | Secure Access | sa | Web category policy → Risky category: page opened through Remote Browser Isolation, away from the device | -5 (Risky web category) | ALLOW WITH LIMITS |
+| W5 | destination ∈ {shadow}; path includes {sa} | Secure Access | sa | Shadow IT control (CASB) → Unsanctioned application identified by the cloud access security broker; use restricted | -10 (Unsanctioned application) | ALLOW WITH LIMITS |
+| W6 | destination ∈ {shadow, web_safe, web_risky, web_mal, pubai}; behaviour any of {upload}; path includes {sa} | Secure Access | sa | Data Loss Prevention → Sensitive upload to an unapproved destination denied by the data loss prevention policy | -15 (Sensitive data upload) | BLOCK |
 | W7 | destination ∈ {saas, ai}; behaviour any of {upload}; path includes {sa} | Secure Access | sa | Data movement policy → Upload to a sanctioned application evaluated and logged | -5 (Sensitive data upload) | — |
 | W8 | who ∈ {insider}; behaviour any of {upload}; path includes {switches, nexus} | Network Analytics | switches / nexus | Insider-threat analytics → Unusually large data movement by this user detected | -20 (Bulk data movement) | ALLOW WITH LIMITS |
 | A1 | destination ∈ {ai}; path includes {sa} | Secure Access | sa | AI access policy → Approved AI application permitted for this user | — | — |
-| A2 | destination ∈ {pubai}; path includes {sa} | Secure Access | sa | Shadow AI control → Unapproved AI application denied | -10 (Unapproved AI tool) | BLOCK |
+| A2 | destination ∈ {pubai}; path includes {sa} | Secure Access | sa | Shadow AI control (CASB) → Unapproved generative AI application detected and blocked | -10 (Unapproved AI tool) | BLOCK |
 | A3 | destination ∈ {ai, pubai}; behaviour any of {aipaste}; path includes {sa} | Secure Access | sa | AI Access data-loss control → Confidential data detected in the prompt to a third-party AI app; prompt not sent | -15 (Sensitive data in prompt) | BLOCK |
 | A4 | destination ∈ {intai}; behaviour any of {aipaste} | AI Defense | @dst | AI data-leakage guardrail → Sensitive content in the prompt flagged and logged | -5 (Sensitive data in prompt) | ALLOW WITH LIMITS |
 | A5 | destination ∈ {intai}; behaviour any of {inject} | AI Defense | @dst | AI runtime guardrail → Prompt-injection pattern detected; request rejected | -25 (Prompt injection attempt) | BLOCK |
 | A6 | destination ∈ {intai}; behaviour none of {inject, aipaste} | AI Defense | @dst | AI runtime protection → Model interaction covered by runtime guardrails | — | — |
 | B1 | path includes {wireless} | Wi-Fi 7 | wireless | Air link → WPA3-protected wireless association | — | — |
-| B2 | path includes {client} | Secure Client | client | Device tunnel → Secure Client provides the device-side VPN / zero trust access session | — | — |
+| B2 | path includes {client} | Secure Client | client | Device tunnel → Secure Client, the unified client for Secure Access, opens the VPN / zero trust access session | — | — |
 | B3 | path includes {sdwan} | Secure Routers · SD-WAN | sdwan | WAN transport → Traffic carried in the encrypted, segmented SD-WAN overlay | — | — |
 | B4 | path includes {sa} | Secure Access | sa | User-to-app policy → Session evaluated against identity, device and destination policy at the cloud edge | — | — |
 | B5 | who ∉ {attacker}; path includes {fw} | Firewall | fw | Traffic inspection → Flow inspected; encrypted traffic assessed without decryption | — | — |
@@ -744,7 +805,7 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | SP1 | always | Splunk Platform | after path | Data platform → Logs and events from the connected Cisco sources are ingested, searchable and retained | — | — |
 | SP2 | always | Enterprise Security | after path | SIEM detection → Events correlated and prioritised with risk-based alerting, mapped to MITRE ATT&CK | — | — |
 | SP3 | always | Splunk SOAR | after path | Response automation → Playbook automates enrichment, case creation and response tasks for the analyst | — | — |
-| SP8 | behaviour any of {scan, ransom, exfil, anomaly}; who ∉ {attacker}; needs a detection from a product that feeds Splunk | Splunk SOAR | after path | Automated response action → Playbook acts on connected Cisco products: quarantine through ISE, host isolation through Secure Endpoint, or a block on the firewall | — | CONTAIN |
+| SP8 | behaviour any of {scan, ransom, exfil, anomaly}; who ∉ {attacker} | Splunk SOAR | after path | Automated response action → Playbook acts on connected Cisco products: quarantine through ISE, host isolation through Secure Endpoint, or a block on the firewall | — | CONTAIN |
 | SP4 | behaviour any of {phish, malfile} | Attack Analyzer | after path | Automated threat analysis → Suspected link or file followed through its attack chain to a verdict, using Talos intelligence | — | — |
 | SP5 | behaviour any of {slow} | Observability Cloud | after path | Full-stack observability → Application, infrastructure and user-experience telemetry reviewed alongside the ThousandEyes network view | — | — |
 | SP6 | destination ∈ {dcapp, cloudapp}; behaviour any of {slow} | AppDynamics | after path | Application-layer view → Application performance combined with network-path data to separate app faults from network faults | — | — |
