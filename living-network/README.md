@@ -5,7 +5,9 @@ where **identity** is verified, where **policy** is authored, distributed and en
 stopped, and how **trust** is re-evaluated through a session.
 
 Independent educational visualization. Not an official Cisco product. Product names are trademarks of Cisco Systems, Inc.
-No Cisco or Splunk logos, icons or artwork are used. Content verified against cisco.com and splunk.com on 10 November 2026.
+No Cisco or Splunk logos, icons or artwork are used. Content verified against cisco.com and splunk.com on 10 November 2026,
+and checked against the Cisco Validated Designs on 12 November 2026 (see "Cisco Validated Design check" below and
+[`CVD-REVIEW.md`](CVD-REVIEW.md)).
 
 ## Run it
 
@@ -16,7 +18,9 @@ the page renders a 2D SVG map of the same data (force it with `index.html?render
 Four modes: **Presets**, **Build your own**, **Free explore** and **Topology**. Topology isolates one architecture
 (SASE, Zero Trust Access, Hybrid Mesh Firewall, secure campus, data center, industrial, detection and response, AI, or
 one of the three suites), lays its building blocks out as a diagram and numbers each relationship stated on cisco.com,
-with the source link beside it. The architecture list is `DATA.architectures`.
+with the source link beside it, and lists the Cisco Validated Designs and design references that cover it. The architecture
+list is `DATA.architectures`. Product panels and decision-timeline steps also link the Cisco Validated Design ("CVD") or
+reference ("Ref") that backs them.
 
 **Playback**: choosing a preset (or changing the builder) sets the scenario up and waits; press Play (`Space`), which
 pulses until then. The **Auto** button in the playback bar starts each scenario as soon as it is chosen; it is off by
@@ -107,6 +111,11 @@ Everything shown lives in the `DATA` object at the top of the script: products, 
 invalid-combination rules, path rules, checkpoint rules, verdict text, suggestions and presets. A new scenario is a data
 edit. The tables below were generated from that object.
 
+`DATA.cvd` lists the Cisco Validated Designs and design references (title, URL, the "Updated" date printed on the page,
+and whether it is Cisco Validated or a reference). Products, architectures and checkpoint rules name them in a `cvd` field,
+and a relationship can use a `cvd` key as its source. In a checkpoint rule, `also` credits a second product and `needs`
+lists the products the action is carried out through, so removing one of them with "Without these controls" skips the rule.
+
 ## How verdicts are produced
 
 1. A path is chosen from the picker state (access rule + route rule).
@@ -121,8 +130,12 @@ edit. The tables below were generated from that object.
 
 - **AgenticOps** has no standalone page that could be found on cisco.com (the guessed URL returned 404). The node uses the
   Cisco AI Canvas page ("the workspace for AgenticOps") as its source and says so in its panel. It takes part in no verdict.
+  The Cisco Secure Networking Architecture CVD names the layer "Unified Management and Agentic Operations" (Cisco Cloud
+  Control, AI Canvas, AI Assistant, Deep Network Model); the panel now cites it.
 - **Secure Equipment Access**: its page states only that it "is now part of Cisco Cyber Vision". The node is kept, labelled
-  that way, and its remote-access behaviour is taken from the Cyber Vision page.
+  that way, and its remote-access behaviour is taken from the Cyber Vision data sheet: least privilege with MFA or SSO,
+  time schedules, permitted protocols and a posture check. Approval workflows and session recording are not stated on
+  either page, so rule S3 no longer claims them.
 - **Security Cloud Control**: kept under that name as requested; the product page is currently titled "Security in Cisco
   Cloud Control" and the panel notes it. The panel and the policy-push checkpoints also say that SD-WAN overlay policy
   stays in Catalyst SD-WAN Manager and that some products keep their own consoles.
@@ -150,7 +163,9 @@ edit. The tables below were generated from that object.
 - **Drawn for Splunk after checking Splunkbase**: ISE (Splunk Add-on for Cisco Identity Services), Meraki (Cisco Meraki
   Add-on for Splunk) and ThousandEyes (Cisco ThousandEyes App for Splunk), each with its app page as the source. ISE
   and ThousandEyes now feed the Splunk layer in scenarios.
-- **Not drawn for Splunk**: Secure Access (no app page found among those checked) and ThousandEyes ↔ ITSI (the
+- **Secure Access → Splunk** is now drawn: the Secure Access help page "Push Security Events" sends security events to
+  Splunk. Secure Access feeds the Splunk layer.
+- **Not drawn for Splunk**: ThousandEyes ↔ ITSI (the
   ThousandEyes Splunk app documentation does not mention ITSI, and the ThousandEyes integrations page refused the
   request). Security Cloud Control does not mention Splunk on the pages read. Secure Client's Splunk reference is only
   a link slug.
@@ -162,7 +177,9 @@ edit. The tables below were generated from that object.
 - **XDR ↔ ISE, XDR ↔ Duo and XDR ↔ Splunk** are now drawn: the public Cisco XDR data sheet lists ISE, Duo, Splunk Cloud
   and Splunk Enterprise as integrations. The data sheet does not describe a response action through ISE, so the tool
   still does not claim that XDR quarantines through ISE, although two reviewers state it. Secure Access is not in the
-  data sheet's list, so that line is not drawn.
+  data sheet's list, so that line is not drawn. The Breach Protection Suite Design Guide documents host isolation in
+  Secure Endpoint and email quarantine in Email Threat Defense as XDR actions (rule Z2). An ISE action is documented only
+  for OT assets, in the XDR and Cyber Vision brief, so only rule Z2-ot uses it.
 - **Hypershield availability** varies by capability; the panel says so and no dates are shown.
 - Listed on cisco.com but out of the requested scope: Secure Web Appliance, Attack Surface Management, Secure Malware
   Analytics, Security Analytics and Logging, Telemetry Broker, Secure DDoS Protection, Vulnerability Management,
@@ -173,6 +190,87 @@ edit. The tables below were generated from that object.
 ## Backlog: known gaps to come back to
 
 Nothing below is done yet. It is kept here so it can be picked up later.
+
+**From the Cisco Validated Design check (12 November 2026): suggestions to check later**
+
+Each item names the document to check. Keys refer to the "Design reference keys" table under "Rule table".
+
+- **Hypershield vulnerability shielding (X4)** has no CVD. The Secure Networking Architecture CVD (`snra`) lists "Cisco
+  Live Protect" under Secure Infrastructure but does not tie it to Hypershield or the N9300. Check the Hypershield and
+  N9300 data sheets before keeping "compensating control" wording.
+- **Verified Duo Push (M5) and Duo risk-based authentication** are in no CVD; the Zero Trust User and Device guide (`ztud`,
+  2023) uses plain Duo Push. Check the current Duo documentation or a newer Duo design guide.
+- **Trust lens wording**: the Secure Access help page for Identity Intelligence (`sacii`) says user trust levels become
+  visible in Secure Access (read from a summary). Once the wording is confirmed, name the Identity Intelligence trust
+  level as the closest real signal in the TRUST lens legend.
+- **Out-of-date device (P4)**: `ztud` warns first and blocks once the browser is a month or more out of date. Consider a
+  second, stricter outcome for a badly out-of-date device.
+- **Catalyst Center** is the policy administration point in the SD-Access CVD (`sda`) and in the Common Policy guide
+  (`cpol`), and **Telemetry Broker** sits between switches, firewalls and Secure Network Analytics in `ztnc` and `sda`.
+  Both are out of scope today; consider adding them as products.
+- **Cisco Cloud Control** is the operating layer above Meraki, Intersight, Security Cloud Control, ThousandEyes and
+  Splunk in the Cloud Control whitepaper (`ccw`). Consider a Cloud Control node or renaming the operations plane. The
+  Hybrid Mesh Firewall at-a-glance (`hmfaag`) says "Cisco Cloud Control" where the N9300 at-a-glance (`n9300`) says
+  "Security Cloud Control"; settle the naming once Cisco does.
+- **Branch path**: the Unified Branch guides (`ub`, `ubl`) put an access switch and access points in front of the secure
+  router, with ISE 3.4 as RADIUS and Meraki Adaptive Policy tags. The branch path is still `branch → sdwan`; consider
+  adding the switch and Wi-Fi hops so N1 acts at the switch.
+- **Guest at HQ**: the local internet breakout for guests comes from the branch design. The SD-Access CVD hands the guest
+  virtual network off at the fabric border; check the SAFE Secure Campus and Secure Internet architecture guides for
+  where an HQ guest leaves.
+- **Containment trigger (T3, T9, T16)**: in `ztnc` and `sda` a SOC analyst starts the quarantine from Secure Network
+  Analytics. The rules now say "Containment" instead of "Automated containment"; consider tying automation to XDR or
+  SOAR in the verdict text.
+- **OT zone enforcement (N7)**: credit moved to ISE with Cyber Vision. The Industrial Security overview (`indso`) also
+  places Secure Firewall at Level 3; when the OT path includes the firewall, the firewall could be credited instead.
+- **Secure Network Analytics to XDR**: the cloud-managed CVD (`cmc`) sends only three alarm types to XDR. Consider saying
+  so in Z1 for Secure Network Analytics scenarios.
+- **ThousandEyes agents (O1)**: the CVDs place agents on the branch secure router (`ub`) and on Catalyst 9000 switches
+  (`cmc`). O1 could name the agent location.
+- **ISE ↔ Secure Access source**: switch from the ISE page to the Secure Access help page "Integrate ISE" (`saise`:
+  ISE security group tags as Secure Access policy sources over pxGrid Cloud) once its wording is confirmed.
+- **Multicloud Defense WAF**: the architecture guide (`mcdag`, 2024) does not mention a WAF. The WAAP note relies on the
+  product page; recheck it.
+- **Self-hosted ZTNA caveat**: the SASE and SSE Architecture Guide (`sseag`, January 2025) is reported to say ZTNA and
+  remote-access VPN "must be self-hosted". The September 2025 SASE Design Guide (`sasedg`) documents both in Secure
+  Access, so the caveat looks superseded; confirm from the PDF.
+- **Out of scope, named in CVDs**: Secure Malware Analytics (`bpsdg`), Isovalent and Cisco Live Protect (`snra`),
+  Access Manager (`snra`, `cmc`).
+
+> [!IMPORTANT]
+> **Long guides and PDFs to read in full later.** The web reader used for the CVD check stops at 10 MB and reads long
+> pages in windows of about 40,000 characters, summarising the rest. The parts it only summarised may hold relationships
+> or caveats the tool still lacks. The most reliable way found: download the PDF version linked at the top of each guide
+> and extract the text locally. That is how the N9300 at-a-glance PDF was read in full.
+>
+> ```bash
+> curl -sSLo guide.pdf "<PDF URL>" && pdftotext -layout guide.pdf guide.txt
+> ```
+
+| Priority | Document | Format | Read so far | What it may settle |
+|---|---|---|---|---|
+| 1 | [Industrial Security Design Guide 3.1](https://www.cisco.com/c/dam/en/us/td/docs/Technology/Industrial-Security-3-1-DG.pdf) | PDF, over 10 MB | Not read (too large for the reader) | Zones and conduits, Cyber Vision with ISE and Secure Firewall, Secure Equipment Access approval and recording, IDMZ |
+| 2 | [SASE and SSE Architecture Guide](https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/sase-sse-ag.pdf) (`sseag`) | PDF, 54 pages | About 40% verbatim | Appendix A capability map (CASB, DLP, RBI), the self-hosted ZTNA caveat |
+| 3 | [Cisco Unified Branch Design Guide](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco_unified_branch_design_guide.html) (`ub`) | HTML; PDF 1.9 MB linked on the page | About 30% verbatim | Secure Access, ISE, ThousandEyes, Splunk and XDR sections |
+| 4 | [Unified Branch Large Branch Deployment Guide](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco-unified-branch-large-branch-deployment-guide.html) (`ubl`) | HTML; PDF 8 MB linked on the page | About 55% verbatim | Secure Access tunnel settings, ISE settings (Appendix C) |
+| 5 | [Zero Trust: Network and Cloud Security Design Guide](https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/zt-network-cloud-dg.html) (`ztnc`) | HTML; PDF 30 MB linked on the page | About 75% verbatim | Quarantine validation test, Secure Malware Analytics appendix |
+| 6 | [Zero Trust: User and Device Security Design Guide](https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/zt-user-device-dg.html) (`ztud`) | HTML; PDF 5.5 MB linked on the page | About 60% verbatim | Duo policy steps, Secure Client posture provisioning |
+| 7 | [Cisco SASE Design Guide](https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/sase-design-guide.html) (`sasedg`) | HTML | About 65% verbatim | Experience Insights, traffic-flow examples, CASB and RBI wording |
+| 8 | [Secure Firewall Threat Defense SD-WAN Design and Deployment Guide](https://www.cisco.com/c/en/us/td/docs/security/secure-firewall/cvd/secure-firewall-sdwan-deployment-guide.html) (`fwsdwan`) | HTML | About 75% verbatim | The branch Secure Access section (what is inspected where) |
+| 9 | [Cisco Catalyst SD-WAN Design Guide](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/SDWAN/cisco-sdwan-design-guide.html) (`sdwandg`) | HTML; PDF 102 pages | About 60% verbatim | Appendix A list of SD-WAN security guides |
+| 10 | [Campus LAN and Wireless LAN Design Guide](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco-campus-lan-wlan-design-guide.html) (`lan`) | HTML | About 50% verbatim | WPA3, guest wireless, quarantine WLAN |
+| 11 | [Cisco Breach Protection Suite Design Guide](https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/breach-protection-suite-dg.html) (`bpsdg`) | HTML | About 80% verbatim | Secure Endpoint and Email Threat Defense test cases |
+| 12 | [Cisco Common Policy Integration Guide](https://www.cisco.com/c/en/us/td/docs/cloud-systems-management/network-automation-and-management/catalyst-center/cisco-validated-solution-profiles/common-policy-integration-guide.html) (`cpol`) | HTML | About 70% verbatim | Security group tag enforcement on the SD-WAN edge and the firewall |
+| 13 | [Cisco Secure Network SD-Access Deployment Guide](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/Cisco-Secure-Networking-SD-Access-Deployment-Guide.html) (`sda`) | HTML | About 90% verbatim | ISE integration steps, Encrypted Traffic Analytics |
+| 14 | Secure Access help pages (`saise`, `sacii`, `saspl`) | HTML | About 33% verbatim each | Exact wording for ISE, Identity Intelligence and Splunk integrations |
+
+Not opened yet, likely useful:
+- [Security Visibility for a CPwE Architecture (PDF)](https://www.cisco.com/c/dam/en/us/td/docs/solutions/Verticals/CPwE/Security-Visibility/CPwE_Security_Visibility_final10-30-23.pdf) — Cyber Vision in the plant.
+- [Securely Traversing IACS Data across the IDMZ](https://www.cisco.com/c/en/us/td/docs/solutions/Verticals/CPwE/3-5-1/IDMZ/DIG/CPwE_IDMZ_2_CVD.html) — firewall in the industrial DMZ.
+- [Cisco Cyber Vision Architecture Guide (PDF)](https://www.cisco.com/c/dam/en/us/td/docs/security/cyber_vision/Cisco_Cyber_Vision_Architecture_Guide-V1-00.pdf).
+- [Security Policy Design Guide for Cisco IOS-XE SD-WAN Devices](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/SDWAN/cisco-sdwan-security-policy-design-guide.html) — router firewall, IPS and URL filtering.
+- [Cisco Zero Trust Architecture Guide](https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/zt-arch-guide.html) and the SAFE Secure Campus, Branch and Internet architecture guides listed on the [Campus and branch design zone](https://www.cisco.com/c/en/us/solutions/design-zone/campus-branch.html).
+- [Secure Substation Design Guide](https://www.cisco.com/c/en/us/solutions/design-zone/industrial-iot-cisco-validated/utilities-and-renewables/secure-substation-design-guide.html) — zones and conduits for utilities.
 
 **Verification**
 - Tested by automated checks in headless Chromium, and by hand by the owner. Not yet measured: frame rate on a range
@@ -185,8 +283,8 @@ Nothing below is done yet. It is kept here so it can be picked up later.
   missing. The "verified on" date is fixed text; there is no process to re-check the pages.
 
 **Content**
-- Secure Access does not feed the Splunk layer and has no XDR line: no public page naming either was found.
-  ThousandEyes ↔ ITSI and an XDR response action through ISE also still need a public page.
+- Secure Access has no XDR line: no public page naming it was found. ThousandEyes ↔ ITSI and an XDR response action
+  through ISE for an IT endpoint also still need a public page.
 - No licensing view: nothing shows which suite or tier a scenario needs.
 - No "exploit" or "denial of service" behaviour, and no multi-stage attack that chains several steps in one run.
 - Products listed on cisco.com but out of scope: Secure Web Appliance, Attack Surface Management, Secure Malware
@@ -213,6 +311,49 @@ Checked in a headless browser: zero console errors; all 30 presets play to a ver
 (about 206,000 including behaviour sets and removed controls) returns a path, a timeline and a verdict; split-view
 compare, removing controls, link sharing, the tour, and each export format work; every product panel links to its
 source page.
+
+## Cisco Validated Design check, 12 November 2026
+
+The tool was compared with the [Cisco Validated index](https://www.cisco.com/site/us/en/solutions/cisco-validated/index.html)
+and the design, deployment and architecture guides it leads to. The full comparison, with a quote and date for every
+finding, is in [`CVD-REVIEW.md`](CVD-REVIEW.md). The index has no Security category and no Hybrid Mesh Firewall,
+Hypershield, Secure Workload, Multicloud Defense or AI Defense design guide, so those parts still rest on product pages
+and at-a-glance documents.
+
+Applied:
+- **Design references in the tool**: `DATA.cvd` holds 28 documents (16 Cisco Validated, 12 references). Product panels,
+  topology views and timeline steps link them.
+- **Eight relationships added** (115 → 123): ISE ↔ Meraki dashboard (`cmc`), ISE ↔ Secure Routers / SD-WAN (`cpol`),
+  ISE ↔ Nexus through ACI (`cpol`), Firewall ↔ Secure Access (`fwsdwan`), Firewall ↔ Network Analytics (`ztnc`),
+  ThousandEyes ↔ XDR (`cmc`), Meraki dashboard ↔ XDR (`ubl`), Secure Access → Splunk Platform (`saspl`).
+- **Stronger sources for six relationships**: ISE ↔ Firewall and ISE ↔ Network Analytics (`ztnc`), Cyber Vision ↔ ISE
+  (`cvise`), Cyber Vision ↔ Firewall (`cvfw`), Cyber Vision ↔ XDR (`cvxdr`), XDR ↔ Email Threat Defense (`bpsdg`).
+- **Secure Access feeds the Splunk layer**, so its blocks now reach Enterprise Security and SOAR when the layer is on.
+- **Rules**:
+  - N7: OT zone enforcement credited to ISE with Cyber Vision, not Cyber Vision alone (`cvise`, `indso`).
+  - S3: Secure Equipment Access no longer claims an approval workflow or session recording (`cvds`).
+  - Z2: XDR's response is host isolation through Secure Endpoint, and it is skipped when Secure Endpoint is removed
+    (`bpsdg`). New Z2-ot: for OT, a Cyber Vision report to XDR runs a workflow that tags the asset in ISE (`cvxdr`).
+  - T3, T9, T16: "Containment" through an Adaptive Network Control quarantine over pxGrid and a Change of Authorization
+    into a quarantine security group (`ztnc`, `sda`).
+  - P3 names the ISE posture module in Secure Client; P4 says the user is warned, then blocked (`ztud`).
+  - Guests on site break out locally at the router, outside the Secure Access tunnels (new path rule RT-inet-guest and
+    rule B3g, `ub`, `ubl`). New rules W3r and W3f keep a malicious site, download or phishing link blocked there by the
+    router's threat protection.
+- **Topology**: ThousandEyes added to Zero Trust Access (Cisco defines it as Secure Access, Duo, ISE and ThousandEyes,
+  `ztaaag`); Secure Firewall and ISE added to SASE; Meraki dashboard and ThousandEyes to Detection and response; Secure
+  Access and Meraki to Splunk for security operations. The Hybrid Mesh Firewall and Data center views say no CVD covers
+  them yet.
+- **Panels**: notes for Security Cloud Control, Secure Access, Secure Equipment Access, Hypershield, AgenticOps, Hybrid
+  Mesh Firewall, ISE, XDR, ThousandEyes and Industrial network, each with its source. The campus hop is renamed "Campus
+  distribution / core" and describes the SD-Access intermediate, border and fusion nodes.
+
+Checks after these changes: zero console errors in the 3D and 2D views; all 30 presets give the same verdicts as before,
+with and without the Splunk layer; 131,040 picker combinations each return a path, a timeline and a verdict. The only
+changes in the presets are the intended ones: the guest preset now breaks out locally, the OT anomaly preset adds the
+XDR-to-ISE workflow, and Secure Access blocks reach Enterprise Security when the Splunk layer is on.
+
+Still open: see "From the Cisco Validated Design check" and "Long guides and PDFs to read in full later" in the backlog.
 
 ## Combined version, 11 November 2026
 
@@ -309,6 +450,9 @@ disagreed, the cisco.com page was checked. Applied:
   core/distribution and wireless controllers are not shown (14); Security Cloud Control scope (30); WAAP is optional in
   front of Multicloud Defense (29); Hypershield availability (25–26); Breach Protection tiers (7); Secure Access
   DNS-layer check for an IoT device calling an unknown host (47, rule W9).
+
+The Cisco Validated Design check on 12 November 2026 added stronger sources for items 3, 4, 11, 12, 14, 19, 30, 37,
+38 and 41; see "Cisco Validated Design check".
 
 Not applied: ISE in a "Premier" User Protection tier (the page lists Essentials and Advantage only), CANNOT CONFIRM on
 items 3 and 7 (the pages confirm them), an XDR ↔ Secure Access line, an XDR quarantine action through ISE, and
@@ -516,34 +660,34 @@ G. THE MODEL ITSELF
 |---|---|---|---|
 | Cisco Wireless (Wi-Fi 7) | Networking | Wi-Fi 7 access points and controllers with WPA3, rogue management and security group tags for segmented wireless access. | https://www.cisco.com/site/us/en/products/networking/wireless/index.html |
 | Cisco Smart Switches (Catalyst) | Networking | Campus and branch switching that carries identity-based segmentation and feeds telemetry to management and assurance tools. | https://www.cisco.com/site/us/en/products/networking/switches/index.html |
-| Cisco Industrial IoT Networking | Networking | Rugged switches, routers and wireless for operational sites, with OT visibility, segmentation and remote access built in. | https://www.cisco.com/site/us/en/products/networking/industrial-iot/index.html |
+| Cisco Industrial IoT Networking | Networking | Rugged switches, routers and wireless for operational sites, with OT visibility, segmentation and remote access built in. *Cyber Vision sensor platforms on the data sheet include IE3400, IE3500 and IE9300 switches, IR1100, IR1800 and IR8300 routers, and the Catalyst 9300. The Industrial Security overview places Secure Firewall at Level 3 to enforce zones and conduits.* | https://www.cisco.com/site/us/en/products/networking/industrial-iot/index.html |
 | Cisco Secure Routers / SD-WAN | Networking | Routing and SD-WAN platform with encryption, segmentation and a built-in next-generation firewall for branch and WAN. | https://www.cisco.com/site/us/en/products/networking/sdwan-routers/index.html |
 | Cisco Nexus Data Center Networking | Networking | Data center switching and fabric management; N9300 Smart Switches embed Hypershield enforcement beside workloads. | https://www.cisco.com/site/us/en/products/networking/cloud-networking/index.html |
 | Cisco Silicon One | Networking | Programmable networking silicon architecture used inside Cisco routing, Nexus and Catalyst switching platforms. | https://www.cisco.com/site/us/en/products/networking/silicon-one/index.html |
-| Cisco ThousandEyes | Networking | Assurance that measures digital experience across owned and unowned networks, from the user to cloud and SaaS. | https://www.cisco.com/site/us/en/products/networking/software/internet-cloud-intelligence/index.html |
+| Cisco ThousandEyes | Networking | Assurance that measures digital experience across owned and unowned networks, from the user to cloud and SaaS. *Zero Trust Access from Cisco is defined as capabilities from Secure Access, Duo, ISE and ThousandEyes. In the Cisco Validated Designs ThousandEyes agents run on the branch secure router, on Catalyst 9000 switches and as a Secure Client module feeding Secure Access Experience Insights.* | https://www.cisco.com/site/us/en/products/networking/software/internet-cloud-intelligence/index.html |
 | Meraki dashboard (Cisco Networking Platform) | Networking | Cloud dashboard that configures and monitors wireless, switching, routing and industrial Ethernet from one place. | https://www.cisco.com/site/us/en/products/networking/networking-cloud/index.html |
-| AgenticOps (Cisco AI Canvas) | Networking | Shared workspace in Cisco Cloud Control where teams and AI agents investigate and resolve cross-domain issues. *No standalone AgenticOps page was found on cisco.com; the AI Canvas page (“the workspace for AgenticOps”) is used as the source.* | https://www.cisco.com/site/us/en/solutions/artificial-intelligence/agentic-ops/ai-canvas/index.html |
+| AgenticOps (Cisco AI Canvas) | Networking | Shared workspace in Cisco Cloud Control where teams and AI agents investigate and resolve cross-domain issues. *No standalone AgenticOps page was found on cisco.com; the AI Canvas page (“the workspace for AgenticOps”) is used as the source. The Cisco Secure Networking Architecture CVD names this layer “Unified Management and Agentic Operations” and lists Cisco Cloud Control, AI Canvas, Cisco AI Assistant and the Deep Network Model in it.* | https://www.cisco.com/site/us/en/solutions/artificial-intelligence/agentic-ops/ai-canvas/index.html |
 | Cisco Duo | Identity & access | Identity and access management with phishing-resistant authentication that verifies the user and device before access. | https://www.cisco.com/site/us/en/products/security/duo/index.html |
-| Cisco Identity Services Engine (ISE) | Identity & access | Network access control that profiles endpoints, applies identity and posture context, segments access and quarantines risky devices. | https://www.cisco.com/site/us/en/products/security/identity-services-engine/index.html |
+| Cisco Identity Services Engine (ISE) | Identity & access | Network access control that profiles endpoints, applies identity and posture context, segments access and quarantines risky devices. *In the Cisco Validated Designs ISE is the context hub: it shares security group tags with Catalyst Center, SD-WAN Manager, Firewall Management Center, ACI, Meraki and Secure Access. Quarantine: Secure Network Analytics sends an Adaptive Network Control action to ISE over pxGrid, ISE sends a Change of Authorization, and the endpoint re-authenticates into a quarantine rule or quarantine security group.* | https://www.cisco.com/site/us/en/products/security/identity-services-engine/index.html |
 | Cisco Identity Intelligence | Identity & access | Identity analytics that exposes risky accounts and privileges and flags high-risk access attempts for Duo, Secure Access and XDR. | https://www.cisco.com/site/us/en/solutions/security/identity-intelligence/index.html |
 | Cisco Secure Client | Identity & access | Modular endpoint client providing VPN and zero trust network access, with endpoint and roaming security modules. | https://www.cisco.com/site/us/en/products/security/secure-client/index.html |
-| Cisco Secure Access | Identity & access | SSE: Cisco Secure Access incorporates the DNS-layer security and secure web gateway (SWG) capabilities that were previously the core of Umbrella, but it expands them into a full SSE platform with zero trust and VPN access to private apps, SaaS and AI use. *DNS-layer security is also offered on its own as “Secure Access DNS Defense”, and the AI Access feature set covers third-party AI apps. Umbrella is retiring, so it is not shown as a separate product; Secure Access is credited for every internet-edge block.* | https://www.cisco.com/site/us/en/products/security/secure-access/index.html |
+| Cisco Secure Access | Identity & access | SSE: Cisco Secure Access incorporates the DNS-layer security and secure web gateway (SWG) capabilities that were previously the core of Umbrella, but it expands them into a full SSE platform with zero trust and VPN access to private apps, SaaS and AI use. *DNS-layer security is also offered on its own as “Secure Access DNS Defense”, and the AI Access feature set covers third-party AI apps. Umbrella is retiring, so it is not shown as a separate product; Secure Access is credited for every internet-edge block. The Cisco SASE Design Guide notes that the Secure Client roaming module is shared with Umbrella, so “migration from Umbrella to Secure Access can be simplified”. In the Unified Branch CVD most branch internet traffic goes through Secure Access tunnels, while guest traffic breaks out locally.* | https://www.cisco.com/site/us/en/products/security/secure-access/index.html |
 | Cisco Secure Firewall | Network security | Firewalls that inspect traffic, use Talos intelligence and detect threats in encrypted flows without decrypting them. | https://www.cisco.com/site/us/en/products/security/firewalls/index.html |
-| Cisco Hybrid Mesh Firewall | Network security | Solution that unifies distributed enforcement points — firewalls, smart switches, agents and AI guardrails — under one management plane. | https://www.cisco.com/site/us/en/solutions/security/hybrid-mesh-firewall/index.html |
+| Cisco Hybrid Mesh Firewall | Network security | Solution that unifies distributed enforcement points — firewalls, smart switches, agents and AI guardrails — under one management plane. *No Cisco Validated Design covers Hybrid Mesh Firewall yet. Its at-a-glance names enforcement-point types (firewalls, smart switches, workload and container agents, third-party and cloud-native firewalls) and says “Policy is orchestrated by Cisco Cloud Control”.* | https://www.cisco.com/site/us/en/solutions/security/hybrid-mesh-firewall/index.html |
 | Cisco Multicloud Defense | Network security | Cloud firewalling from one control plane with ingress, egress and east-west protection across public and private clouds. | https://www.cisco.com/site/us/en/products/security/multicloud-defense/index.html |
-| Cisco Security Cloud Control | Network security | Unified management that authors policy once and applies it across Cisco and third-party enforcement points. *The cisco.com product page is currently titled “Security in Cisco Cloud Control”. It manages security policy; SD-WAN overlay policy stays in Catalyst SD-WAN Manager, and some products, such as Secure Access and Secure Workload, keep their own consoles alongside it.* | https://www.cisco.com/site/us/en/products/security/security-cloud-control/index.html |
-| Cisco Hypershield | Cloud & application security | Distributed security fabric giving stateful segmentation close to workloads, enforced on Nexus N9300 Smart Switches. *Availability varies by capability and enforcement point; check the product page before presenting a capability as generally available.* | https://www.cisco.com/site/us/en/products/security/hypershield/index.html |
+| Cisco Security Cloud Control | Network security | Unified management that authors policy once and applies it across Cisco and third-party enforcement points. *The cisco.com product page is currently titled “Security in Cisco Cloud Control”. The Cisco Cloud Control whitepaper (Cisco Validated) calls it “the security management tenant” inside Cisco Cloud Control. It manages security policy; SD-WAN overlay policy stays in Catalyst SD-WAN Manager (Catalyst SD-WAN Design Guide), a Meraki MX secure router is configured in the Meraki dashboard (Unified Branch Design Guide), and some products, such as Secure Access and Secure Workload, keep their own consoles alongside it.* | https://www.cisco.com/site/us/en/products/security/security-cloud-control/index.html |
+| Cisco Hypershield | Cloud & application security | Distributed security fabric giving stateful segmentation close to workloads, enforced on Nexus N9300 Smart Switches. *Availability varies by capability and enforcement point; check the product page before presenting a capability as generally available. The N9300 Smart Switch at-a-glance: “Cisco Hypershield defines the policy. Cisco 9300 Series Smart Switches enforce it.” Security policy is managed from the Hypershield on-premises controller or Security Cloud Control; switch operations stay in NX-OS and Nexus Dashboard.* | https://www.cisco.com/site/us/en/products/security/hypershield/index.html |
 | Cisco Secure Workload | Cloud & application security | Zero trust microsegmentation for workloads in any environment, with visibility into flows and policy recommendations. | https://www.cisco.com/site/us/en/products/security/secure-workload/index.html |
 | Cisco AI Defense | Cloud & application security | Discovers AI assets, tests models for vulnerabilities and applies runtime guardrails against prompt injection and data leakage. | https://www.cisco.com/site/us/en/products/security/ai-defense/index.html |
 | Cisco Web Application and API Protection (WAAP) | Cloud & application security | Application, API and bot protection that uses behavioural analysis to identify threats before they reach the application. *Multicloud Defense also provides ingress web application firewalling, so a separate WAAP in front of it is optional and depends on the requirement.* | https://www.cisco.com/c/en/us/products/security/secure-web-application-firewall/index.html |
 | Cisco Secure Endpoint | Endpoint & email | Endpoint detection and response that blocks malware and can isolate an infected host with one action. | https://www.cisco.com/site/us/en/products/security/endpoint-security/secure-endpoint/index.html |
 | Cisco Secure Email Threat Defense | Endpoint & email | Cloud email security that stops threats before delivery and remediates messages after delivery through APIs. | https://www.cisco.com/site/us/en/products/security/secure-email/index.html |
-| Cisco XDR | Detection & intelligence | Correlates telemetry from network, endpoint, email, cloud and identity into prioritised incidents with guided and automated response. | https://www.cisco.com/site/us/en/products/security/xdr/index.html |
+| Cisco XDR | Detection & intelligence | Correlates telemetry from network, endpoint, email, cloud and identity into prioritised incidents with guided and automated response. *Response actions in the Breach Protection Suite Design Guide: host isolation in Secure Endpoint and email quarantine in Email Threat Defense. An ISE action (assigning a security group tag) is documented for OT assets through a Cyber Vision workflow; an XDR quarantine of an IT endpoint through ISE is not described in the pages read.* | https://www.cisco.com/site/us/en/products/security/xdr/index.html |
 | Cisco Secure Network Analytics | Detection & intelligence | Behavioural network analytics that detects insider threats, exfiltration and threats in encrypted traffic without decryption. | https://www.cisco.com/site/us/en/products/security/security-analytics/secure-network-analytics/index.html |
 | Cisco Talos | Detection & intelligence | Cisco’s threat intelligence organisation; its research and detections feed Cisco security products. | https://www.cisco.com/site/us/en/products/security/talos/index.html |
 | Cisco Cyber Vision | Industrial (OT) security | OT visibility from sensors embedded in network equipment: asset inventory, risk scoring, threat detection, segmentation and remote access. | https://www.cisco.com/site/us/en/products/security/industrial-security/cyber-vision/index.html |
 | Cisco Industrial Threat Defense | Industrial (OT) security | OT security solution combining asset discovery, segmentation, zero trust remote access and unified IT/OT detection. | https://www.cisco.com/site/us/en/products/security/industrial-security/index.html |
-| Cisco Secure Equipment Access | Industrial (OT) security | Zero trust remote access to industrial assets; cisco.com states it is now part of Cyber Vision. *The product page states: “Cisco Secure Equipment Access is now part of Cisco Cyber Vision.” Capabilities shown here are those listed for remote access on the Cyber Vision page.* | https://www.cisco.com/site/us/en/products/security/industrial-security/secure-equipment-access/index.html |
+| Cisco Secure Equipment Access | Industrial (OT) security | Zero trust remote access to industrial assets; cisco.com states it is now part of Cyber Vision. *The product page states: “Cisco Secure Equipment Access is now part of Cisco Cyber Vision.” The Cyber Vision data sheet describes least-privilege remote access with MFA or SSO, time schedules, permitted protocols and a remote-user posture check, through a ZTNA gateway agent on the sensor platforms. Approval workflows and session recording are not stated on either page.* | https://www.cisco.com/site/us/en/products/security/industrial-security/secure-equipment-access/index.html |
 | Cisco User Protection Suite | Suites | Suite packaging Secure Access, Duo and Email Threat Defense; the Advantage tier adds Secure Endpoint and ISE. | https://www.cisco.com/site/us/en/products/security/user-protection/index.html |
 | Cisco Cloud Protection Suite | Suites | Suite for adopting Hybrid Mesh Firewall: Secure Workload, Hypershield, Secure Firewall, Multicloud Defense and Security Cloud Control. | https://www.cisco.com/site/us/en/products/security/cloud-protection/index.html |
 | Splunk Platform (Cloud Platform / Enterprise) | Splunk (data, security analytics, observability) | Data platform to search, analyse, visualise and act on machine data, with streaming ingestion and federated search. | https://www.splunk.com/en_us/products/splunk-cloud-platform.html |
@@ -555,18 +699,21 @@ G. THE MODEL ITSELF
 | Splunk AppDynamics | Splunk (data, security analytics, observability) | Application observability for hybrid and on-premises apps that links performance to business metrics, with runtime application security. | https://www.splunk.com/en_us/products/splunk-appdynamics.html |
 | Cisco Breach Protection Suite | Suites | Suite unified by XDR with Email Threat Defense and Secure Endpoint; the Advantage tier adds Secure Network Analytics and Telemetry Broker, and a Premier tier adds managed XDR and Talos Incident Response. | https://www.cisco.com/site/us/en/products/security/breach-protection/index.html |
 
-## Relationships drawn (115)
+## Relationships drawn (123)
 
-Each line is a relationship stated on the cisco.com page given as its source.
+Each line is a relationship stated on the cisco.com page, design guide or Splunkbase page given as its source.
 
 | A | B | Stated relationship | Source page |
 |---|---|---|---|
 | ISE | Smart Switches | Identity-based segmentation with security group tags, orchestrated by ISE | https://www.cisco.com/site/us/en/solutions/networking/campus-branch-networking/secure-campus/index.html |
 | ISE | Wi-Fi 7 | Security group tags on wireless; segmentation orchestrated by ISE | https://www.cisco.com/site/us/en/solutions/networking/campus-branch-networking/secure-campus/index.html |
 | ISE | Hybrid Mesh Firewall | ISE identity context informs segmentation policy | https://www.cisco.com/site/us/en/products/security/identity-services-engine/index.html |
-| ISE | Firewall | ISE shares identity context for segmentation | https://www.cisco.com/site/us/en/products/security/firewalls/index.html |
-| ISE | Network Analytics | Used together for segmentation policy and unauthorised-access alerts | https://www.cisco.com/site/us/en/products/security/security-analytics/secure-network-analytics/index.html |
-| ISE | Cyber Vision | Out-of-the-box IT/OT integration | https://www.cisco.com/site/us/en/products/security/industrial-security/cyber-vision/index.html |
+| ISE | Firewall | ISE shares security group tags and user-to-IP mappings with the firewall (pxGrid and SXP) for SGT-based access control | https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/zt-network-cloud-dg.html |
+| ISE | Network Analytics | Secure Network Analytics sends Adaptive Network Control quarantine actions to ISE over pxGrid | https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/zt-network-cloud-dg.html |
+| ISE | Cyber Vision | Cyber Vision shares OT asset profiles and zones with ISE over pxGrid; ISE assigns each asset a security group tag | https://www.cisco.com/c/en/us/products/collateral/security/cyber-vision/ise-cyber-vision-working-together-so.html |
+| ISE | Meraki dashboard | Security group tags created in ISE synchronise into Meraki Adaptive Policy through pxGrid | https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/Cisco-Secure-Networking-Cloud-Managed-Deployment-Guide.html |
+| ISE | Secure Routers · SD-WAN | ISE sends security group tags to SD-WAN Manager and IP-to-SGT mappings to the SD-WAN Controller | https://www.cisco.com/c/en/us/td/docs/cloud-systems-management/network-automation-and-management/catalyst-center/cisco-validated-solution-profiles/common-policy-integration-guide.html |
+| ISE | Nexus | ISE and ACI (APIC) exchange context: endpoint and security groups are mapped to security group tags | https://www.cisco.com/c/en/us/td/docs/cloud-systems-management/network-automation-and-management/catalyst-center/cisco-validated-solution-profiles/common-policy-integration-guide.html |
 | ISE | Secure Access | Zero Trust Access is built with ISE, Secure Access and Duo | https://www.cisco.com/site/us/en/products/security/identity-services-engine/index.html |
 | ISE | Duo | Zero Trust Access is built with ISE, Secure Access and Duo | https://www.cisco.com/site/us/en/products/security/identity-services-engine/index.html |
 | Duo | Secure Access | Duo strengthens authentication for Secure Access | https://www.cisco.com/site/us/en/products/security/secure-access/index.html |
@@ -594,7 +741,9 @@ Each line is a relationship stated on the cisco.com page given as its source.
 | Firewall | Secure Workload | Native integration between Secure Workload and Secure Firewall | https://www.cisco.com/site/us/en/products/security/secure-workload/index.html |
 | Firewall | XDR | Listed firewall integration | https://www.cisco.com/site/us/en/products/security/firewalls/index.html |
 | Firewall | WAAP | Listed firewall integration | https://www.cisco.com/site/us/en/products/security/firewalls/index.html |
-| Firewall | Cyber Vision | Out-of-the-box IT/OT integration | https://www.cisco.com/site/us/en/products/security/industrial-security/cyber-vision/index.html |
+| Firewall | Cyber Vision | Firewall Management Center turns Cyber Vision groups into dynamic objects used in firewall rules | https://www.cisco.com/c/en/us/products/collateral/security/industrial-security/cyber-vision/secure-firewall-cyber-vision-work-together-so.html |
+| Firewall | Secure Access | Threat Defense builds the branch IPsec tunnel to Secure Access for secure internet access | https://www.cisco.com/c/en/us/td/docs/security/secure-firewall/cvd/secure-firewall-sdwan-deployment-guide.html |
+| Firewall | Network Analytics | Firewall NetFlow and intrusion and malware events feed Secure Network Analytics | https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/zt-network-cloud-dg.html |
 | Hybrid Mesh Firewall | Security Cloud Control | All enforcement points are managed through Security Cloud Control | https://www.cisco.com/site/us/en/solutions/security/hybrid-mesh-firewall/index.html |
 | Hybrid Mesh Firewall | Secure Workload | End-to-end segmentation powered by Secure Workload | https://www.cisco.com/site/us/en/solutions/security/hybrid-mesh-firewall/index.html |
 | Hybrid Mesh Firewall | AI Defense | AI workload protection powered by AI Defense | https://www.cisco.com/site/us/en/solutions/security/hybrid-mesh-firewall/index.html |
@@ -612,9 +761,11 @@ Each line is a relationship stated on the cisco.com page given as its source.
 | Secure Endpoint | Talos | Talos threat hunting and intelligence built in | https://www.cisco.com/site/us/en/products/security/endpoint-security/secure-endpoint/index.html |
 | Secure Endpoint | Duo | Duo verifies user identity before application access | https://www.cisco.com/site/us/en/products/security/endpoint-security/secure-endpoint/index.html |
 | Email Threat Defense | Secure Endpoint | Listed “better together” pairing | https://www.cisco.com/site/us/en/products/security/secure-email/index.html |
-| XDR | Email Threat Defense | Listed Cisco integration | https://www.cisco.com/site/us/en/products/security/xdr/index.html |
+| XDR | Email Threat Defense | XDR quarantines emails through its Email Threat Defense integration | https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/breach-protection-suite-dg.html |
 | XDR | Network Analytics | Listed Cisco integration for network visibility | https://www.cisco.com/site/us/en/products/security/xdr/index.html |
-| Cyber Vision | XDR | Out-of-the-box IT/OT integration | https://www.cisco.com/site/us/en/products/security/industrial-security/cyber-vision/index.html |
+| Cyber Vision | XDR | Report to XDR from Cyber Vision; XDR workflows can assign a security group tag to the asset in ISE | https://www.cisco.com/c/en/us/products/collateral/security/xdr/xdr-cyber-vision-working-together-so.html |
+| ThousandEyes | XDR | ThousandEyes returns data to Cisco XDR | https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/Cisco-Secure-Networking-Cloud-Managed-Deployment-Guide.html |
+| Meraki dashboard | XDR | XDR integration enabled from the Meraki dashboard, network by network; data flows to XDR | https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco-unified-branch-large-branch-deployment-guide.html |
 | Cyber Vision | Talos | Talos intelligence and detection content | https://www.cisco.com/site/us/en/products/security/industrial-security/cyber-vision/index.html |
 | Cyber Vision | Industrial network | Cyber Vision sensor is built into industrial network equipment | https://www.cisco.com/site/us/en/products/networking/industrial-iot/index.html |
 | Industrial Threat Defense | Cyber Vision | Component of Industrial Threat Defense | https://www.cisco.com/site/us/en/products/security/industrial-security/index.html |
@@ -665,6 +816,7 @@ Each line is a relationship stated on the cisco.com page given as its source.
 | Multicloud Defense | Splunk Platform | Multicloud Defense data sent to Splunk through the Cisco Security Cloud app | https://splunkbase.splunk.com/app/7404 |
 | Secure Endpoint | Splunk Platform | Secure Endpoint data sent to Splunk through the Cisco Security Cloud app | https://splunkbase.splunk.com/app/7404 |
 | Secure Workload | Splunk Platform | Secure Workload data sent to Splunk through the Cisco Security Cloud app | https://splunkbase.splunk.com/app/7404 |
+| Secure Access | Splunk Platform | Secure Access pushes security events to Splunk (DNS, web, firewall, IPS, DLP, ZTNA and VPN events) | https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/push-security-events-integration.html |
 | XDR | Enterprise Security | XDR incidents imported into Splunk and promoted to Enterprise Security notables (Cisco Security Cloud app) | https://splunkbase.splunk.com/app/7404 |
 | Talos | Attack Analyzer | Talos threat intelligence is available in Splunk Attack Analyzer | https://www.cisco.com/site/us/en/products/security/talos/index.html |
 | ThousandEyes | Observability Cloud | Splunk Observability and ThousandEyes are presented together as Cisco Observability | https://www.cisco.com/site/us/en/products/observability/index.html |
@@ -680,6 +832,41 @@ Each line is a relationship stated on the cisco.com page given as its source.
 ## Rule table
 
 Identifiers are the ids used in the `DATA` object (`pickers`, `products`, `places`).
+
+### Design reference keys
+
+The "Design refs" column below and the backlog use these keys from `DATA.cvd`.
+
+| Key | Document | Updated | Kind |
+|---|---|---|---|
+| snra | [Introduction to the Cisco Secure Networking Architecture](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/Intro-Cisco-Secure-Network-Architecture.html) | 22 Oct 2026 | Cisco Validated |
+| sda | [Cisco Secure Network SD-Access Deployment Guide](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/Cisco-Secure-Networking-SD-Access-Deployment-Guide.html) | 21 Oct 2026 | Cisco Validated |
+| cmc | [Cisco Secure Networking Cloud-Managed Campus Deployment Guide](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/Cisco-Secure-Networking-Cloud-Managed-Deployment-Guide.html) | 19 Oct 2026 | Cisco Validated |
+| ccw | [Cisco Cloud Control Architecture and Operations Technical Whitepaper](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/Cisco-Cloud-Control-Technical-Whitepaper.html) | 10 Nov 2026 | Cisco Validated |
+| ub | [Cisco Unified Branch Design Guide](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco_unified_branch_design_guide.html) | 3 Nov 2026 | Cisco Validated |
+| ubl | [Cisco Unified Branch Large Branch Deployment Guide](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco-unified-branch-large-branch-deployment-guide.html) | 9 Nov 2026 | Cisco Validated |
+| cpol | [Cisco Common Policy Integration Guide](https://www.cisco.com/c/en/us/td/docs/cloud-systems-management/network-automation-and-management/catalyst-center/cisco-validated-solution-profiles/common-policy-integration-guide.html) | 15 Jan 2026 | Cisco Validated |
+| ztnc | [Zero Trust: Network and Cloud Security Design Guide](https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/zt-network-cloud-dg.html) | 9 Mar 2023 | Cisco Validated |
+| ztud | [Zero Trust: User and Device Security Design Guide](https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/zt-user-device-dg.html) | 11 Apr 2023 | Cisco Validated |
+| bpsdg | [Cisco Breach Protection Suite Design Guide](https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/breach-protection-suite-dg.html) | 22 Nov 2023 | Cisco Validated |
+| sasedg | [Cisco SASE Design Guide (SSE with Secure Access)](https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/sase-design-guide.html) | 15 Sep 2025 | Cisco Validated |
+| sseag | [Cisco SASE and SSE Architecture Guide](https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/sase-sse-ag.html) | 23 Jan 2025 | Cisco Validated |
+| fwsdwan | [Cisco Secure Firewall Threat Defense SD-WAN Design and Deployment Guide](https://www.cisco.com/c/en/us/td/docs/security/secure-firewall/cvd/secure-firewall-sdwan-deployment-guide.html) | 30 Sep 2025 | Cisco Validated |
+| sdwandg | [Cisco Catalyst SD-WAN Design Guide](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/SDWAN/cisco-sdwan-design-guide.html) | 21 Aug 2024 | Cisco Validated |
+| lan | [Campus LAN and Wireless LAN Design Guide](https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco-campus-lan-wlan-design-guide.html) | 4 May 2020 | Cisco Validated |
+| indso | [Industrial Security Solution Overview (Cisco Validated)](https://www.cisco.com/c/en/us/products/collateral/security/industrial-security-cvd-so.html) | 12 Feb 2026 | Cisco Validated |
+| ztaaag | [Zero Trust Access from Cisco: At a Glance](https://www.cisco.com/c/en/us/products/collateral/security/secure-access/zero-trust-access-aag.html) | 9 Dec 2025 | Reference |
+| cvds | [Cisco Cyber Vision Data Sheet](https://www.cisco.com/c/en/us/products/collateral/security/cyber-vision/cyber-vision-ds.html) | 14 Apr 2026 | Reference |
+| cvise | [Cisco ISE and Cisco Cyber Vision working together](https://www.cisco.com/c/en/us/products/collateral/security/cyber-vision/ise-cyber-vision-working-together-so.html) | 16 Aug 2024 | Reference |
+| cvfw | [Cisco Secure Firewall and Cisco Cyber Vision working together](https://www.cisco.com/c/en/us/products/collateral/security/industrial-security/cyber-vision/secure-firewall-cyber-vision-work-together-so.html) | 14 Nov 2024 | Reference |
+| cvxdr | [Cisco XDR and Cisco Cyber Vision working together](https://www.cisco.com/c/en/us/products/collateral/security/xdr/xdr-cyber-vision-working-together-so.html) | 24 Jun 2024 | Reference |
+| hmfaag | [Cisco Hybrid Mesh Firewall: At a Glance](https://www.cisco.com/c/en/us/solutions/collateral/security/hybrid-mesh-firewall/hybrid-mesh-firewall-aag.html) | 12 Jun 2026 | Reference |
+| n9300 | [Cisco N9300 Series Smart Switches with Cisco Hypershield: At a Glance (PDF)](https://www.cisco.com/c/en/us/products/collateral/switches/9300-series-smart-switches/n9300-series-smart-switch-aag.pdf) | Aug 2026 | Reference |
+| mcdag | [Cisco Multicloud Defense Architecture Guide](https://www.cisco.com/c/en/us/products/collateral/security/multicloud-defense/multicloud-defense-ag.html) | 15 Mar 2024 | Reference |
+| saise | [Secure Access help: Integrate ISE with Secure Access](https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/integrate-ise.html) | 8 Nov 2026 | Reference |
+| sasdwan | [Secure Access help: Integrate Catalyst SD-WAN with Secure Access](https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/integrate-catalyst-sd-wan.html) | 8 Nov 2026 | Reference |
+| sacii | [Secure Access help: Integrate Cisco Identity Intelligence](https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/integrate-cisco-identity-intelligence.html) | 8 Nov 2026 | Reference |
+| saspl | [Secure Access help: Push Security Events](https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/push-security-events-integration.html) | 8 Nov 2026 | Reference |
 
 ### Path rules
 
@@ -706,6 +893,7 @@ The most specific matching rule wins (ties: the later rule). `@loc` / `@dest` ar
 | RT-cloud-internet (route) | location ∈ {internet}; destination ∈ {cloudapp} | waap → mcd → cloudapp |
 | RT-inet (route) | destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail} | sa → @dest |
 | RT-inet-onprem (route) | location ∈ {hq, branch, factory}; destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail} | sdwan → sa → @dest |
+| RT-inet-guest (route) | who ∈ {guest}; location ∈ {hq, branch, factory}; destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail} | sdwan → @dest |
 | RT-inet-workload (route) | device ∈ {server}; destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail} | fw → @dest |
 | RT-inet-internet (route) | location ∈ {internet}; destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail} | @dest |
 | RT-ot (route) | destination ∈ {ot} | fw → industrial → otctl |
@@ -716,111 +904,115 @@ The most specific matching rule wins (ties: the later rule). `@loc` / `@dest` ar
 
 Every matching rule fires in path order. Verdict = highest severity among fired rules (ALLOW < ALLOW WITH LIMITS < STEP-UP < BLOCK < CONTAIN); with none, ALLOW. STEP-UP, BLOCK and CONTAIN on the path stop traffic at that hop.
 
-| Rule | When | Checked by | At hop | What is checked → result | Trust | Verdict |
-|---|---|---|---|---|---|---|
-| N1 | device ∉ {headless, server}; who ∉ {guest, attacker}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Network access control → User and device authenticated to the network; segment assigned from identity | +5 (Network identity established) | — |
-| N2 | device ∈ {headless}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Endpoint profiling → Headless device profiled and placed in a least-privilege segment | +5 (Device profiled) | ALLOW WITH LIMITS |
-| N3 | who ∈ {guest}; destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Guest access → Guest identity mapped to an internet-only segment | — | ALLOW WITH LIMITS |
-| N4 | who ∈ {guest}; destination ∈ {dcapp, cloudapp, eastwest, intai, ot}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Guest segmentation → The guest segment has no path to internal resources | -10 (Out-of-scope request) | BLOCK |
-| N5 | who ∈ {iot, ot}; destination ∈ {dcapp, cloudapp, intai}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Device segmentation → Destination is outside what this device profile may reach | -10 (Out-of-profile destination) | BLOCK |
-| N6 | who ∈ {iot}; destination ∈ {ot}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Device segmentation → IT-side device has no path into the industrial zone | -10 (Out-of-profile destination) | BLOCK |
-| N7 | who ∈ {ot}; destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail}; path includes {industrial} | Cyber Vision | industrial | Zones and conduits → No conduit is defined from this OT zone to the internet | -10 (Out-of-zone destination) | BLOCK |
-| P1 | device ∈ {mgd, mobile}; location ∈ {hq, branch, factory}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Device posture → Managed device meets compliance policy | +5 (Posture compliant) | — |
-| P2 | who ∈ {emp, admin, exec, contractor, insider, attacker}; device ∈ {mgd, mobile}; location ∈ {home, public, travel} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Device trust → Managed, healthy device confirmed | +5 (Trusted device) | — |
-| P3 | device ∈ {stale}; location ∈ {hq, branch, factory}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Device posture → Secure Client posture check reports the device out of date; it fails compliance policy | -15 (Posture non-compliant) | ALLOW WITH LIMITS |
-| P4 | device ∈ {stale}; location ∈ {home, public, travel} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Device trust → Device is out of date and fails the device-health policy | -15 (Posture non-compliant) | ALLOW WITH LIMITS |
-| P5 | who ∈ {emp, admin, exec, contractor, insider}; device ∈ {byod, claptop} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Device trust → Device is not managed by the organisation; trust not established | -10 (Unmanaged device) | ALLOW WITH LIMITS |
-| M6 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {fatigue} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Identity analytics → Abnormal authentication pattern flagged on the account | -10 (Identity risk raised) | STEP-UP |
-| M7 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {stolen} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Identity analytics → Valid password presented from an unfamiliar context: high-risk sign-in | -25 (Credential risk) | STEP-UP |
-| M8 | who ∈ {emp, admin, exec, contractor, insider, attacker}; location ∈ {travel} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Sign-in context → Location is inconsistent with the account’s recent activity | -20 (Impossible travel) | STEP-UP |
-| M9 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {offhours} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Access pattern → Access time is outside the identity’s normal pattern | -8 (Unusual time of access) | — |
-| M1 | who ∈ {emp, exec, contractor, insider}; behaviour none of {mfa_fail, fatigue, stolen} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → User verified with phishing-resistant MFA | +10 (MFA passed) | — |
-| M1b | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour all of {stolen, mfa_ok} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → MFA challenge completed | +5 (MFA passed) | — |
-| M2 | who ∈ {admin}; behaviour any of {mfa_ok}; behaviour none of {stolen} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Privileged authentication → Administrator verified with fresh phishing-resistant MFA | +10 (MFA passed) | — |
-| M3 | who ∈ {admin}; behaviour none of {mfa_ok, mfa_fail, fatigue} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Privileged session → Privileged access requires fresh strong authentication | -5 (Fresh authentication required) | STEP-UP |
-| M4 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {mfa_fail} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → MFA not completed; no session issued | -30 (MFA failed) | BLOCK |
-| M5 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {fatigue} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Push-bombing resistance → Verified Duo Push needs a code from the sign-in screen, so repeated prompts cannot be approved blindly; sign-in refused | -25 (MFA fatigue pattern) | BLOCK |
-| M10 | who ∈ {attacker}; behaviour none of {stolen} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → No valid identity presented | -20 (Unauthenticated request) | BLOCK |
-| S1 | who ∈ {contractor}; destination ∈ {dcapp, cloudapp}; path includes {sa} | Secure Access | sa | Zero trust access → Access granted to the one approved application, not to the network | — | ALLOW WITH LIMITS |
-| S1b | who ∈ {contractor}; destination ∈ {dcapp, cloudapp}; path includes {switches, industrial, sdwan}; path lacks {sa} | ISE | switches / industrial / sdwan | Contractor segmentation → Contractor segment permits only the approved application | — | ALLOW WITH LIMITS |
-| S2 | who ∈ {contractor}; destination ∈ {eastwest, intai}; path includes {sa} | Secure Access | sa | Zero trust access → Requested resource is not among the contractor’s granted applications | -15 (Out-of-scope request) | BLOCK |
-| S2b | who ∈ {contractor}; destination ∈ {eastwest, intai}; path includes {switches, industrial, sdwan}; path lacks {sa} | ISE | switches / industrial / sdwan | Contractor segmentation → Requested resource is outside the contractor segment | -15 (Out-of-scope request) | BLOCK |
-| S3 | path includes {sea} | Secure Equipment Access | sea | Remote equipment access → Least-privilege session to the named asset, with approval workflow and session recording | — | ALLOW WITH LIMITS |
-| S4 | behaviour any of {priv}; path includes {sa} | Secure Access | sa | Least-privilege access → Requested privilege exceeds what the identity’s role allows | -15 (Excess privilege request) | BLOCK |
-| S5 | behaviour any of {priv}; path includes {nexus}; path lacks {sa} | Secure Workload | nexus | Microsegmentation policy → Flow is outside the workload’s allowed communication policy | -15 (Excess privilege request) | BLOCK |
-| S6 | behaviour any of {priv}; path lacks {sa, nexus} | Identity Intelligence | switches / industrial / sdwan / @dst | Privilege analytics → Privilege request exceeds the role and is flagged as risky | -15 (Excess privilege request) | BLOCK |
-| X1 | who ∈ {attacker}; path includes {fw} | Firewall | fw | Inbound threat prevention → Unsolicited inbound connection denied; known attack patterns blocked using Talos intelligence | -25 (Hostile inbound traffic) | BLOCK |
-| X2 | who ∈ {attacker}; path includes {waap} | WAAP | waap | Application and API protection → Malicious requests and automated-client patterns filtered in front of the application | -25 (Application attack pattern) | BLOCK |
-| X3 | who ∈ {attacker}; path includes {mcd} | Multicloud Defense | mcd | Cloud ingress protection → Inbound attack blocked at the cloud gateway | -20 (Hostile inbound traffic) | BLOCK |
-| X4 | who ∈ {attacker}; path includes {nexus} | Hypershield | nexus | Vulnerability shielding → A compensating control shields the exposed workload from exploitation | -20 (Exploit attempt) | BLOCK |
-| T1a | device ∈ {compromised}; behaviour none of {scan, ransom, exfil} | Secure Endpoint | @src | Endpoint detection → Malware detected on the device; host isolated from the network | -45 (Malware on device) | CONTAIN |
-| T1b | device ∈ {compromised}; behaviour any of {scan, exfil} | Secure Endpoint | @src | Endpoint detection → Malicious activity observed on the device; telemetry raised | -30 (Malware on device) | — |
-| T8 | device ∈ {mgd, stale, mobile, compromised}; behaviour any of {ransom} | Secure Endpoint | @src | Endpoint detection and response → Ransomware behaviour detected; host isolated | -45 (Ransomware behaviour) | CONTAIN |
-| T2 | behaviour any of {scan}; path includes {switches, nexus} | Network Analytics | switches / nexus | Network behaviour analytics → Scanning and lateral-movement pattern detected from this host | -25 (Lateral-movement behaviour) | — |
-| T5 | behaviour any of {scan}; path includes {industrial} | Cyber Vision | industrial | OT threat detection → Abnormal scanning traffic seen by the sensor in the industrial network | -20 (Lateral-movement behaviour) | — |
-| T3 | behaviour any of {scan}; who ∉ {attacker}; device ∉ {server}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Automated containment → Endpoint moved to a quarantine segment by an Adaptive Network Control policy | -15 (Endpoint quarantined) | CONTAIN |
-| T4 | behaviour any of {scan}; path includes {sa}; path lacks {switches, industrial, sdwan} | Secure Access | sa | Zero trust access → Only the granted application is reachable; there is no network path to scan | -15 (Lateral-movement behaviour) | BLOCK |
-| T6 | behaviour any of {scan, ransom}; path includes {nexus} | Secure Workload | nexus | Microsegmentation → Flow to other workloads denied outside the allowed policy | -10 (Segment boundary hit) | BLOCK |
-| T7 | behaviour any of {scan, exfil}; path includes {mcd} | Multicloud Defense | mcd | Cloud east-west and egress control → Lateral-movement or exfiltration traffic blocked at the cloud gateway | -15 (Malicious cloud traffic) | BLOCK |
-| T11 | behaviour any of {exfil}; path includes {switches, nexus} | Network Analytics | switches / nexus | Encrypted traffic analytics → Exfiltration pattern identified in encrypted traffic without decryption | -25 (Exfiltration behaviour) | — |
-| T12 | behaviour any of {exfil}; path includes {sa} | Secure Access | sa | DNS and internet egress control → Covert channel to the external destination blocked | -15 (Exfiltration behaviour) | BLOCK |
-| T13 | behaviour any of {exfil}; who ∉ {attacker}; path includes {fw} | Firewall | fw | Encrypted Visibility Engine → Malicious encrypted flow identified and blocked without decryption | -15 (Exfiltration behaviour) | BLOCK |
-| T14 | behaviour any of {anomaly}; path includes {industrial} | Cyber Vision | industrial | OT behaviour baseline → Communication deviates from the asset’s recorded behaviour | -25 (OT anomaly) | — |
-| W9 | destination ∈ {web_safe, web_risky, web_mal}; behaviour any of {anomaly}; path includes {sa} | Secure Access | switches / industrial / sdwan | DNS-layer security → Lookup of an unknown internet host flagged and the connection denied before it is made | -10 (Suspicious destination) | BLOCK |
-| T15 | behaviour any of {anomaly}; path includes {switches} | Network Analytics | switches | Behavioural analytics → Device traffic no longer matches its expected behaviour | -20 (IoT anomaly) | — |
-| T16 | behaviour any of {anomaly}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Automated containment → Device no longer matches its profile; moved to a quarantine segment by an Adaptive Network Control policy | -20 (Profile mismatch) | CONTAIN |
-| E1 | behaviour any of {phish} | Email Threat Defense | @src | Email threat detection → Phishing message identified and remediated from the mailbox after delivery | -5 (Phishing email) | — |
-| W2 | destination ∈ {web_mal}; path includes {sa} | Secure Access | sa | Secure internet access → DNS-layer and web security: known malicious destination denied before a connection is made | -20 (Malicious destination) | BLOCK |
-| W2p | behaviour any of {phish}; path includes {sa} | Secure Access | sa | Secure internet access → Phishing destination denied by threat policy | -15 (Phishing link clicked) | BLOCK |
-| W2f | destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail}; behaviour any of {malfile}; path includes {sa} | Secure Access | sa | Secure internet access → Malicious download denied by threat policy | -15 (Malicious download) | BLOCK |
-| W3 | destination ∈ {web_mal}; path includes {fw}; path lacks {sa} | Firewall | fw | Egress threat prevention → Outbound connection to a known malicious destination blocked using Talos intelligence | -20 (Malicious destination) | BLOCK |
-| W4 | destination ∈ {web_risky}; path includes {sa} | Secure Access | sa | Web category policy → Risky category: page opened through Remote Browser Isolation, away from the device | -5 (Risky web category) | ALLOW WITH LIMITS |
-| W5 | destination ∈ {shadow}; path includes {sa} | Secure Access | sa | Shadow IT control (CASB) → Unsanctioned application identified by the cloud access security broker; use restricted | -10 (Unsanctioned application) | ALLOW WITH LIMITS |
-| W6 | destination ∈ {shadow, web_safe, web_risky, web_mal, pubai}; behaviour any of {upload}; path includes {sa} | Secure Access | sa | Data Loss Prevention → Sensitive upload to an unapproved destination denied by the data loss prevention policy | -15 (Sensitive data upload) | BLOCK |
-| W7 | destination ∈ {saas, ai}; behaviour any of {upload}; path includes {sa} | Secure Access | sa | Data movement policy → Upload to a sanctioned application evaluated and logged | -5 (Sensitive data upload) | — |
-| W8 | who ∈ {insider}; behaviour any of {upload}; path includes {switches, nexus} | Network Analytics | switches / nexus | Insider-threat analytics → Unusually large data movement by this user detected | -20 (Bulk data movement) | ALLOW WITH LIMITS |
-| A1 | destination ∈ {ai}; path includes {sa} | Secure Access | sa | AI access policy → Approved AI application permitted for this user | — | — |
-| A2 | destination ∈ {pubai}; path includes {sa} | Secure Access | sa | Shadow AI control (CASB) → Unapproved generative AI application detected and blocked | -10 (Unapproved AI tool) | BLOCK |
-| A3 | destination ∈ {ai, pubai}; behaviour any of {aipaste}; path includes {sa} | Secure Access | sa | AI Access data-loss control → Confidential data detected in the prompt to a third-party AI app; prompt not sent | -15 (Sensitive data in prompt) | BLOCK |
-| A4 | destination ∈ {intai}; behaviour any of {aipaste} | AI Defense | @dst | AI data-leakage guardrail → Sensitive content in the prompt flagged and logged | -5 (Sensitive data in prompt) | ALLOW WITH LIMITS |
-| A5 | destination ∈ {intai}; behaviour any of {inject} | AI Defense | @dst | AI runtime guardrail → Prompt-injection pattern detected; request rejected | -25 (Prompt injection attempt) | BLOCK |
-| A6 | destination ∈ {intai}; behaviour none of {inject, aipaste} | AI Defense | @dst | AI runtime protection → Model interaction covered by runtime guardrails | — | — |
-| B1 | path includes {wireless} | Wi-Fi 7 | wireless | Air link → WPA3-protected wireless association | — | — |
-| B2 | path includes {client} | Secure Client | client | Device tunnel → Secure Client, the unified client for Secure Access, opens the VPN / zero trust access session | — | — |
-| B3 | path includes {sdwan} | Secure Routers · SD-WAN | sdwan | WAN transport → Traffic carried in the encrypted, segmented SD-WAN overlay | — | — |
-| B4 | path includes {sa} | Secure Access | sa | User-to-app policy → Session evaluated against identity, device and destination policy at the cloud edge | — | — |
-| B5 | who ∉ {attacker}; path includes {fw} | Firewall | fw | Traffic inspection → Flow inspected; encrypted traffic assessed without decryption | — | — |
-| B6 | path includes {mcd} | Multicloud Defense | mcd | Cloud gateway → Ingress, egress and east-west policy applied in the cloud network | — | — |
-| B7 | path includes {nexus} | Hypershield | nexus | Workload-edge segmentation → Flow checked against segmentation policy on the smart switch | — | — |
-| B8 | destination ∈ {dcapp, eastwest, intai}; path includes {nexus} | Secure Workload | nexus | Workload policy → Flow matches the workload’s allowed communication policy | — | — |
-| B9 | path includes {industrial} | Cyber Vision | industrial | OT visibility → Asset and its communications inventoried by the embedded sensor | — | — |
-| B10 | destination ∈ {mail} | Email Threat Defense | @dst | Mail protection → Messages scanned for threats before they reach the mailbox | — | — |
-| O1 | behaviour any of {slow} | ThousandEyes | wireless / switches / sdwan / client / @src | Owned-network path → Access and WAN segments measured from the user’s vantage point: healthy | — | — |
-| O2 | behaviour any of {slow}; path includes {sa} | ThousandEyes | sa | Access-flow correlation → Digital experience correlated with the Secure Access session | — | — |
-| O3 | behaviour any of {slow} | ThousandEyes | after path | Fault localisation → Degradation located on a network segment the organisation does not own | — | — |
-| F1 | device ∈ {mgd, stale, mobile, compromised}; behaviour any of {malfile} | Secure Endpoint | after path | Endpoint file protection → Malicious file blocked and quarantined on the device | -15 (Malicious download) | BLOCK |
-| E2 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {phish} | Duo | after path | Phishing-resistant authentication → A captured password cannot be replayed without the phishing-resistant factor | — | — |
-| T9 | location ∈ {hq, branch, factory}; behaviour any of {ransom}; device ∉ {server} | ISE | after path | Automated containment → Endpoint moved to a quarantine segment by an Adaptive Network Control policy | -10 (Endpoint quarantined) | CONTAIN |
-| T10 | behaviour any of {ransom} | Hypershield | after path | Segment boundary → Stateful segmentation near workloads keeps the outbreak inside one segment | — | — |
-| Z1 | always; needs earlier telemetry | XDR | after path | Cross-domain correlation → Telemetry correlated into one prioritised incident with guided response | -5 (Incident opened) | — |
-| Z2 | behaviour any of {scan, ransom, exfil}; who ∉ {attacker}; needs earlier telemetry | XDR | after path | Automated response → Containment action triggered to stop lateral movement | — | CONTAIN |
-| Z3 | behaviour any of {ransom}; needs earlier telemetry | XDR | after path | Recovery → Affected host can be restored from a last-known-good snapshot | — | — |
-| SP1 | always | Splunk Platform | after path | Data platform → Logs and events from the connected Cisco sources are ingested, searchable and retained | — | — |
-| SP2 | always | Enterprise Security | after path | SIEM detection → Events correlated and prioritised with risk-based alerting, mapped to MITRE ATT&CK | — | — |
-| SP3 | always | Splunk SOAR | after path | Response automation → Playbook automates enrichment, case creation and response tasks for the analyst | — | — |
-| SP8 | behaviour any of {scan, ransom, exfil, anomaly}; who ∉ {attacker} | Splunk SOAR | after path | Automated response action → Playbook acts on connected Cisco products: quarantine through ISE, host isolation through Secure Endpoint, or a block on the firewall | — | CONTAIN |
-| SP4 | behaviour any of {phish, malfile} | Attack Analyzer | after path | Automated threat analysis → Suspected link or file followed through its attack chain to a verdict, using Talos intelligence | — | — |
-| SP5 | behaviour any of {slow} | Observability Cloud | after path | Full-stack observability → Application, infrastructure and user-experience telemetry reviewed alongside the ThousandEyes network view | — | — |
-| SP6 | destination ∈ {dcapp, cloudapp}; behaviour any of {slow} | AppDynamics | after path | Application-layer view → Application performance combined with network-path data to separate app faults from network faults | — | — |
-| SP7 | behaviour any of {slow} | ITSI | after path | Service health → Related alerts grouped into one episode with a service health score for the affected service | — | — |
-| O4 | behaviour any of {push} | Security Cloud Control | after path | Policy authoring → Security intent authored in Security Cloud Control for the enforcement points it manages | — | — |
-| O5-fw | behaviour any of {push} | Firewall | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — |
-| O5-mcd | behaviour any of {push} | Multicloud Defense | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — |
-| O5-hs | behaviour any of {push} | Hypershield | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — |
-| O5-sa | behaviour any of {push} | Secure Access | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — |
-| O5-wl | behaviour any of {push} | Secure Workload | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — |
-| O5-aid | behaviour any of {push} | AI Defense | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — |
-| O5-sdwan | behaviour any of {push} | Secure Routers · SD-WAN | after path | Policy distribution → Router firewall policy received from Security Cloud Control; SD-WAN overlay policy stays in Catalyst SD-WAN Manager | — | — |
+| Rule | When | Checked by | At hop | What is checked → result | Trust | Verdict | Design refs |
+|---|---|---|---|---|---|---|---|
+| N1 | device ∉ {headless, server}; who ∉ {guest, attacker}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Network access control → User and device authenticated to the network; segment assigned from identity | +5 (Network identity established) | — | sda, ztnc |
+| N2 | device ∈ {headless}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Endpoint profiling → Headless device profiled and placed in a least-privilege segment | +5 (Device profiled) | ALLOW WITH LIMITS | sda |
+| N3 | who ∈ {guest}; destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Guest access → Guest identity mapped to an internet-only segment that breaks out locally, outside the Secure Access tunnels | — | ALLOW WITH LIMITS | ubl |
+| N4 | who ∈ {guest}; destination ∈ {dcapp, cloudapp, eastwest, intai, ot}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Guest segmentation → The guest segment has no path to internal resources | -10 (Out-of-scope request) | BLOCK | sda |
+| N5 | who ∈ {iot, ot}; destination ∈ {dcapp, cloudapp, intai}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Device segmentation → Destination is outside what this device profile may reach | -10 (Out-of-profile destination) | BLOCK | — |
+| N6 | who ∈ {iot}; destination ∈ {ot}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Device segmentation → IT-side device has no path into the industrial zone | -10 (Out-of-profile destination) | BLOCK | — |
+| N7 | who ∈ {ot}; destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail}; path includes {industrial} | ISE (with Cyber Vision) | industrial | Zones and conduits → The Cyber Vision zone has no conduit to the internet; ISE enforces it through the asset’s security group tag | -10 (Out-of-zone destination) | BLOCK | cvise, indso |
+| P1 | device ∈ {mgd, mobile}; location ∈ {hq, branch, factory}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Device posture → Managed device meets compliance policy | +5 (Posture compliant) | — | — |
+| P2 | who ∈ {emp, admin, exec, contractor, insider, attacker}; device ∈ {mgd, mobile}; location ∈ {home, public, travel} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Device trust → Managed, healthy device confirmed | +5 (Trusted device) | — | — |
+| P3 | device ∈ {stale}; location ∈ {hq, branch, factory}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Device posture → ISE posture module in Secure Client reports the device out of date; it fails compliance policy | -15 (Posture non-compliant) | ALLOW WITH LIMITS | ztud, sasedg |
+| P4 | device ∈ {stale}; location ∈ {home, public, travel} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Device trust → Device is out of date: the user is warned, and blocked once it falls too far behind the device-health policy | -15 (Posture non-compliant) | ALLOW WITH LIMITS | ztud |
+| P5 | who ∈ {emp, admin, exec, contractor, insider}; device ∈ {byod, claptop} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Device trust → Device is not managed by the organisation; trust not established | -10 (Unmanaged device) | ALLOW WITH LIMITS | ztud |
+| M6 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {fatigue} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Identity analytics → Abnormal authentication pattern flagged on the account | -10 (Identity risk raised) | STEP-UP | — |
+| M7 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {stolen} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Identity analytics → Valid password presented from an unfamiliar context: high-risk sign-in | -25 (Credential risk) | STEP-UP | — |
+| M8 | who ∈ {emp, admin, exec, contractor, insider, attacker}; location ∈ {travel} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Sign-in context → Location is inconsistent with the account’s recent activity | -20 (Impossible travel) | STEP-UP | — |
+| M9 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {offhours} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Access pattern → Access time is outside the identity’s normal pattern | -8 (Unusual time of access) | — | — |
+| M1 | who ∈ {emp, exec, contractor, insider}; behaviour none of {mfa_fail, fatigue, stolen} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → User verified with phishing-resistant MFA | +10 (MFA passed) | — | — |
+| M1b | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour all of {stolen, mfa_ok} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → MFA challenge completed | +5 (MFA passed) | — | — |
+| M2 | who ∈ {admin}; behaviour any of {mfa_ok}; behaviour none of {stolen} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Privileged authentication → Administrator verified with fresh phishing-resistant MFA | +10 (MFA passed) | — | — |
+| M3 | who ∈ {admin}; behaviour none of {mfa_ok, mfa_fail, fatigue} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Privileged session → Privileged access requires fresh strong authentication | -5 (Fresh authentication required) | STEP-UP | — |
+| M4 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {mfa_fail} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → MFA not completed; no session issued | -30 (MFA failed) | BLOCK | — |
+| M5 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {fatigue} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Push-bombing resistance → Verified Duo Push needs a code from the sign-in screen, so repeated prompts cannot be approved blindly; sign-in refused | -25 (MFA fatigue pattern) | BLOCK | — |
+| M10 | who ∈ {attacker}; behaviour none of {stolen} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → No valid identity presented | -20 (Unauthenticated request) | BLOCK | — |
+| S1 | who ∈ {contractor}; destination ∈ {dcapp, cloudapp}; path includes {sa} | Secure Access | sa | Zero trust access → Access granted to the one approved application, not to the network | — | ALLOW WITH LIMITS | sasedg, ztud |
+| S1b | who ∈ {contractor}; destination ∈ {dcapp, cloudapp}; path includes {switches, industrial, sdwan}; path lacks {sa} | ISE | switches / industrial / sdwan | Contractor segmentation → Contractor segment permits only the approved application | — | ALLOW WITH LIMITS | — |
+| S2 | who ∈ {contractor}; destination ∈ {eastwest, intai}; path includes {sa} | Secure Access | sa | Zero trust access → Requested resource is not among the contractor’s granted applications | -15 (Out-of-scope request) | BLOCK | ztud |
+| S2b | who ∈ {contractor}; destination ∈ {eastwest, intai}; path includes {switches, industrial, sdwan}; path lacks {sa} | ISE | switches / industrial / sdwan | Contractor segmentation → Requested resource is outside the contractor segment | -15 (Out-of-scope request) | BLOCK | — |
+| S3 | path includes {sea} | Secure Equipment Access | sea | Remote equipment access → Least-privilege session to the named asset only, with MFA or SSO, a time schedule and a posture check | — | ALLOW WITH LIMITS | cvds |
+| S4 | behaviour any of {priv}; path includes {sa} | Secure Access | sa | Least-privilege access → Requested privilege exceeds what the identity’s role allows | -15 (Excess privilege request) | BLOCK | — |
+| S5 | behaviour any of {priv}; path includes {nexus}; path lacks {sa} | Secure Workload | nexus | Microsegmentation policy → Flow is outside the workload’s allowed communication policy | -15 (Excess privilege request) | BLOCK | — |
+| S6 | behaviour any of {priv}; path lacks {sa, nexus} | Identity Intelligence | switches / industrial / sdwan / @dst | Privilege analytics → Privilege request exceeds the role and is flagged as risky | -15 (Excess privilege request) | BLOCK | — |
+| X1 | who ∈ {attacker}; path includes {fw} | Firewall (with Talos) | fw | Inbound threat prevention → Unsolicited inbound connection denied; known attack patterns blocked using Talos intelligence | -25 (Hostile inbound traffic) | BLOCK | — |
+| X2 | who ∈ {attacker}; path includes {waap} | WAAP | waap | Application and API protection → Malicious requests and automated-client patterns filtered in front of the application | -25 (Application attack pattern) | BLOCK | — |
+| X3 | who ∈ {attacker}; path includes {mcd} | Multicloud Defense | mcd | Cloud ingress protection → Inbound attack blocked at the cloud gateway | -20 (Hostile inbound traffic) | BLOCK | — |
+| X4 | who ∈ {attacker}; path includes {nexus} | Hypershield | nexus | Vulnerability shielding → A compensating control shields the exposed workload from exploitation | -20 (Exploit attempt) | BLOCK | — |
+| T1a | device ∈ {compromised}; behaviour none of {scan, ransom, exfil} | Secure Endpoint | @src | Endpoint detection → Malware detected on the device; host isolated from the network | -45 (Malware on device) | CONTAIN | bpsdg |
+| T1b | device ∈ {compromised}; behaviour any of {scan, exfil} | Secure Endpoint | @src | Endpoint detection → Malicious activity observed on the device; telemetry raised | -30 (Malware on device) | — | — |
+| T8 | device ∈ {mgd, stale, mobile, compromised}; behaviour any of {ransom} | Secure Endpoint | @src | Endpoint detection and response → Ransomware behaviour detected; host isolated | -45 (Ransomware behaviour) | CONTAIN | bpsdg |
+| T2 | behaviour any of {scan}; path includes {switches, nexus} | Network Analytics | switches / nexus | Network behaviour analytics → Scanning and lateral-movement pattern detected from this host | -25 (Lateral-movement behaviour) | — | ztnc |
+| T5 | behaviour any of {scan}; path includes {industrial} | Cyber Vision | industrial | OT threat detection → Abnormal scanning traffic seen by the sensor in the industrial network | -20 (Lateral-movement behaviour) | — | — |
+| T3 | behaviour any of {scan}; who ∉ {attacker}; device ∉ {server}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Containment → Adaptive Network Control quarantine sent to ISE over pxGrid; a Change of Authorization moves the endpoint to a quarantine security group | -15 (Endpoint quarantined) | CONTAIN | ztnc, sda |
+| T4 | behaviour any of {scan}; path includes {sa}; path lacks {switches, industrial, sdwan} | Secure Access | sa | Zero trust access → Only the granted application is reachable; there is no network path to scan | -15 (Lateral-movement behaviour) | BLOCK | — |
+| T6 | behaviour any of {scan, ransom}; path includes {nexus} | Secure Workload | nexus | Microsegmentation → Flow to other workloads denied outside the allowed policy | -10 (Segment boundary hit) | BLOCK | — |
+| T7 | behaviour any of {scan, exfil}; path includes {mcd} | Multicloud Defense | mcd | Cloud east-west and egress control → Lateral-movement or exfiltration traffic blocked at the cloud gateway | -15 (Malicious cloud traffic) | BLOCK | — |
+| T11 | behaviour any of {exfil}; path includes {switches, nexus} | Network Analytics | switches / nexus | Encrypted traffic analytics → Exfiltration pattern identified in encrypted traffic without decryption | -25 (Exfiltration behaviour) | — | ztnc |
+| T12 | behaviour any of {exfil}; path includes {sa} | Secure Access | sa | DNS and internet egress control → Covert channel to the external destination blocked | -15 (Exfiltration behaviour) | BLOCK | — |
+| T13 | behaviour any of {exfil}; who ∉ {attacker}; path includes {fw} | Firewall | fw | Encrypted Visibility Engine → Malicious encrypted flow identified and blocked without decryption | -15 (Exfiltration behaviour) | BLOCK | snra |
+| T14 | behaviour any of {anomaly}; path includes {industrial} | Cyber Vision | industrial | OT behaviour baseline → Communication deviates from the asset’s recorded behaviour | -25 (OT anomaly) | — | cvds |
+| W9 | destination ∈ {web_safe, web_risky, web_mal}; behaviour any of {anomaly}; path includes {sa} | Secure Access | switches / industrial / sdwan | DNS-layer security → Lookup of an unknown internet host flagged and the connection denied before it is made | -10 (Suspicious destination) | BLOCK | — |
+| T15 | behaviour any of {anomaly}; path includes {switches} | Network Analytics | switches | Behavioural analytics → Device traffic no longer matches its expected behaviour | -20 (IoT anomaly) | — | — |
+| T16 | behaviour any of {anomaly}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Containment → Device no longer matches its profile; an Adaptive Network Control quarantine and a Change of Authorization move it to a quarantine security group | -20 (Profile mismatch) | CONTAIN | ztnc, sda |
+| E1 | behaviour any of {phish} | Email Threat Defense | @src | Email threat detection → Phishing message identified and remediated from the mailbox after delivery | -5 (Phishing email) | — | bpsdg |
+| W2 | destination ∈ {web_mal}; path includes {sa} | Secure Access | sa | Secure internet access → DNS-layer and web security: known malicious destination denied before a connection is made | -20 (Malicious destination) | BLOCK | — |
+| W2p | behaviour any of {phish}; path includes {sa} | Secure Access | sa | Secure internet access → Phishing destination denied by threat policy | -15 (Phishing link clicked) | BLOCK | — |
+| W2f | destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail}; behaviour any of {malfile}; path includes {sa} | Secure Access | sa | Secure internet access → Malicious download denied by threat policy | -15 (Malicious download) | BLOCK | — |
+| W3 | destination ∈ {web_mal}; path includes {fw}; path lacks {sa} | Firewall (with Talos) | fw | Egress threat prevention → Outbound connection to a known malicious destination blocked using Talos intelligence | -20 (Malicious destination) | BLOCK | — |
+| W4 | destination ∈ {web_risky}; path includes {sa} | Secure Access | sa | Web category policy → Risky category: page opened through Remote Browser Isolation, away from the device | -5 (Risky web category) | ALLOW WITH LIMITS | — |
+| W5 | destination ∈ {shadow}; path includes {sa} | Secure Access | sa | Shadow IT control (CASB) → Unsanctioned application identified by the cloud access security broker; use restricted | -10 (Unsanctioned application) | ALLOW WITH LIMITS | — |
+| W6 | destination ∈ {shadow, web_safe, web_risky, web_mal, pubai}; behaviour any of {upload}; path includes {sa} | Secure Access | sa | Data Loss Prevention → Sensitive upload to an unapproved destination denied by the data loss prevention policy | -15 (Sensitive data upload) | BLOCK | sasedg |
+| W7 | destination ∈ {saas, ai}; behaviour any of {upload}; path includes {sa} | Secure Access | sa | Data movement policy → Upload to a sanctioned application evaluated and logged | -5 (Sensitive data upload) | — | — |
+| W8 | who ∈ {insider}; behaviour any of {upload}; path includes {switches, nexus} | Network Analytics | switches / nexus | Insider-threat analytics → Unusually large data movement by this user detected | -20 (Bulk data movement) | ALLOW WITH LIMITS | — |
+| A1 | destination ∈ {ai}; path includes {sa} | Secure Access | sa | AI access policy → Approved AI application permitted for this user | — | — | — |
+| A2 | destination ∈ {pubai}; path includes {sa} | Secure Access | sa | Shadow AI control (CASB) → Unapproved generative AI application detected and blocked | -10 (Unapproved AI tool) | BLOCK | — |
+| A3 | destination ∈ {ai, pubai}; behaviour any of {aipaste}; path includes {sa} | Secure Access | sa | AI Access data-loss control → Confidential data detected in the prompt to a third-party AI app; prompt not sent | -15 (Sensitive data in prompt) | BLOCK | — |
+| A4 | destination ∈ {intai}; behaviour any of {aipaste} | AI Defense | @dst | AI data-leakage guardrail → Sensitive content in the prompt flagged and logged | -5 (Sensitive data in prompt) | ALLOW WITH LIMITS | — |
+| A5 | destination ∈ {intai}; behaviour any of {inject} | AI Defense | @dst | AI runtime guardrail → Prompt-injection pattern detected; request rejected | -25 (Prompt injection attempt) | BLOCK | — |
+| A6 | destination ∈ {intai}; behaviour none of {inject, aipaste} | AI Defense | @dst | AI runtime protection → Model interaction covered by runtime guardrails | — | — | — |
+| B1 | path includes {wireless} | Wi-Fi 7 | wireless | Air link → WPA3-protected wireless association | — | — | — |
+| B2 | path includes {client} | Secure Client | client | Device tunnel → Secure Client, the unified client for Secure Access, opens the VPN / zero trust access session | — | — | sasedg |
+| B3 | who ∉ {guest}; path includes {sdwan} | Secure Routers · SD-WAN | sdwan | WAN transport → Traffic carried in the encrypted, segmented SD-WAN overlay | — | — | sdwandg |
+| B3g | who ∈ {guest}; path includes {sdwan} | Secure Routers · SD-WAN | sdwan | Local internet breakout → Guest traffic leaves through the router’s own internet uplink, outside the Secure Access tunnels | — | — | ub, ubl |
+| W3r | destination ∈ {web_mal}; path includes {sdwan}; path lacks {sa} | Secure Routers · SD-WAN | sdwan | Threat protection → Content filtering and threat protection on the secure router block a known malicious destination at the local breakout | -20 (Malicious destination) | BLOCK | ubl |
+| W3f | destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail}; behaviour any of {malfile, phish}; path includes {sdwan}; path lacks {sa} | Secure Routers · SD-WAN | sdwan | Threat protection → Threat protection on the secure router blocks the malicious download or phishing link at the local breakout | -15 (Malicious download) | BLOCK | ubl |
+| B4 | path includes {sa} | Secure Access | sa | User-to-app policy → Session evaluated against identity, device and destination policy at the cloud edge | — | — | sasedg |
+| B5 | who ∉ {attacker}; path includes {fw} | Firewall | fw | Traffic inspection → Flow inspected; encrypted traffic assessed without decryption | — | — | — |
+| B6 | path includes {mcd} | Multicloud Defense | mcd | Cloud gateway → Ingress, egress and east-west policy applied in the cloud network | — | — | — |
+| B7 | path includes {nexus} | Hypershield | nexus | Workload-edge segmentation → Flow checked against segmentation policy on the smart switch | — | — | n9300 |
+| B8 | destination ∈ {dcapp, eastwest, intai}; path includes {nexus} | Secure Workload | nexus | Workload policy → Flow matches the workload’s allowed communication policy | — | — | — |
+| B9 | path includes {industrial} | Cyber Vision | industrial | OT visibility → Asset and its communications inventoried by the embedded sensor | — | — | cvds |
+| B10 | destination ∈ {mail} | Email Threat Defense | @dst | Mail protection → Messages scanned for threats before they reach the mailbox | — | — | — |
+| O1 | behaviour any of {slow} | ThousandEyes | wireless / switches / sdwan / client / @src | Owned-network path → Access and WAN segments measured from the user’s vantage point: healthy | — | — | — |
+| O2 | behaviour any of {slow}; path includes {sa} | ThousandEyes | sa | Access-flow correlation → Digital experience correlated with the Secure Access session | — | — | sasedg |
+| O3 | behaviour any of {slow} | ThousandEyes | after path | Fault localisation → Degradation located on a network segment the organisation does not own | — | — | — |
+| F1 | device ∈ {mgd, stale, mobile, compromised}; behaviour any of {malfile} | Secure Endpoint | after path | Endpoint file protection → Malicious file blocked and quarantined on the device | -15 (Malicious download) | BLOCK | — |
+| E2 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {phish} | Duo | after path | Phishing-resistant authentication → A captured password cannot be replayed without the phishing-resistant factor | — | — | — |
+| T9 | location ∈ {hq, branch, factory}; behaviour any of {ransom}; device ∉ {server} | ISE | after path | Containment → Adaptive Network Control quarantine sent to ISE over pxGrid; a Change of Authorization moves the endpoint to a quarantine security group | -10 (Endpoint quarantined) | CONTAIN | ztnc, sda |
+| T10 | behaviour any of {ransom} | Hypershield | after path | Segment boundary → Stateful segmentation near workloads keeps the outbreak inside one segment | — | — | n9300 |
+| Z1 | always; needs earlier telemetry | XDR | after path | Cross-domain correlation → Telemetry correlated into one prioritised incident with guided response | -5 (Incident opened) | — | bpsdg |
+| Z2 | behaviour any of {scan, ransom, exfil}; who ∉ {attacker}; path lacks {industrial}; needs earlier telemetry | XDR (with Secure Endpoint) | after path | Response action → Host isolation requested in Secure Endpoint from the incident, manually or by an automation workflow | — | CONTAIN | bpsdg |
+| Z2-ot | behaviour any of {scan, anomaly}; who ∉ {attacker}; path includes {industrial}; needs earlier telemetry | XDR (with ISE) | after path | Response workflow → Cyber Vision reports the incident to XDR; a workflow assigns a security group tag in ISE that stops the asset communicating | — | CONTAIN | cvxdr |
+| Z3 | behaviour any of {ransom}; needs earlier telemetry | XDR | after path | Recovery → Affected host can be restored from a last-known-good snapshot | — | — | — |
+| SP1 | always | Splunk Platform | after path | Data platform → Logs and events from the connected Cisco sources are ingested, searchable and retained | — | — | — |
+| SP2 | always | Enterprise Security | after path | SIEM detection → Events correlated and prioritised with risk-based alerting, mapped to MITRE ATT&CK | — | — | — |
+| SP3 | always | Splunk SOAR | after path | Response automation → Playbook automates enrichment, case creation and response tasks for the analyst | — | — | — |
+| SP8 | behaviour any of {scan, ransom, exfil, anomaly}; who ∉ {attacker} | Splunk SOAR | after path | Automated response action → Playbook acts on connected Cisco products: quarantine through ISE, host isolation through Secure Endpoint, or a block on the firewall | — | CONTAIN | — |
+| SP4 | behaviour any of {phish, malfile} | Attack Analyzer (with Talos) | after path | Automated threat analysis → Suspected link or file followed through its attack chain to a verdict, using Talos intelligence | — | — | — |
+| SP5 | behaviour any of {slow} | Observability Cloud | after path | Full-stack observability → Application, infrastructure and user-experience telemetry reviewed alongside the ThousandEyes network view | — | — | — |
+| SP6 | destination ∈ {dcapp, cloudapp}; behaviour any of {slow} | AppDynamics | after path | Application-layer view → Application performance combined with network-path data to separate app faults from network faults | — | — | — |
+| SP7 | behaviour any of {slow} | ITSI | after path | Service health → Related alerts grouped into one episode with a service health score for the affected service | — | — | — |
+| O4 | behaviour any of {push} | Security Cloud Control | after path | Policy authoring → Security intent authored in Security Cloud Control for the enforcement points it manages | — | — | — |
+| O5-fw | behaviour any of {push} | Firewall | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — | — |
+| O5-mcd | behaviour any of {push} | Multicloud Defense | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — | — |
+| O5-hs | behaviour any of {push} | Hypershield | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — | — |
+| O5-sa | behaviour any of {push} | Secure Access | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — | — |
+| O5-wl | behaviour any of {push} | Secure Workload | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — | — |
+| O5-aid | behaviour any of {push} | AI Defense | after path | Policy distribution → Enforcement point receives the policy from Security Cloud Control | — | — | — |
+| O5-sdwan | behaviour any of {push} | Secure Routers · SD-WAN | after path | Policy distribution → Router firewall policy received from Security Cloud Control; SD-WAN overlay policy stays in Catalyst SD-WAN Manager (or the Meraki dashboard for a Meraki MX) | — | — | sdwandg, ub |
 
 ### Invalid combinations (disabled in the UI)
 

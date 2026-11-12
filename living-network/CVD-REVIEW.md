@@ -5,6 +5,10 @@ Checked on 12 November 2026 against the Cisco Validated index
 guides it leads to. Every statement below names its source page and the "Updated" date printed on that page.
 Where a page was long and only part of it could be read verbatim, the item says "verify wording".
 
+**Status, 12 November 2026.** Sections 2 to 5 are applied in the tool, except the items listed in the README backlog
+under "From the Cisco Validated Design check". The long guides that were only partly read are listed there too, under
+"Long guides and PDFs to read in full later". The README section "Cisco Validated Design check" lists what changed.
+
 **Headline.** Nothing the tool shows is contradicted by a CVD. The CVDs do three things for it: they confirm most of
 the rule table with a stronger source than a product page, they settle five of the README's "not verified" items, and
 they show nine relationships the scene does not draw yet. Three rule credits should move to a different product.

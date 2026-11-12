@@ -246,6 +246,7 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr) 350px;min-height:0}
 .conn button{background:none;border:0;padding:0;color:var(--data);font-weight:600;text-decoration:underline;text-underline-offset:2px}
 .conn small{color:var(--tx3)}
 .src{display:inline-block;margin-top:10px;font-weight:600}
+.cvdl{display:flex;flex-direction:column;gap:3px;margin-top:4px}.cvdl a{font-size:11px;line-height:1.35}
 
 footer{font-size:10.5px;color:var(--tx3);padding:5px 14px;background:var(--bg2);border-top:1px solid var(--line);text-align:center}
 #tourSpot{position:fixed;z-index:70;border:2px solid var(--lens);border-radius:10px;box-shadow:0 0 0 200vmax #030610c4;pointer-events:none;transition:all .28s ease}
@@ -408,9 +409,10 @@ const CX = 'https://www.cisco.com/site/us/en/', SX = 'https://www.splunk.com/en_
 const DATA = {
   meta: {
     verified: '10 November 2026',
+    cvdChecked: '12 November 2026',
     verdictNote: 'Illustrative outcome — actual result depends on configured policy and licensed products.',
-    footer: 'Independent educational visualization. Not an official Cisco product. Product names are trademarks of Cisco Systems, Inc. and Splunk LLC. Content verified against cisco.com and splunk.com on {date}.',
-    sceneLabel: 'Conceptual architecture — not a validated design; wireless controllers and SD-Access fabric nodes not shown'
+    footer: 'Independent educational visualization. Not an official Cisco product. Product names are trademarks of Cisco Systems, Inc. and Splunk LLC. Content verified against cisco.com and splunk.com on {date}; checked against Cisco Validated Designs on 12 November 2026.',
+    sceneLabel: 'Conceptual architecture — not a validated design; wireless controllers and SD-Access border and fusion nodes not shown'
   },
 
   lenses: [
@@ -457,25 +459,59 @@ const DATA = {
     sads: 'https://www.cisco.com/c/en/us/products/collateral/security/secure-access/secure-access-ds.html'   /* Cisco Secure Access data sheet */
   },
 
+  /* Cisco Validated Designs and design references checked on 12 November 2026 (see CVD-REVIEW.md).
+     [title, url, "Updated" date printed on the page, kind]. kind 'cvd' = listed under cisco.com/go/designzone (Cisco Validated);
+     'ref' = at-a-glance, solution overview, data sheet or product documentation used alongside them. Usable as a link source key. */
+  cvd: {
+    snra: ['Introduction to the Cisco Secure Networking Architecture', 'https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/Intro-Cisco-Secure-Network-Architecture.html', '22 Oct 2026', 'cvd'],
+    sda: ['Cisco Secure Network SD-Access Deployment Guide', 'https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/Cisco-Secure-Networking-SD-Access-Deployment-Guide.html', '21 Oct 2026', 'cvd'],
+    cmc: ['Cisco Secure Networking Cloud-Managed Campus Deployment Guide', 'https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/Cisco-Secure-Networking-Cloud-Managed-Deployment-Guide.html', '19 Oct 2026', 'cvd'],
+    ccw: ['Cisco Cloud Control Architecture and Operations Technical Whitepaper', 'https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/Cisco-Cloud-Control-Technical-Whitepaper.html', '10 Nov 2026', 'cvd'],
+    ub: ['Cisco Unified Branch Design Guide', 'https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco_unified_branch_design_guide.html', '3 Nov 2026', 'cvd'],
+    ubl: ['Cisco Unified Branch Large Branch Deployment Guide', 'https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco-unified-branch-large-branch-deployment-guide.html', '9 Nov 2026', 'cvd'],
+    cpol: ['Cisco Common Policy Integration Guide', 'https://www.cisco.com/c/en/us/td/docs/cloud-systems-management/network-automation-and-management/catalyst-center/cisco-validated-solution-profiles/common-policy-integration-guide.html', '15 Jan 2026', 'cvd'],
+    ztnc: ['Zero Trust: Network and Cloud Security Design Guide', 'https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/zt-network-cloud-dg.html', '9 Mar 2023', 'cvd'],
+    ztud: ['Zero Trust: User and Device Security Design Guide', 'https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/zt-user-device-dg.html', '11 Apr 2023', 'cvd'],
+    bpsdg: ['Cisco Breach Protection Suite Design Guide', 'https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/breach-protection-suite-dg.html', '22 Nov 2023', 'cvd'],
+    sasedg: ['Cisco SASE Design Guide (SSE with Secure Access)', 'https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/sase-design-guide.html', '15 Sep 2025', 'cvd'],
+    sseag: ['Cisco SASE and SSE Architecture Guide', 'https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/sase-sse-ag.html', '23 Jan 2025', 'cvd'],
+    fwsdwan: ['Cisco Secure Firewall Threat Defense SD-WAN Design and Deployment Guide', 'https://www.cisco.com/c/en/us/td/docs/security/secure-firewall/cvd/secure-firewall-sdwan-deployment-guide.html', '30 Sep 2025', 'cvd'],
+    sdwandg: ['Cisco Catalyst SD-WAN Design Guide', 'https://www.cisco.com/c/en/us/td/docs/solutions/CVD/SDWAN/cisco-sdwan-design-guide.html', '21 Aug 2024', 'cvd'],
+    lan: ['Campus LAN and Wireless LAN Design Guide', 'https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco-campus-lan-wlan-design-guide.html', '4 May 2020', 'cvd'],
+    indso: ['Industrial Security Solution Overview (Cisco Validated)', 'https://www.cisco.com/c/en/us/products/collateral/security/industrial-security-cvd-so.html', '12 Feb 2026', 'cvd'],
+    ztaaag: ['Zero Trust Access from Cisco: At a Glance', 'https://www.cisco.com/c/en/us/products/collateral/security/secure-access/zero-trust-access-aag.html', '9 Dec 2025', 'ref'],
+    cvds: ['Cisco Cyber Vision Data Sheet', 'https://www.cisco.com/c/en/us/products/collateral/security/cyber-vision/cyber-vision-ds.html', '14 Apr 2026', 'ref'],
+    cvise: ['Cisco ISE and Cisco Cyber Vision working together', 'https://www.cisco.com/c/en/us/products/collateral/security/cyber-vision/ise-cyber-vision-working-together-so.html', '16 Aug 2024', 'ref'],
+    cvfw: ['Cisco Secure Firewall and Cisco Cyber Vision working together', 'https://www.cisco.com/c/en/us/products/collateral/security/industrial-security/cyber-vision/secure-firewall-cyber-vision-work-together-so.html', '14 Nov 2024', 'ref'],
+    cvxdr: ['Cisco XDR and Cisco Cyber Vision working together', 'https://www.cisco.com/c/en/us/products/collateral/security/xdr/xdr-cyber-vision-working-together-so.html', '24 Jun 2024', 'ref'],
+    hmfaag: ['Cisco Hybrid Mesh Firewall: At a Glance', 'https://www.cisco.com/c/en/us/solutions/collateral/security/hybrid-mesh-firewall/hybrid-mesh-firewall-aag.html', '12 Jun 2026', 'ref'],
+    n9300: ['Cisco N9300 Series Smart Switches with Cisco Hypershield: At a Glance (PDF)', 'https://www.cisco.com/c/en/us/products/collateral/switches/9300-series-smart-switches/n9300-series-smart-switch-aag.pdf', 'Aug 2026', 'ref'],
+    mcdag: ['Cisco Multicloud Defense Architecture Guide', 'https://www.cisco.com/c/en/us/products/collateral/security/multicloud-defense/multicloud-defense-ag.html', '15 Mar 2024', 'ref'],
+    saise: ['Secure Access help: Integrate ISE with Secure Access', 'https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/integrate-ise.html', '8 Nov 2026', 'ref'],
+    sasdwan: ['Secure Access help: Integrate Catalyst SD-WAN with Secure Access', 'https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/integrate-catalyst-sd-wan.html', '8 Nov 2026', 'ref'],
+    sacii: ['Secure Access help: Integrate Cisco Identity Intelligence', 'https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/integrate-cisco-identity-intelligence.html', '8 Nov 2026', 'ref'],
+    saspl: ['Secure Access help: Push Security Events', 'https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/push-security-events-integration.html', '8 Nov 2026', 'ref']
+  },
+
   /* pol: where the product sits in the policy lifecycle. inspect: inspects traffic in the DATA lens. */
   products: {
-    wireless: { name: 'Cisco Wireless (Wi-Fi 7)', s: 'Wi-Fi 7', cat: 'net', zone: 'access', p: [-17.5, 0, -22.5],
+    wireless: { cvd: ['sda', 'cmc', 'lan'], name: 'Cisco Wireless (Wi-Fi 7)', s: 'Wi-Fi 7', cat: 'net', zone: 'access', p: [-17.5, 0, -22.5],
       fn: 'Wi-Fi 7 access points and controllers with WPA3, rogue management and security group tags for segmented wireless access.',
       url: CX + 'products/networking/wireless/index.html', pol: ['enforce'],
       roles: { data: 'Encrypted air link', identity: 'Wireless onboarding', policy: 'Enforce: segment tags' } },
-    switches: { name: 'Cisco Smart Switches (Catalyst)', s: 'Smart Switches', cat: 'net', zone: 'access', p: [-12.5, 0, -21],
+    switches: { cvd: ['sda', 'cmc', 'ztnc', 'lan'], name: 'Cisco Smart Switches (Catalyst)', s: 'Smart Switches', cat: 'net', zone: 'access', p: [-12.5, 0, -21],
       fn: 'Campus and branch switching that carries identity-based segmentation and feeds telemetry to management and assurance tools.',
       url: CX + 'products/networking/switches/index.html', pol: ['enforce'],
       roles: { data: 'Wired access', identity: 'Port-level identity with ISE', policy: 'Enforce: segment tags' } },
-    industrial: { name: 'Cisco Industrial IoT Networking', s: 'Industrial network', cat: 'net', zone: 'access', p: [-15, 0, 14],
+    industrial: { note: 'Cyber Vision sensor platforms on the data sheet include IE3400, IE3500 and IE9300 switches, IR1100, IR1800 and IR8300 routers, and the Catalyst 9300. The Industrial Security overview places Secure Firewall at Level 3 to enforce zones and conduits.', cvd: ['indso', 'cvds'], name: 'Cisco Industrial IoT Networking', s: 'Industrial network', cat: 'net', zone: 'access', p: [-15, 0, 14],
       fn: 'Rugged switches, routers and wireless for operational sites, with OT visibility, segmentation and remote access built in.',
       url: CX + 'products/networking/industrial-iot/index.html', pol: ['enforce'],
       roles: { data: 'Factory access', policy: 'Enforce: zones and conduits', threat: 'Hosts the OT sensor' } },
-    sdwan: { name: 'Cisco Secure Routers / SD-WAN', s: 'Secure Routers · SD-WAN', cat: 'net', zone: 'wan', p: [-5, 0, -11], inspect: true,
+    sdwan: { cvd: ['sdwandg', 'ub', 'fwsdwan', 'cpol'], name: 'Cisco Secure Routers / SD-WAN', s: 'Secure Routers · SD-WAN', cat: 'net', zone: 'wan', p: [-5, 0, -11], inspect: true,
       fn: 'Routing and SD-WAN platform with encryption, segmentation and a built-in next-generation firewall for branch and WAN.',
       url: CX + 'products/networking/sdwan-routers/index.html', pol: ['enforce'],
       roles: { data: 'Encrypted WAN overlay', policy: 'Enforce: segmentation, NGFW', threat: 'Branch inspection' } },
-    nexus: { name: 'Cisco Nexus Data Center Networking', s: 'Nexus', cat: 'net', zone: 'dest', p: [16, 0, -20],
+    nexus: { cvd: ['cpol', 'n9300'], name: 'Cisco Nexus Data Center Networking', s: 'Nexus', cat: 'net', zone: 'dest', p: [16, 0, -20],
       fn: 'Data center switching and fabric management; N9300 Smart Switches embed Hypershield enforcement beside workloads.',
       url: CX + 'products/networking/cloud-networking/index.html', pol: ['enforce'],
       roles: { data: 'Data center fabric', policy: 'Enforce: on smart switches' } },
@@ -483,70 +519,70 @@ const DATA = {
       fn: 'Programmable networking silicon architecture used inside Cisco routing, Nexus and Catalyst switching platforms.',
       url: CX + 'products/networking/silicon-one/index.html',
       roles: { data: 'Forwarding silicon' } },
-    te: { name: 'Cisco ThousandEyes', s: 'ThousandEyes', cat: 'net', zone: 'ops', p: [4, 13, 4],
+    te: { note: 'Zero Trust Access from Cisco is defined as capabilities from Secure Access, Duo, ISE and ThousandEyes. In the Cisco Validated Designs ThousandEyes agents run on the branch secure router, on Catalyst 9000 switches and as a Secure Client module feeding Secure Access Experience Insights.', cvd: ['sasedg', 'cmc', 'ubl', 'ztaaag'], name: 'Cisco ThousandEyes', s: 'ThousandEyes', cat: 'net', zone: 'ops', p: [4, 13, 4],
       fn: 'Assurance that measures digital experience across owned and unowned networks, from the user to cloud and SaaS.',
       url: CX + 'products/networking/software/internet-cloud-intelligence/index.html',
       roles: { data: 'Path and experience visibility' } },
-    meraki: { name: 'Meraki dashboard (Cisco Networking Platform)', s: 'Meraki dashboard', cat: 'net', zone: 'ops', p: [-14, 13, -4],
+    meraki: { cvd: ['cmc', 'ub', 'ubl'], name: 'Meraki dashboard (Cisco Networking Platform)', s: 'Meraki dashboard', cat: 'net', zone: 'ops', p: [-14, 13, -4],
       fn: 'Cloud dashboard that configures and monitors wireless, switching, routing and industrial Ethernet from one place.',
       url: CX + 'products/networking/networking-cloud/index.html', pol: ['author'],
       roles: { policy: 'Author: network configuration' } },
-    agentic: { name: 'AgenticOps (Cisco AI Canvas)', s: 'AgenticOps', cat: 'net', zone: 'ops', p: [-14, 13, 4],
+    agentic: { cvd: ['snra', 'ccw'], name: 'AgenticOps (Cisco AI Canvas)', s: 'AgenticOps', cat: 'net', zone: 'ops', p: [-14, 13, 4],
       fn: 'Shared workspace in Cisco Cloud Control where teams and AI agents investigate and resolve cross-domain issues.',
       url: CX + 'solutions/artificial-intelligence/agentic-ops/ai-canvas/index.html',
-      note: 'No standalone AgenticOps page was found on cisco.com; the AI Canvas page (“the workspace for AgenticOps”) is used as the source.',
+      note: 'No standalone AgenticOps page was found on cisco.com; the AI Canvas page (“the workspace for AgenticOps”) is used as the source. The Cisco Secure Networking Architecture CVD names this layer “Unified Management and Agentic Operations” and lists Cisco Cloud Control, AI Canvas, Cisco AI Assistant and the Deep Network Model in it.',
       roles: { data: 'Cross-domain troubleshooting' } },
 
-    duo: { name: 'Cisco Duo', s: 'Duo', cat: 'id', zone: 'wan', p: [-4, 0, -4],
+    duo: { cvd: ['ztud', 'ztaaag', 'ccw'], name: 'Cisco Duo', s: 'Duo', cat: 'id', zone: 'wan', p: [-4, 0, -4],
       fn: 'Identity and access management with phishing-resistant authentication that verifies the user and device before access.',
       url: CX + 'products/security/duo/index.html', pol: ['enforce'],
       roles: { identity: 'MFA and device trust', policy: 'Enforce: sign-in decision', trust: 'User verification signal' } },
-    ise: { name: 'Cisco Identity Services Engine (ISE)', s: 'ISE', cat: 'id', zone: 'access', p: [-12.5, 0, -15.5],
+    ise: { note: 'In the Cisco Validated Designs ISE is the context hub: it shares security group tags with Catalyst Center, SD-WAN Manager, Firewall Management Center, ACI, Meraki and Secure Access. Quarantine: Secure Network Analytics sends an Adaptive Network Control action to ISE over pxGrid, ISE sends a Change of Authorization, and the endpoint re-authenticates into a quarantine rule or quarantine security group.', cvd: ['sda', 'ztnc', 'cpol', 'cmc', 'ubl', 'saise'], name: 'Cisco Identity Services Engine (ISE)', s: 'ISE', cat: 'id', zone: 'access', p: [-12.5, 0, -15.5],
       fn: 'Network access control that profiles endpoints, applies identity and posture context, segments access and quarantines risky devices.',
       url: CX + 'products/security/identity-services-engine/index.html', pol: ['author'],
       roles: { identity: 'Network identity, profiling, posture', policy: 'Author: segmentation policy', threat: 'Quarantine endpoint', trust: 'Posture and behaviour context' } },
-    cii: { name: 'Cisco Identity Intelligence', s: 'Identity Intelligence', cat: 'id', zone: 'ops', p: [12, 13, -4],
+    cii: { cvd: ['snra', 'sacii'], name: 'Cisco Identity Intelligence', s: 'Identity Intelligence', cat: 'id', zone: 'ops', p: [12, 13, -4],
       fn: 'Identity analytics that exposes risky accounts and privileges and flags high-risk access attempts for Duo, Secure Access and XDR.',
       url: CX + 'solutions/security/identity-intelligence/index.html',
       roles: { identity: 'Identity risk analytics', threat: 'Identity threat detection', trust: 'Identity risk signal' } },
-    client: { name: 'Cisco Secure Client', s: 'Secure Client', cat: 'id', zone: 'access', p: [-15, 0, -3],
+    client: { cvd: ['sasedg', 'ztud', 'bpsdg'], name: 'Cisco Secure Client', s: 'Secure Client', cat: 'id', zone: 'access', p: [-15, 0, -3],
       fn: 'Modular endpoint client providing VPN and zero trust network access, with endpoint and roaming security modules.',
       url: CX + 'products/security/secure-client/index.html',
       roles: { data: 'Encrypted tunnel from device', identity: 'Device-side access agent' } },
-    sa: { name: 'Cisco Secure Access', s: 'Secure Access', cat: 'id', zone: 'wan', p: [2, 0, -2], inspect: true,
+    sa: { cvd: ['sasedg', 'sseag', 'ub', 'ubl', 'ztaaag', 'sasdwan', 'saspl'], name: 'Cisco Secure Access', s: 'Secure Access', cat: 'id', zone: 'wan', p: [2, 0, -2], inspect: true,
       fn: 'SSE: Cisco Secure Access incorporates the DNS-layer security and secure web gateway (SWG) capabilities that were previously the core of Umbrella, but it expands them into a full SSE platform with zero trust and VPN access to private apps, SaaS and AI use.',
       url: CX + 'products/security/secure-access/index.html', pol: ['enforce'],
-      note: 'DNS-layer security is also offered on its own as “Secure Access DNS Defense”, and the AI Access feature set covers third-party AI apps. Umbrella is retiring, so it is not shown as a separate product; Secure Access is credited for every internet-edge block.',
+      note: 'DNS-layer security is also offered on its own as “Secure Access DNS Defense”, and the AI Access feature set covers third-party AI apps. Umbrella is retiring, so it is not shown as a separate product; Secure Access is credited for every internet-edge block. The Cisco SASE Design Guide notes that the Secure Client roaming module is shared with Umbrella, so “migration from Umbrella to Secure Access can be simplified”. In the Unified Branch CVD most branch internet traffic goes through Secure Access tunnels, while guest traffic breaks out locally.',
       roles: { data: 'Inspection at cloud edge', identity: 'Per-app zero trust access', policy: 'Enforce: user-to-app policy', threat: 'Internet and SaaS control', trust: 'Per-session decision' } },
 
-    fw: { name: 'Cisco Secure Firewall', s: 'Firewall', cat: 'netsec', zone: 'dest', p: [11, 0, -20], inspect: true,
+    fw: { cvd: ['ztnc', 'fwsdwan', 'cvfw', 'indso'], name: 'Cisco Secure Firewall', s: 'Firewall', cat: 'netsec', zone: 'dest', p: [11, 0, -20], inspect: true,
       fn: 'Firewalls that inspect traffic, use Talos intelligence and detect threats in encrypted flows without decrypting them.',
       url: CX + 'products/security/firewalls/index.html', pol: ['enforce'],
       roles: { data: 'Traffic inspection', policy: 'Enforce: network policy', threat: 'Threat prevention' } },
-    hmf: { name: 'Cisco Hybrid Mesh Firewall', s: 'Hybrid Mesh Firewall', cat: 'netsec', zone: 'dest', p: [11, 0, -14.5],
+    hmf: { note: 'No Cisco Validated Design covers Hybrid Mesh Firewall yet. Its at-a-glance names enforcement-point types (firewalls, smart switches, workload and container agents, third-party and cloud-native firewalls) and says “Policy is orchestrated by Cisco Cloud Control”.', cvd: ['hmfaag', 'snra'], name: 'Cisco Hybrid Mesh Firewall', s: 'Hybrid Mesh Firewall', cat: 'netsec', zone: 'dest', p: [11, 0, -14.5],
       fn: 'Solution that unifies distributed enforcement points — firewalls, smart switches, agents and AI guardrails — under one management plane.',
       url: CX + 'solutions/security/hybrid-mesh-firewall/index.html',
       roles: { policy: 'Distribute: one policy, many enforcers', threat: 'Unified enforcement mesh' } },
-    mcd: { name: 'Cisco Multicloud Defense', s: 'Multicloud Defense', cat: 'netsec', zone: 'dest', p: [13, 0, -3.5], inspect: true,
+    mcd: { cvd: ['mcdag'], name: 'Cisco Multicloud Defense', s: 'Multicloud Defense', cat: 'netsec', zone: 'dest', p: [13, 0, -3.5], inspect: true,
       fn: 'Cloud firewalling from one control plane with ingress, egress and east-west protection across public and private clouds.',
       url: CX + 'products/security/multicloud-defense/index.html', pol: ['enforce'],
       roles: { data: 'Cloud gateway inspection', policy: 'Enforce: cloud network policy', threat: 'Blocks attacks, C2, exfiltration' } },
-    scc: { name: 'Cisco Security Cloud Control', s: 'Security Cloud Control', cat: 'netsec', zone: 'ops', p: [4, 13, -4],
+    scc: { cvd: ['ccw', 'fwsdwan', 'n9300'], name: 'Cisco Security Cloud Control', s: 'Security Cloud Control', cat: 'netsec', zone: 'ops', p: [4, 13, -4],
       fn: 'Unified management that authors policy once and applies it across Cisco and third-party enforcement points.',
       url: CX + 'products/security/security-cloud-control/index.html', pol: ['author'],
-      note: 'The cisco.com product page is currently titled “Security in Cisco Cloud Control”. It manages security policy; SD-WAN overlay policy stays in Catalyst SD-WAN Manager, and some products, such as Secure Access and Secure Workload, keep their own consoles alongside it.',
+      note: 'The cisco.com product page is currently titled “Security in Cisco Cloud Control”. The Cisco Cloud Control whitepaper (Cisco Validated) calls it “the security management tenant” inside Cisco Cloud Control. It manages security policy; SD-WAN overlay policy stays in Catalyst SD-WAN Manager (Catalyst SD-WAN Design Guide), a Meraki MX secure router is configured in the Meraki dashboard (Unified Branch Design Guide), and some products, such as Secure Access and Secure Workload, keep their own consoles alongside it.',
       roles: { policy: 'Author: unified security policy' } },
 
-    hs: { name: 'Cisco Hypershield', s: 'Hypershield', cat: 'cloud', zone: 'dest', p: [16, 0, -15],
+    hs: { cvd: ['n9300'], name: 'Cisco Hypershield', s: 'Hypershield', cat: 'cloud', zone: 'dest', p: [16, 0, -15],
       fn: 'Distributed security fabric giving stateful segmentation close to workloads, enforced on Nexus N9300 Smart Switches.',
       url: CX + 'products/security/hypershield/index.html', pol: ['enforce'],
-      note: 'Availability varies by capability and enforcement point; check the product page before presenting a capability as generally available.',
+      note: 'Availability varies by capability and enforcement point; check the product page before presenting a capability as generally available. The N9300 Smart Switch at-a-glance: “Cisco Hypershield defines the policy. Cisco 9300 Series Smart Switches enforce it.” Security policy is managed from the Hypershield on-premises controller or Security Cloud Control; switch operations stay in NX-OS and Nexus Dashboard.',
       roles: { policy: 'Enforce: segmentation at the workload edge', threat: 'Shields vulnerabilities' } },
-    wl: { name: 'Cisco Secure Workload', s: 'Secure Workload', cat: 'cloud', zone: 'dest', p: [20, 0, -12],
+    wl: { cvd: ['snra'], name: 'Cisco Secure Workload', s: 'Secure Workload', cat: 'cloud', zone: 'dest', p: [20, 0, -12],
       fn: 'Zero trust microsegmentation for workloads in any environment, with visibility into flows and policy recommendations.',
       url: CX + 'products/security/secure-workload/index.html', pol: ['enforce'],
       roles: { policy: 'Enforce: microsegmentation', threat: 'Stops lateral movement' } },
-    aid: { name: 'Cisco AI Defense', s: 'AI Defense', cat: 'cloud', zone: 'dest', p: [17, 0, -8],
+    aid: { cvd: ['snra'], name: 'Cisco AI Defense', s: 'AI Defense', cat: 'cloud', zone: 'dest', p: [17, 0, -8],
       fn: 'Discovers AI assets, tests models for vulnerabilities and applies runtime guardrails against prompt injection and data leakage.',
       url: CX + 'products/security/ai-defense/index.html', pol: ['enforce'],
       roles: { policy: 'Enforce: AI guardrails', threat: 'Prompt injection and leakage guardrails' } },
@@ -556,49 +592,49 @@ const DATA = {
       note: 'Multicloud Defense also provides ingress web application firewalling, so a separate WAAP in front of it is optional and depends on the requirement.',
       roles: { data: 'Application-layer inspection', policy: 'Enforce: application policy', threat: 'App, API and bot protection' } },
 
-    ep: { name: 'Cisco Secure Endpoint', s: 'Secure Endpoint', cat: 'endpoint', zone: 'access', p: [-15, 0, 3],
+    ep: { cvd: ['bpsdg', 'ztud'], name: 'Cisco Secure Endpoint', s: 'Secure Endpoint', cat: 'endpoint', zone: 'access', p: [-15, 0, 3],
       fn: 'Endpoint detection and response that blocks malware and can isolate an infected host with one action.',
       url: CX + 'products/security/endpoint-security/secure-endpoint/index.html',
       roles: { threat: 'Endpoint detection, host isolation', trust: 'Device health signal' } },
-    email: { name: 'Cisco Secure Email Threat Defense', s: 'Email Threat Defense', cat: 'endpoint', zone: 'wan', p: [2, 0, 13], inspect: true,
+    email: { cvd: ['bpsdg'], name: 'Cisco Secure Email Threat Defense', s: 'Email Threat Defense', cat: 'endpoint', zone: 'wan', p: [2, 0, 13], inspect: true,
       fn: 'Cloud email security that stops threats before delivery and remediates messages after delivery through APIs.',
       url: CX + 'products/security/secure-email/index.html',
       roles: { data: 'Mail inspection', threat: 'Phishing and email threat detection' } },
 
-    xdr: { name: 'Cisco XDR', s: 'XDR', cat: 'detect', zone: 'ops', p: [-5, 13, -4],
+    xdr: { note: 'Response actions in the Breach Protection Suite Design Guide: host isolation in Secure Endpoint and email quarantine in Email Threat Defense. An ISE action (assigning a security group tag) is documented for OT assets through a Cyber Vision workflow; an XDR quarantine of an IT endpoint through ISE is not described in the pages read.', cvd: ['bpsdg', 'cmc', 'ubl', 'cvxdr'], name: 'Cisco XDR', s: 'XDR', cat: 'detect', zone: 'ops', p: [-5, 13, -4],
       fn: 'Correlates telemetry from network, endpoint, email, cloud and identity into prioritised incidents with guided and automated response.',
       url: CX + 'products/security/xdr/index.html',
       roles: { threat: 'Correlate, prioritise, respond', trust: 'Incident signal' } },
-    sna: { name: 'Cisco Secure Network Analytics', s: 'Network Analytics', cat: 'detect', zone: 'access', p: [-17.5, 0, -16],
+    sna: { cvd: ['ztnc', 'sda', 'bpsdg'], name: 'Cisco Secure Network Analytics', s: 'Network Analytics', cat: 'detect', zone: 'access', p: [-17.5, 0, -16],
       fn: 'Behavioural network analytics that detects insider threats, exfiltration and threats in encrypted traffic without decryption.',
       url: CX + 'products/security/security-analytics/secure-network-analytics/index.html',
       roles: { threat: 'Network behaviour detection', trust: 'Behaviour signal' } },
-    talos: { name: 'Cisco Talos', s: 'Talos', cat: 'detect', zone: 'ops', p: [-5, 13, 4],
+    talos: { cvd: ['bpsdg', 'cvds'], name: 'Cisco Talos', s: 'Talos', cat: 'detect', zone: 'ops', p: [-5, 13, 4],
       fn: 'Cisco’s threat intelligence organisation; its research and detections feed Cisco security products.',
       url: CX + 'products/security/talos/index.html',
       roles: { threat: 'Threat intelligence feed' } },
 
-    cv: { name: 'Cisco Cyber Vision', s: 'Cyber Vision', cat: 'ot', zone: 'access', p: [-12, 0, 19],
+    cv: { cvd: ['indso', 'cvds', 'cvise', 'cvfw', 'cvxdr'], name: 'Cisco Cyber Vision', s: 'Cyber Vision', cat: 'ot', zone: 'access', p: [-12, 0, 19],
       fn: 'OT visibility from sensors embedded in network equipment: asset inventory, risk scoring, threat detection, segmentation and remote access.',
       url: CX + 'products/security/industrial-security/cyber-vision/index.html', pol: ['author'],
       roles: { identity: 'OT asset inventory', policy: 'Author: zones and conduits', threat: 'OT threat detection', trust: 'OT behaviour baseline' } },
-    itd: { name: 'Cisco Industrial Threat Defense', s: 'Industrial Threat Defense', cat: 'ot', zone: 'access', p: [-17.5, 0, 20.5],
+    itd: { cvd: ['indso'], name: 'Cisco Industrial Threat Defense', s: 'Industrial Threat Defense', cat: 'ot', zone: 'access', p: [-17.5, 0, 20.5],
       fn: 'OT security solution combining asset discovery, segmentation, zero trust remote access and unified IT/OT detection.',
       url: CX + 'products/security/industrial-security/index.html',
       roles: { threat: 'OT security solution' } },
-    sea: { name: 'Cisco Secure Equipment Access', s: 'Secure Equipment Access', cat: 'ot', zone: 'access', p: [-12, 0, 8],
+    sea: { cvd: ['cvds'], name: 'Cisco Secure Equipment Access', s: 'Secure Equipment Access', cat: 'ot', zone: 'access', p: [-12, 0, 8],
       fn: 'Zero trust remote access to industrial assets; cisco.com states it is now part of Cyber Vision.',
       url: CX + 'products/security/industrial-security/secure-equipment-access/index.html', pol: ['enforce'],
-      note: 'The product page states: “Cisco Secure Equipment Access is now part of Cisco Cyber Vision.” Capabilities shown here are those listed for remote access on the Cyber Vision page.',
+      note: 'The product page states: “Cisco Secure Equipment Access is now part of Cisco Cyber Vision.” The Cyber Vision data sheet describes least-privilege remote access with MFA or SSO, time schedules, permitted protocols and a remote-user posture check, through a ZTNA gateway agent on the sensor platforms. Approval workflows and session recording are not stated on either page.',
       roles: { data: 'Brokered remote session', identity: 'Least-privilege remote access', policy: 'Enforce: per-asset access' } },
 
-    ups: { name: 'Cisco User Protection Suite', s: 'User Protection', cat: 'suite', zone: 'ops', p: [12, 13, 4],
+    ups: { cvd: ['ztaaag'], name: 'Cisco User Protection Suite', s: 'User Protection', cat: 'suite', zone: 'ops', p: [12, 13, 4],
       fn: 'Suite packaging Secure Access, Duo and Email Threat Defense; the Advantage tier adds Secure Endpoint and ISE.',
       url: CX + 'products/security/user-protection/index.html', roles: {} },
     cps: { name: 'Cisco Cloud Protection Suite', s: 'Cloud Protection', cat: 'suite', zone: 'ops', p: [19, 13, -4],
       fn: 'Suite for adopting Hybrid Mesh Firewall: Secure Workload, Hypershield, Secure Firewall, Multicloud Defense and Security Cloud Control.',
       url: CX + 'products/security/cloud-protection/index.html', roles: {} },
-    splunk: { name: 'Splunk Platform (Cloud Platform / Enterprise)', s: 'Splunk Platform', cat: 'splunk', zone: 'splunk', p: [2, 22, 0],
+    splunk: { cvd: ['saspl', 'ubl'], name: 'Splunk Platform (Cloud Platform / Enterprise)', s: 'Splunk Platform', cat: 'splunk', zone: 'splunk', p: [2, 22, 0],
       fn: 'Data platform to search, analyse, visualise and act on machine data, with streaming ingestion and federated search.',
       url: SX + 'splunk-cloud-platform.html',
       roles: { data: 'Log and event data platform', threat: 'Search and retention for investigations' } },
@@ -627,14 +663,14 @@ const DATA = {
       url: SX + 'splunk-appdynamics.html',
       roles: { data: 'Application performance', threat: 'Runtime application security' } },
 
-    bps: { name: 'Cisco Breach Protection Suite', s: 'Breach Protection', cat: 'suite', zone: 'ops', p: [19, 13, 4],
+    bps: { cvd: ['bpsdg'], name: 'Cisco Breach Protection Suite', s: 'Breach Protection', cat: 'suite', zone: 'ops', p: [19, 13, 4],
       fn: 'Suite unified by XDR with Email Threat Defense and Secure Endpoint; the Advantage tier adds Secure Network Analytics and Telemetry Broker, and a Premier tier adds managed XDR and Talos Incident Response.',
       url: CX + 'products/security/breach-protection/index.html', roles: {} }
   },
 
   /* --- SPLUNK LAYER. Product facts from each product's splunk.com page (cisco.com has no Splunk product pages);
      relationships to Cisco products only where a Cisco or Splunk page states them. Toggled as one layer. --- */
-  splunkFeeds: ['fw', 'sna', 'cv', 'duo', 'email', 'cii', 'mcd', 'ep', 'wl', 'aid', 'xdr', 'ise', 'te'],   /* Cisco products with a stated Splunk data integration (own page or the Cisco Security Cloud app on Splunkbase); their checks feed the layer */
+  splunkFeeds: ['fw', 'sna', 'cv', 'duo', 'email', 'cii', 'mcd', 'ep', 'wl', 'aid', 'xdr', 'ise', 'te', 'sa'],   /* Cisco products with a stated Splunk data integration (own page or the Cisco Security Cloud app on Splunkbase); their checks feed the layer */
   /* non-product scene nodes */
   places: {
     hq: { name: 'HQ campus', kind: 'loc', p: [-27, 0, -20], fn: 'Corporate campus with wired and Wi-Fi access.' },
@@ -656,7 +692,7 @@ const DATA = {
     mail: { name: 'Email inbox', kind: 'dest', p: [23, 0, 21.5], fn: 'The user’s corporate mailbox.' },
     otctl: { name: 'OT controller', kind: 'dest', p: [23, 0, 25.5], fn: 'Industrial controller on the factory floor.' },
     /* generic infrastructure hops: not products, shown so the path is not misleading (expert review, item 14) */
-    core: { name: 'Campus core / distribution', kind: 'infra', p: [-12.5, 0, -25.6], fn: 'Core and distribution switching between the access layer and the data center, WAN and internet edges.' }
+    core: { name: 'Campus distribution / core', kind: 'infra', p: [-12.5, 0, -25.6], fn: 'Distribution and core switching between the access layer and the data center, WAN and internet edges. In the Cisco SD-Access deployment guide this is the intermediate nodes, the fabric border and control-plane nodes and the fusion nodes, with a dedicated Catalyst 9800 wireless controller pair; the classic campus design uses access, distribution and core layers.' }
   },
 
   /* Relationships stated on cisco.com. [a, b, relationship, source (product id or DATA.sources key), kind] */
@@ -664,9 +700,12 @@ const DATA = {
     ['ise', 'switches', 'Identity-based segmentation with security group tags, orchestrated by ISE', 'campus'],
     ['ise', 'wireless', 'Security group tags on wireless; segmentation orchestrated by ISE', 'campus'],
     ['ise', 'hmf', 'ISE identity context informs segmentation policy', 'ise'],
-    ['ise', 'fw', 'ISE shares identity context for segmentation', 'fw'],
-    ['ise', 'sna', 'Used together for segmentation policy and unauthorised-access alerts', 'sna'],
-    ['ise', 'cv', 'Out-of-the-box IT/OT integration', 'cv'],
+    ['ise', 'fw', 'ISE shares security group tags and user-to-IP mappings with the firewall (pxGrid and SXP) for SGT-based access control', 'ztnc'],
+    ['ise', 'sna', 'Secure Network Analytics sends Adaptive Network Control quarantine actions to ISE over pxGrid', 'ztnc'],
+    ['ise', 'cv', 'Cyber Vision shares OT asset profiles and zones with ISE over pxGrid; ISE assigns each asset a security group tag', 'cvise'],
+    ['ise', 'meraki', 'Security group tags created in ISE synchronise into Meraki Adaptive Policy through pxGrid', 'cmc'],
+    ['ise', 'sdwan', 'ISE sends security group tags to SD-WAN Manager and IP-to-SGT mappings to the SD-WAN Controller', 'cpol'],
+    ['ise', 'nexus', 'ISE and ACI (APIC) exchange context: endpoint and security groups are mapped to security group tags', 'cpol'],
     ['ise', 'sa', 'Zero Trust Access is built with ISE, Secure Access and Duo', 'ise'],
     ['ise', 'duo', 'Zero Trust Access is built with ISE, Secure Access and Duo', 'ise'],
     ['duo', 'sa', 'Duo strengthens authentication for Secure Access', 'sa'],
@@ -694,7 +733,9 @@ const DATA = {
     ['fw', 'wl', 'Native integration between Secure Workload and Secure Firewall', 'wl'],
     ['fw', 'xdr', 'Listed firewall integration', 'fw'],
     ['fw', 'waap', 'Listed firewall integration', 'fw'],
-    ['fw', 'cv', 'Out-of-the-box IT/OT integration', 'cv'],
+    ['fw', 'cv', 'Firewall Management Center turns Cyber Vision groups into dynamic objects used in firewall rules', 'cvfw'],
+    ['fw', 'sa', 'Threat Defense builds the branch IPsec tunnel to Secure Access for secure internet access', 'fwsdwan'],
+    ['fw', 'sna', 'Firewall NetFlow and intrusion and malware events feed Secure Network Analytics', 'ztnc'],
     ['hmf', 'scc', 'All enforcement points are managed through Security Cloud Control', 'hmf'],
     ['hmf', 'wl', 'End-to-end segmentation powered by Secure Workload', 'hmf'],
     ['hmf', 'aid', 'AI workload protection powered by AI Defense', 'hmf'],
@@ -712,9 +753,11 @@ const DATA = {
     ['ep', 'talos', 'Talos threat hunting and intelligence built in', 'ep'],
     ['ep', 'duo', 'Duo verifies user identity before application access', 'ep'],
     ['email', 'ep', 'Listed “better together” pairing', 'email'],
-    ['xdr', 'email', 'Listed Cisco integration', 'xdr'],
+    ['xdr', 'email', 'XDR quarantines emails through its Email Threat Defense integration', 'bpsdg'],
     ['xdr', 'sna', 'Listed Cisco integration for network visibility', 'xdr'],
-    ['cv', 'xdr', 'Out-of-the-box IT/OT integration', 'cv'],
+    ['cv', 'xdr', 'Report to XDR from Cyber Vision; XDR workflows can assign a security group tag to the asset in ISE', 'cvxdr'],
+    ['te', 'xdr', 'ThousandEyes returns data to Cisco XDR', 'cmc'],
+    ['meraki', 'xdr', 'XDR integration enabled from the Meraki dashboard, network by network; data flows to XDR', 'ubl'],
     ['cv', 'talos', 'Talos intelligence and detection content', 'cv'],
     ['cv', 'industrial', 'Cyber Vision sensor is built into industrial network equipment', 'industrial'],
     ['itd', 'cv', 'Component of Industrial Threat Defense', 'itd'],
@@ -758,6 +801,7 @@ const DATA = {
     ['mcd', 'splunk', 'Multicloud Defense data sent to Splunk through the Cisco Security Cloud app', 'splsc'],
     ['ep', 'splunk', 'Secure Endpoint data sent to Splunk through the Cisco Security Cloud app', 'splsc'],
     ['wl', 'splunk', 'Secure Workload data sent to Splunk through the Cisco Security Cloud app', 'splsc'],
+    ['sa', 'splunk', 'Secure Access pushes security events to Splunk (DNS, web, firewall, IPS, DLP, ZTNA and VPN events)', 'saspl'],
     ['xdr', 'es', 'XDR incidents imported into Splunk and promoted to Enterprise Security notables (Cisco Security Cloud app)', 'splsc'],
     ['talos', 'saa', 'Talos threat intelligence is available in Splunk Attack Analyzer', 'talos'],
     ['te', 'o11y', 'Splunk Observability and ThousandEyes are presented together as Cisco Observability', 'obs'],
@@ -772,14 +816,16 @@ const DATA = {
   ],
   /* subsets of the links above that the POLICY and THREAT lenses animate */
   policyFlow: [['scc', 'fw'], ['scc', 'mcd'], ['scc', 'hs'], ['scc', 'sa'], ['scc', 'wl'], ['scc', 'aid'], ['scc', 'sdwan'],
-    ['ise', 'switches'], ['ise', 'wireless'], ['meraki', 'switches'], ['meraki', 'wireless'], ['meraki', 'industrial'], ['cv', 'industrial']],
-  teleFlow: [['ep', 'xdr'], ['email', 'xdr'], ['sna', 'xdr'], ['client', 'xdr'], ['cv', 'xdr'], ['fw', 'xdr'], ['cii', 'xdr'], ['xdr', 'ise'], ['xdr', 'duo'], ['ise', 'splunk'],
+    ['ise', 'switches'], ['ise', 'wireless'], ['ise', 'meraki'], ['ise', 'sdwan'], ['meraki', 'switches'], ['meraki', 'wireless'], ['meraki', 'industrial'], ['cv', 'industrial']],
+  teleFlow: [['ep', 'xdr'], ['email', 'xdr'], ['sna', 'xdr'], ['client', 'xdr'], ['cv', 'xdr'], ['fw', 'xdr'], ['cii', 'xdr'], ['xdr', 'ise'], ['xdr', 'duo'], ['ise', 'splunk'], ['fw', 'sna'], ['te', 'xdr'], ['meraki', 'xdr'], ['sa', 'splunk'],
     ['talos', 'fw'], ['talos', 'ep'], ['talos', 'cv'], ['talos', 'aid'],
     ['fw', 'splunk'], ['sna', 'splunk'], ['cv', 'splunk'], ['ep', 'splunk'], ['email', 'splunk'], ['duo', 'splunk'], ['xdr', 'es'],
     ['talos', 'saa'], ['es', 'soar'], ['es', 'splunk']],
 
   /* DATA lens: how each path segment is carried. First match wins; default is "clear". */
   segments: [['*', 'wireless', 'enc', 'WPA3 air link'], ['client', '*', 'enc', 'Device tunnel (VPN / zero trust access)'],
+    ['sdwan', 'sa', 'enc', 'IPsec tunnel to Secure Access'], ['sdwan', 'saas', 'clear', 'Local internet breakout'], ['sdwan', 'shadow', 'clear', 'Local internet breakout'],
+    ['sdwan', 'web', 'clear', 'Local internet breakout'], ['sdwan', 'ai', 'clear', 'Local internet breakout'], ['sdwan', 'pubai', 'clear', 'Local internet breakout'],
     ['sdwan', '*', 'enc', 'Encrypted SD-WAN overlay'], ['sea', '*', 'enc', 'Brokered remote-access session']],
 
   groups: {
@@ -919,6 +965,7 @@ const DATA = {
       { id: 'RT-cloud-internet', when: { dest: ['cloudapp'], loc: ['internet'] }, nodes: ['waap', 'mcd', 'cloudapp'] },
       { id: 'RT-inet', when: { dest: ['$INET'] }, nodes: ['sa', '@dest'] },
       { id: 'RT-inet-onprem', when: { dest: ['$INET'], loc: ['$ONPREM'] }, nodes: ['sdwan', 'sa', '@dest'] },
+      { id: 'RT-inet-guest', when: { who: ['guest'], dest: ['$INET'], loc: ['$ONPREM'] }, nodes: ['sdwan', '@dest'] },   /* guest VLAN uses local internet breakout, outside the Secure Access tunnels (Unified Branch CVD) */
       { id: 'RT-inet-workload', when: { dest: ['$INET'], device: ['server'] }, nodes: ['fw', '@dest'] },
       { id: 'RT-inet-internet', when: { dest: ['$INET'], loc: ['internet'] }, nodes: ['@dest'] },
       { id: 'RT-ot', when: { dest: ['ot'] }, nodes: ['fw', 'industrial', 'otctl'] },
@@ -936,15 +983,15 @@ const DATA = {
      tele: emits telemetry that XDR can correlate.  base: routine check, skipped once the session is stopped at that hop. */
   checks: [
     /* --- network identity and segmentation --- */
-    { id: 'N1', when: { via: ['$ACC'], not: { device: ['headless', 'server'], who: ['guest', 'attacker'] } }, hop: ['$ACC'], at: 'ise', lens: 'identity',
+    { id: 'N1', cvd: ['sda', 'ztnc'], when: { via: ['$ACC'], not: { device: ['headless', 'server'], who: ['guest', 'attacker'] } }, hop: ['$ACC'], at: 'ise', lens: 'identity',
       c: 'Network access control', r: 'User and device authenticated to the network; segment assigned from identity', d: 5, sig: 'Network identity established' },
-    { id: 'N2', when: { device: ['headless'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'identity',
+    { id: 'N2', cvd: ['sda'], when: { device: ['headless'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'identity',
       c: 'Endpoint profiling', r: 'Headless device profiled and placed in a least-privilege segment', d: 5, sig: 'Device profiled',
       v: 'LIMIT', why: 'Headless devices are profiled and confined to a least-privilege segment.' },
-    { id: 'N3', when: { who: ['guest'], dest: ['$INET'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
-      c: 'Guest access', r: 'Guest identity mapped to an internet-only segment',
+    { id: 'N3', cvd: ['ubl'], when: { who: ['guest'], dest: ['$INET'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
+      c: 'Guest access', r: 'Guest identity mapped to an internet-only segment that breaks out locally, outside the Secure Access tunnels',
       v: 'LIMIT', why: 'Guests receive internet access only, isolated from internal resources.' },
-    { id: 'N4', when: { who: ['guest'], dest: ['$PRIV'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
+    { id: 'N4', cvd: ['sda'], when: { who: ['guest'], dest: ['$PRIV'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
       c: 'Guest segmentation', r: 'The guest segment has no path to internal resources', d: -10, sig: 'Out-of-scope request',
       v: 'BLOCK', why: 'Guest access is internet-only; internal resources are unreachable from the guest segment.' },
     { id: 'N5', when: { who: ['iot', 'ot'], dest: ['dcapp', 'cloudapp', 'intai'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
@@ -953,8 +1000,8 @@ const DATA = {
     { id: 'N6', when: { who: ['iot'], dest: ['ot'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
       c: 'Device segmentation', r: 'IT-side device has no path into the industrial zone', d: -10, sig: 'Out-of-profile destination',
       v: 'BLOCK', why: 'The device’s segment only permits the destinations its profile needs.' },
-    { id: 'N7', when: { who: ['ot'], dest: ['$INET'], via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'policy',
-      c: 'Zones and conduits', r: 'No conduit is defined from this OT zone to the internet', d: -10, sig: 'Out-of-zone destination',
+    { id: 'N7', cvd: ['cvise', 'indso'], when: { who: ['ot'], dest: ['$INET'], via: ['industrial'] }, hop: ['industrial'], at: 'ise', also: ['cv'], lens: 'policy',
+      c: 'Zones and conduits', r: 'The Cyber Vision zone has no conduit to the internet; ISE enforces it through the asset’s security group tag', d: -10, sig: 'Out-of-zone destination',
       v: 'BLOCK', why: 'OT assets communicate only through defined zones and conduits.' },
 
     /* --- device posture and trust --- */
@@ -962,13 +1009,13 @@ const DATA = {
       c: 'Device posture', r: 'Managed device meets compliance policy', d: 5, sig: 'Posture compliant' },
     { id: 'P2', when: { device: ['mgd', 'mobile'], loc: ['$REMOTE'], who: ['$AUTHN'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
       c: 'Device trust', r: 'Managed, healthy device confirmed', d: 5, sig: 'Trusted device' },
-    { id: 'P3', when: { device: ['stale'], loc: ['$ONPREM'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'identity',
-      c: 'Device posture', r: 'Secure Client posture check reports the device out of date; it fails compliance policy', d: -15, sig: 'Posture non-compliant',
+    { id: 'P3', cvd: ['ztud', 'sasedg'], when: { device: ['stale'], loc: ['$ONPREM'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'identity',
+      c: 'Device posture', r: 'ISE posture module in Secure Client reports the device out of date; it fails compliance policy', d: -15, sig: 'Posture non-compliant',
       v: 'LIMIT', why: 'An out-of-date device is restricted until it is remediated.' },
-    { id: 'P4', when: { device: ['stale'], loc: ['$REMOTE'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
-      c: 'Device trust', r: 'Device is out of date and fails the device-health policy', d: -15, sig: 'Posture non-compliant',
+    { id: 'P4', cvd: ['ztud'], when: { device: ['stale'], loc: ['$REMOTE'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+      c: 'Device trust', r: 'Device is out of date: the user is warned, and blocked once it falls too far behind the device-health policy', d: -15, sig: 'Posture non-compliant',
       v: 'LIMIT', why: 'An out-of-date device is restricted until it is remediated.' },
-    { id: 'P5', when: { device: ['byod', 'claptop'], who: ['emp', 'admin', 'exec', 'contractor', 'insider'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+    { id: 'P5', cvd: ['ztud'], when: { device: ['byod', 'claptop'], who: ['emp', 'admin', 'exec', 'contractor', 'insider'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
       c: 'Device trust', r: 'Device is not managed by the organisation; trust not established', d: -10, sig: 'Unmanaged device',
       v: 'LIMIT', why: 'Unmanaged devices receive limited access.' },
 
@@ -1004,21 +1051,21 @@ const DATA = {
       v: 'BLOCK', why: 'Without a verified identity there is no session.' },
 
     /* --- access scope --- */
-    { id: 'S1', when: { who: ['contractor'], dest: ['dcapp', 'cloudapp'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
+    { id: 'S1', cvd: ['sasedg', 'ztud'], when: { who: ['contractor'], dest: ['dcapp', 'cloudapp'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
       c: 'Zero trust access', r: 'Access granted to the one approved application, not to the network',
       v: 'LIMIT', why: 'Contractor access is limited to one approved application.' },
     { id: 'S1b', when: { who: ['contractor'], dest: ['dcapp', 'cloudapp'], nvia: ['sa'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
       c: 'Contractor segmentation', r: 'Contractor segment permits only the approved application',
       v: 'LIMIT', why: 'Contractor access is limited to one approved application.' },
-    { id: 'S2', when: { who: ['contractor'], dest: ['eastwest', 'intai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
+    { id: 'S2', cvd: ['ztud'], when: { who: ['contractor'], dest: ['eastwest', 'intai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
       c: 'Zero trust access', r: 'Requested resource is not among the contractor’s granted applications', d: -15, sig: 'Out-of-scope request',
       v: 'BLOCK', why: 'The resource is outside the contractor’s approved scope.' },
     { id: 'S2b', when: { who: ['contractor'], dest: ['eastwest', 'intai'], nvia: ['sa'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'policy',
       c: 'Contractor segmentation', r: 'Requested resource is outside the contractor segment', d: -15, sig: 'Out-of-scope request',
       v: 'BLOCK', why: 'The resource is outside the contractor’s approved scope.' },
-    { id: 'S3', when: { via: ['sea'] }, hop: ['sea'], at: 'sea', lens: 'policy',
-      c: 'Remote equipment access', r: 'Least-privilege session to the named asset, with approval workflow and session recording',
-      v: 'LIMIT', why: 'Remote access to the machine is limited to the named asset through a controlled, recorded session.' },
+    { id: 'S3', cvd: ['cvds'], when: { via: ['sea'] }, hop: ['sea'], at: 'sea', lens: 'policy',
+      c: 'Remote equipment access', r: 'Least-privilege session to the named asset only, with MFA or SSO, a time schedule and a posture check',
+      v: 'LIMIT', why: 'Remote access is limited to the named machine; the vendor never reaches the wider network.' },
     { id: 'S4', when: { beh: ['priv'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
       c: 'Least-privilege access', r: 'Requested privilege exceeds what the identity’s role allows', d: -15, sig: 'Excess privilege request',
       v: 'BLOCK', why: 'The request exceeds the role’s least-privilege entitlement.' },
@@ -1044,20 +1091,20 @@ const DATA = {
       v: 'BLOCK', why: 'An exploit attempt against an unpatched workload is stopped by a compensating control next to the workload.' },
 
     /* --- threat behaviour --- */
-    { id: 'T1a', when: { device: ['compromised'], nbeh: ['scan', 'ransom', 'exfil'] }, hop: ['@src'], at: 'ep', lens: 'threat', tele: true,
+    { id: 'T1a', cvd: ['bpsdg'], when: { device: ['compromised'], nbeh: ['scan', 'ransom', 'exfil'] }, hop: ['@src'], at: 'ep', lens: 'threat', tele: true,
       c: 'Endpoint detection', r: 'Malware detected on the device; host isolated from the network', d: -45, sig: 'Malware on device',
       v: 'CONTAIN', why: 'Malware is present on the device, so the host is isolated and an incident is opened.' },
     { id: 'T1b', when: { device: ['compromised'], beh: ['scan', 'exfil'] }, hop: ['@src'], at: 'ep', lens: 'threat', tele: true,
       c: 'Endpoint detection', r: 'Malicious activity observed on the device; telemetry raised', d: -30, sig: 'Malware on device' },
-    { id: 'T8', when: { beh: ['ransom'], device: ['$MANAGED'] }, hop: ['@src'], at: 'ep', lens: 'threat', tele: true,
+    { id: 'T8', cvd: ['bpsdg'], when: { beh: ['ransom'], device: ['$MANAGED'] }, hop: ['@src'], at: 'ep', lens: 'threat', tele: true,
       c: 'Endpoint detection and response', r: 'Ransomware behaviour detected; host isolated', d: -45, sig: 'Ransomware behaviour',
       v: 'CONTAIN', why: 'Ransomware behaviour triggers host isolation, confining the outbreak to one segment.' },
-    { id: 'T2', when: { beh: ['scan'], via: ['switches', 'nexus'] }, hop: ['switches', 'nexus'], at: 'sna', lens: 'threat', tele: true,
+    { id: 'T2', cvd: ['ztnc'], when: { beh: ['scan'], via: ['switches', 'nexus'] }, hop: ['switches', 'nexus'], at: 'sna', lens: 'threat', tele: true,
       c: 'Network behaviour analytics', r: 'Scanning and lateral-movement pattern detected from this host', d: -25, sig: 'Lateral-movement behaviour' },
     { id: 'T5', when: { beh: ['scan'], via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'threat', tele: true,
       c: 'OT threat detection', r: 'Abnormal scanning traffic seen by the sensor in the industrial network', d: -20, sig: 'Lateral-movement behaviour' },
-    { id: 'T3', when: { beh: ['scan'], via: ['$ACC'], not: { who: ['attacker'], device: ['server'] } }, hop: ['$ACC'], at: 'ise', lens: 'threat',
-      c: 'Automated containment', r: 'Endpoint moved to a quarantine segment by an Adaptive Network Control policy', d: -15, sig: 'Endpoint quarantined',
+    { id: 'T3', cvd: ['ztnc', 'sda'], when: { beh: ['scan'], via: ['$ACC'], not: { who: ['attacker'], device: ['server'] } }, hop: ['$ACC'], at: 'ise', lens: 'threat',
+      c: 'Containment', r: 'Adaptive Network Control quarantine sent to ISE over pxGrid; a Change of Authorization moves the endpoint to a quarantine security group', d: -15, sig: 'Endpoint quarantined',
       v: 'CONTAIN', why: 'Scanning from an internal host is treated as lateral movement, so the endpoint is quarantined.' },
     { id: 'T4', when: { beh: ['scan'], via: ['sa'], nvia: ['$ACC'] }, hop: ['sa'], at: 'sa', lens: 'threat',
       c: 'Zero trust access', r: 'Only the granted application is reachable; there is no network path to scan', d: -15, sig: 'Lateral-movement behaviour',
@@ -1068,27 +1115,27 @@ const DATA = {
     { id: 'T7', when: { beh: ['scan', 'exfil'], via: ['mcd'] }, hop: ['mcd'], at: 'mcd', lens: 'threat',
       c: 'Cloud east-west and egress control', r: 'Lateral-movement or exfiltration traffic blocked at the cloud gateway', d: -15, sig: 'Malicious cloud traffic',
       v: 'BLOCK', why: 'The cloud gateway blocks lateral movement and exfiltration.' },
-    { id: 'T11', when: { beh: ['exfil'], via: ['switches', 'nexus'] }, hop: ['switches', 'nexus'], at: 'sna', lens: 'threat', tele: true,
+    { id: 'T11', cvd: ['ztnc'], when: { beh: ['exfil'], via: ['switches', 'nexus'] }, hop: ['switches', 'nexus'], at: 'sna', lens: 'threat', tele: true,
       c: 'Encrypted traffic analytics', r: 'Exfiltration pattern identified in encrypted traffic without decryption', d: -25, sig: 'Exfiltration behaviour' },
     { id: 'T12', when: { beh: ['exfil'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'threat',
       c: 'DNS and internet egress control', r: 'Covert channel to the external destination blocked', d: -15, sig: 'Exfiltration behaviour',
       v: 'BLOCK', why: 'The covert outbound channel is blocked at the egress control point.' },
-    { id: 'T13', when: { beh: ['exfil'], via: ['fw'], not: { who: ['attacker'] } }, hop: ['fw'], at: 'fw', lens: 'threat', tele: true,
+    { id: 'T13', cvd: ['snra'], when: { beh: ['exfil'], via: ['fw'], not: { who: ['attacker'] } }, hop: ['fw'], at: 'fw', lens: 'threat', tele: true,
       c: 'Encrypted Visibility Engine', r: 'Malicious encrypted flow identified and blocked without decryption', d: -15, sig: 'Exfiltration behaviour',
       v: 'BLOCK', why: 'The covert outbound channel is blocked at the egress control point.' },
-    { id: 'T14', when: { beh: ['anomaly'], via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'threat', tele: true,
+    { id: 'T14', cvd: ['cvds'], when: { beh: ['anomaly'], via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'threat', tele: true,
       c: 'OT behaviour baseline', r: 'Communication deviates from the asset’s recorded behaviour', d: -25, sig: 'OT anomaly' },
     { id: 'W9', when: { beh: ['anomaly'], dest: ['$WEB'], via: ['sa'] }, hop: ['$ACC'], at: 'sa', lens: 'threat',
       c: 'DNS-layer security', r: 'Lookup of an unknown internet host flagged and the connection denied before it is made', d: -10, sig: 'Suspicious destination',
       v: 'BLOCK', why: 'The call-out to an unknown host is denied at the DNS layer, and the device is contained.' },
     { id: 'T15', when: { beh: ['anomaly'], via: ['switches'] }, hop: ['switches'], at: 'sna', lens: 'threat', tele: true,
       c: 'Behavioural analytics', r: 'Device traffic no longer matches its expected behaviour', d: -20, sig: 'IoT anomaly' },
-    { id: 'T16', when: { beh: ['anomaly'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'threat',
-      c: 'Automated containment', r: 'Device no longer matches its profile; moved to a quarantine segment by an Adaptive Network Control policy', d: -20, sig: 'Profile mismatch',
+    { id: 'T16', cvd: ['ztnc', 'sda'], when: { beh: ['anomaly'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'threat',
+      c: 'Containment', r: 'Device no longer matches its profile; an Adaptive Network Control quarantine and a Change of Authorization move it to a quarantine security group', d: -20, sig: 'Profile mismatch',
       v: 'CONTAIN', why: 'A device behaving unlike its profile is quarantined and an alert is raised.' },
 
     /* --- email, web and SaaS --- */
-    { id: 'E1', when: { beh: ['phish'] }, hop: ['@src'], at: 'email', lens: 'threat', tele: true,
+    { id: 'E1', cvd: ['bpsdg'], when: { beh: ['phish'] }, hop: ['@src'], at: 'email', lens: 'threat', tele: true,
       c: 'Email threat detection', r: 'Phishing message identified and remediated from the mailbox after delivery', d: -5, sig: 'Phishing email' },
     { id: 'W2', when: { dest: ['web_mal'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'threat',
       c: 'Secure internet access', r: 'DNS-layer and web security: known malicious destination denied before a connection is made', d: -20, sig: 'Malicious destination',
@@ -1108,7 +1155,7 @@ const DATA = {
     { id: 'W5', when: { dest: ['shadow'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
       c: 'Shadow IT control (CASB)', r: 'Unsanctioned application identified by the cloud access security broker; use restricted', d: -10, sig: 'Unsanctioned application',
       v: 'LIMIT', why: 'Unsanctioned SaaS is restricted; sensitive actions such as uploads are not permitted.' },
-    { id: 'W6', when: { beh: ['upload'], dest: ['shadow', '$WEB', 'pubai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
+    { id: 'W6', cvd: ['sasedg'], when: { beh: ['upload'], dest: ['shadow', '$WEB', 'pubai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
       c: 'Data Loss Prevention', r: 'Sensitive upload to an unapproved destination denied by the data loss prevention policy', d: -15, sig: 'Sensitive data upload',
       v: 'BLOCK', why: 'Sensitive data may not be uploaded to an unapproved destination.' },
     { id: 'W7', when: { beh: ['upload'], dest: ['saas', 'ai'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy',
@@ -1138,21 +1185,29 @@ const DATA = {
     /* --- routine transit checks (skipped at a hop once the session is stopped there) --- */
     { id: 'B1', when: { via: ['wireless'] }, hop: ['wireless'], at: 'wireless', lens: 'data', base: true,
       c: 'Air link', r: 'WPA3-protected wireless association' },
-    { id: 'B2', when: { via: ['client'] }, hop: ['client'], at: 'client', lens: 'data', base: true,
+    { id: 'B2', cvd: ['sasedg'], when: { via: ['client'] }, hop: ['client'], at: 'client', lens: 'data', base: true,
       c: 'Device tunnel', r: 'Secure Client, the unified client for Secure Access, opens the VPN / zero trust access session' },
-    { id: 'B3', when: { via: ['sdwan'] }, hop: ['sdwan'], at: 'sdwan', lens: 'data', base: true,
+    { id: 'B3', cvd: ['sdwandg'], when: { via: ['sdwan'], not: { who: ['guest'] } }, hop: ['sdwan'], at: 'sdwan', lens: 'data', base: true,
       c: 'WAN transport', r: 'Traffic carried in the encrypted, segmented SD-WAN overlay' },
-    { id: 'B4', when: { via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy', base: true,
+    { id: 'B3g', cvd: ['ub', 'ubl'], when: { who: ['guest'], via: ['sdwan'] }, hop: ['sdwan'], at: 'sdwan', lens: 'data', base: true,
+      c: 'Local internet breakout', r: 'Guest traffic leaves through the router’s own internet uplink, outside the Secure Access tunnels' },
+    { id: 'W3r', cvd: ['ubl'], when: { dest: ['web_mal'], via: ['sdwan'], nvia: ['sa'] }, hop: ['sdwan'], at: 'sdwan', lens: 'threat',
+      c: 'Threat protection', r: 'Content filtering and threat protection on the secure router block a known malicious destination at the local breakout', d: -20, sig: 'Malicious destination',
+      v: 'BLOCK', why: 'The destination is known to be malicious, so the router blocks it at the local internet breakout.' },
+    { id: 'W3f', cvd: ['ubl'], when: { beh: ['malfile', 'phish'], dest: ['$INET'], via: ['sdwan'], nvia: ['sa'] }, hop: ['sdwan'], at: 'sdwan', lens: 'threat',
+      c: 'Threat protection', r: 'Threat protection on the secure router blocks the malicious download or phishing link at the local breakout', d: -15, sig: 'Malicious download',
+      v: 'BLOCK', why: 'Threat protection on the router stops the malicious content at the local internet breakout.' },
+    { id: 'B4', cvd: ['sasedg'], when: { via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'policy', base: true,
       c: 'User-to-app policy', r: 'Session evaluated against identity, device and destination policy at the cloud edge' },
     { id: 'B5', when: { via: ['fw'], not: { who: ['attacker'] } }, hop: ['fw'], at: 'fw', lens: 'data', base: true,
       c: 'Traffic inspection', r: 'Flow inspected; encrypted traffic assessed without decryption' },
     { id: 'B6', when: { via: ['mcd'] }, hop: ['mcd'], at: 'mcd', lens: 'data', base: true,
       c: 'Cloud gateway', r: 'Ingress, egress and east-west policy applied in the cloud network' },
-    { id: 'B7', when: { via: ['nexus'] }, hop: ['nexus'], at: 'hs', lens: 'policy', base: true,
+    { id: 'B7', cvd: ['n9300'], when: { via: ['nexus'] }, hop: ['nexus'], at: 'hs', lens: 'policy', base: true,
       c: 'Workload-edge segmentation', r: 'Flow checked against segmentation policy on the smart switch' },
     { id: 'B8', when: { via: ['nexus'], dest: ['$DC'] }, hop: ['nexus'], at: 'wl', lens: 'policy', base: true,
       c: 'Workload policy', r: 'Flow matches the workload’s allowed communication policy' },
-    { id: 'B9', when: { via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'identity', base: true,
+    { id: 'B9', cvd: ['cvds'], when: { via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'identity', base: true,
       c: 'OT visibility', r: 'Asset and its communications inventoried by the embedded sensor' },
     { id: 'B10', when: { dest: ['mail'] }, hop: ['@dst'], at: 'email', lens: 'data', base: true,
       c: 'Mail protection', r: 'Messages scanned for threats before they reach the mailbox' },
@@ -1160,7 +1215,7 @@ const DATA = {
     /* --- experience assurance (operations) --- */
     { id: 'O1', when: { beh: ['slow'] }, hop: ['wireless', 'switches', 'sdwan', 'client', '@src'], at: 'te', lens: 'data',
       c: 'Owned-network path', r: 'Access and WAN segments measured from the user’s vantage point: healthy' },
-    { id: 'O2', when: { beh: ['slow'], via: ['sa'] }, hop: ['sa'], at: 'te', lens: 'data',
+    { id: 'O2', cvd: ['sasedg'], when: { beh: ['slow'], via: ['sa'] }, hop: ['sa'], at: 'te', lens: 'data',
       c: 'Access-flow correlation', r: 'Digital experience correlated with the Secure Access session' },
     { id: 'O3', when: { beh: ['slow'] }, post: true, at: 'te', lens: 'data',
       c: 'Fault localisation', r: 'Degradation located on a network segment the organisation does not own', sig: 'Experience fault (not a security signal)' },
@@ -1171,16 +1226,19 @@ const DATA = {
       v: 'BLOCK', why: 'The malicious file is stopped before it can run.' },
     { id: 'E2', when: { beh: ['phish'], who: ['$AUTHN'] }, post: true, at: 'duo', lens: 'identity',
       c: 'Phishing-resistant authentication', r: 'A captured password cannot be replayed without the phishing-resistant factor' },
-    { id: 'T9', when: { beh: ['ransom'], loc: ['$ONPREM'], not: { device: ['server'] } }, post: true, at: 'ise', lens: 'threat',
-      c: 'Automated containment', r: 'Endpoint moved to a quarantine segment by an Adaptive Network Control policy', d: -10, sig: 'Endpoint quarantined',
+    { id: 'T9', cvd: ['ztnc', 'sda'], when: { beh: ['ransom'], loc: ['$ONPREM'], not: { device: ['server'] } }, post: true, at: 'ise', lens: 'threat',
+      c: 'Containment', r: 'Adaptive Network Control quarantine sent to ISE over pxGrid; a Change of Authorization moves the endpoint to a quarantine security group', d: -10, sig: 'Endpoint quarantined',
       v: 'CONTAIN', why: 'Ransomware behaviour triggers quarantine, confining the outbreak to one segment.' },
-    { id: 'T10', when: { beh: ['ransom'] }, post: true, at: 'hs', lens: 'policy',
+    { id: 'T10', cvd: ['n9300'], when: { beh: ['ransom'] }, post: true, at: 'hs', lens: 'policy',
       c: 'Segment boundary', r: 'Stateful segmentation near workloads keeps the outbreak inside one segment' },
-    { id: 'Z1', needsTele: true, post: true, at: 'xdr', lens: 'threat', from: '@tele',
+    { id: 'Z1', cvd: ['bpsdg'], needsTele: true, post: true, at: 'xdr', lens: 'threat', from: '@tele',
       c: 'Cross-domain correlation', r: 'Telemetry correlated into one prioritised incident with guided response', d: -5, sig: 'Incident opened' },
-    { id: 'Z2', when: { beh: ['scan', 'ransom', 'exfil'], not: { who: ['attacker'] } }, needsTele: true, post: true, at: 'xdr', lens: 'threat',
-      c: 'Automated response', r: 'Containment action triggered to stop lateral movement',
-      v: 'CONTAIN', why: 'Correlated detections trigger containment and an incident for the security team.' },
+    { id: 'Z2', cvd: ['bpsdg'], when: { beh: ['scan', 'ransom', 'exfil'], nvia: ['industrial'], not: { who: ['attacker'] } }, needsTele: true, needs: ['ep'], post: true, at: 'xdr', also: ['ep'], lens: 'threat',
+      c: 'Response action', r: 'Host isolation requested in Secure Endpoint from the incident, manually or by an automation workflow',
+      v: 'CONTAIN', why: 'Correlated detections open an incident, and XDR has the affected host isolated through Secure Endpoint.' },
+    { id: 'Z2-ot', cvd: ['cvxdr'], when: { beh: ['scan', 'anomaly'], via: ['industrial'], not: { who: ['attacker'] } }, needsTele: true, needs: ['ise', 'cv'], post: true, at: 'xdr', also: ['ise'], lens: 'threat',
+      c: 'Response workflow', r: 'Cyber Vision reports the incident to XDR; a workflow assigns a security group tag in ISE that stops the asset communicating',
+      v: 'CONTAIN', why: 'The OT incident is reported to XDR, and a workflow tags the asset in ISE so the network stops its traffic.' },
     { id: 'Z3', when: { beh: ['ransom'] }, needsTele: true, post: true, at: 'xdr', lens: 'threat',
       c: 'Recovery', r: 'Affected host can be restored from a last-known-good snapshot' },
 
@@ -1209,37 +1267,37 @@ const DATA = {
       c: 'Policy authoring', r: 'Security intent authored in Security Cloud Control for the enforcement points it manages' },
     { id: 'O5', when: { beh: ['push'] }, post: true, lens: 'policy', from: 'scc', fan: ['fw', 'mcd', 'hs', 'sa', 'wl', 'aid'],
       c: 'Policy distribution', r: 'Enforcement point receives the policy from Security Cloud Control' },
-    { id: 'O5-sdwan', when: { beh: ['push'] }, post: true, at: 'sdwan', lens: 'policy', from: 'scc',
-      c: 'Policy distribution', r: 'Router firewall policy received from Security Cloud Control; SD-WAN overlay policy stays in Catalyst SD-WAN Manager' }
+    { id: 'O5-sdwan', cvd: ['sdwandg', 'ub'], when: { beh: ['push'] }, post: true, at: 'sdwan', lens: 'policy', from: 'scc',
+      c: 'Policy distribution', r: 'Router firewall policy received from Security Cloud Control; SD-WAN overlay policy stays in Catalyst SD-WAN Manager (or the Meraki dashboard for a Meraki MX)' }
   ],
 
   /* TOPOLOGY mode: architecture views. Each shows a set of products and only the relationships stated on cisco.com between them.
      hub = a suite: show the suite and what it packages. src = product id or DATA.sources key for the page describing the architecture. */
   architectures: [
-    { id: 'sase', name: 'SASE: network and security edge', src: 'sase', nodes: ['sa', 'sdwan', 'meraki', 'te', 'duo', 'cii', 'scc'],
-      blurb: 'Secure Access is the cloud security edge and SD-WAN the network edge. Identity, experience monitoring and shared management attach around the pair.' },
-    { id: 'zta', name: 'Zero Trust Access', src: 'zta', nodes: ['ise', 'sa', 'duo', 'cii', 'hmf', 'ep', 'switches', 'wireless', 'client'],
-      blurb: 'Identity decides access everywhere: ISE on the network, Duo at sign-in, Secure Access per application, with Identity Intelligence supplying risk context.' },
-    { id: 'hmf', name: 'Hybrid Mesh Firewall', src: 'hmf', nodes: ['hmf', 'scc', 'fw', 'mcd', 'hs', 'wl', 'aid', 'ise', 'nexus', 'talos'],
-      blurb: 'Many enforcement points — firewalls, cloud gateways, smart switches, workload agents and AI guardrails — run one policy managed from Security Cloud Control.' },
-    { id: 'campus', name: 'Secure campus and branch', src: 'campus', nodes: ['wireless', 'switches', 'ise', 'sna', 'meraki', 'te', 'agentic', 'silicon', 'sdwan', 'sa'],
-      blurb: 'Wired and wireless access carry identity-based segmentation orchestrated by ISE, with cloud management, embedded assurance and AgenticOps on top.' },
-    { id: 'dc', name: 'Data center and cloud', src: 'nexus', nodes: ['nexus', 'silicon', 'hs', 'hmf', 'fw', 'wl', 'mcd', 'aid', 'scc', 'te'],
-      blurb: 'The Nexus fabric hosts Hypershield enforcement on smart switches; firewalls, workload segmentation and cloud gateways extend the same policy to every workload.' },
-    { id: 'ot', name: 'Industrial (OT) security', src: 'itd', nodes: ['industrial', 'cv', 'sea', 'itd', 'fw', 'ise', 'xdr', 'talos', 'meraki'],
+    { id: 'sase', name: 'SASE: network and security edge', src: 'sase', cvd: ['sasedg', 'sseag', 'ub', 'fwsdwan', 'sasdwan'], nodes: ['sa', 'sdwan', 'meraki', 'te', 'duo', 'cii', 'scc', 'fw', 'ise'],
+      blurb: 'Secure Access is the cloud security edge and SD-WAN the network edge. Identity, experience monitoring and shared management attach around the pair. ISE security group tags and SD-WAN segments are carried into Secure Access policy, and a Secure Firewall branch can tunnel to Secure Access too.' },
+    { id: 'zta', name: 'Zero Trust Access', src: 'zta', cvd: ['ztaaag', 'sasedg', 'ztud', 'ztnc'], nodes: ['ise', 'sa', 'duo', 'te', 'cii', 'hmf', 'ep', 'switches', 'wireless', 'client'],
+      blurb: 'Cisco defines Zero Trust Access as capabilities from Secure Access, Duo, ISE and ThousandEyes. Identity decides access everywhere: ISE on the network, Duo at sign-in, Secure Access per application, with Identity Intelligence supplying risk context.' },
+    { id: 'hmf', name: 'Hybrid Mesh Firewall', src: 'hmf', cvd: ['hmfaag', 'n9300'], nodes: ['hmf', 'scc', 'fw', 'mcd', 'hs', 'wl', 'aid', 'ise', 'nexus', 'talos'],
+      blurb: 'Many enforcement points — firewalls, cloud gateways, smart switches, workload agents and AI guardrails — run one policy managed from Security Cloud Control. No Cisco Validated Design covers this view yet; the at-a-glance says policy is orchestrated by Cisco Cloud Control.' },
+    { id: 'campus', name: 'Secure campus and branch', src: 'campus', cvd: ['sda', 'cmc', 'ub', 'cpol', 'lan'], nodes: ['wireless', 'switches', 'ise', 'sna', 'meraki', 'te', 'agentic', 'silicon', 'sdwan', 'sa'],
+      blurb: 'Wired and wireless access carry identity-based segmentation orchestrated by ISE, with cloud management, embedded assurance and AgenticOps on top. In the Cisco Validated Designs an SD-Access fabric is managed from Catalyst Center (not shown) and a cloud-managed campus or branch from the Meraki dashboard.' },
+    { id: 'dc', name: 'Data center and cloud', src: 'nexus', cvd: ['n9300', 'cpol', 'mcdag'], nodes: ['nexus', 'silicon', 'hs', 'hmf', 'fw', 'wl', 'mcd', 'aid', 'scc', 'te'],
+      blurb: 'The Nexus fabric hosts Hypershield enforcement on smart switches; firewalls, workload segmentation and cloud gateways extend the same policy to every workload. No Cisco Validated Design covers data center security yet; sources are product pages and at-a-glance documents.' },
+    { id: 'ot', name: 'Industrial (OT) security', src: 'itd', cvd: ['indso', 'cvds', 'cvise', 'cvfw', 'cvxdr'], nodes: ['industrial', 'cv', 'sea', 'itd', 'fw', 'ise', 'xdr', 'talos', 'meraki'],
       blurb: 'The industrial network is the sensor: Cyber Vision inventories assets and feeds segmentation, firewalling, remote access and IT/OT detection.' },
-    { id: 'xdr', name: 'Detection and response', src: 'xdr', nodes: ['xdr', 'ep', 'email', 'sna', 'client', 'cv', 'fw', 'cii', 'talos', 'ise', 'duo'],
+    { id: 'xdr', name: 'Detection and response', src: 'xdr', cvd: ['bpsdg', 'cmc', 'ubl'], nodes: ['xdr', 'ep', 'email', 'sna', 'client', 'cv', 'fw', 'cii', 'talos', 'ise', 'duo', 'meraki', 'te'],
       blurb: 'Endpoint, email, network, OT, firewall and identity telemetry converge in XDR, which correlates it into incidents; Talos supplies intelligence to the sensors.' },
-    { id: 'ai', name: 'Securing AI use', src: 'aid', nodes: ['aid', 'sa', 'hmf', 'scc', 'talos'],
+    { id: 'ai', name: 'Securing AI use', src: 'aid', cvd: ['snra'], nodes: ['aid', 'sa', 'hmf', 'scc', 'talos'],
       blurb: 'AI Defense protects models and applications with guardrails, while access to third-party AI apps is governed at the Secure Access edge.' },
-    { id: 'ups', name: 'User Protection Suite', src: 'ups', hub: 'ups', nodes: ['ups', 'sa', 'duo', 'email', 'ep', 'ise', 'talos'],
+    { id: 'ups', name: 'User Protection Suite', src: 'ups', cvd: ['ztaaag'], hub: 'ups', nodes: ['ups', 'sa', 'duo', 'email', 'ep', 'ise', 'talos'],
       blurb: 'What the suite packages for protecting users: secure access, authentication, email and — in the Advantage tier — endpoint and network access control.' },
     { id: 'cps', name: 'Cloud Protection Suite', src: 'cps', hub: 'cps', nodes: ['cps', 'wl', 'hs', 'scc', 'fw', 'mcd', 'hmf'],
       blurb: 'What the suite packages for adopting Hybrid Mesh Firewall: a Segmentation package and a Gateway package, both with Security Cloud Control.' },
-    { id: 'bps', name: 'Breach Protection Suite', src: 'bps', hub: 'bps', nodes: ['bps', 'xdr', 'email', 'ep', 'sna', 'talos'],
+    { id: 'bps', name: 'Breach Protection Suite', src: 'bps', cvd: ['bpsdg'], hub: 'bps', nodes: ['bps', 'xdr', 'email', 'ep', 'sna', 'talos'],
       blurb: 'What the suite packages for detection and response, unified by XDR.' },
-    { id: 'splsec', name: 'Splunk for security operations', src: 'es', layer: 'splunk', center: 'splunk', nodes: ['splunk', 'es', 'soar', 'saa', 'fw', 'hmf', 'sna', 'cv', 'itd', 'talos', 'aid', 'xdr', 'ep', 'duo', 'email', 'ise'],
-      blurb: 'Cisco firewalls, network analytics, endpoint, email, identity and OT sensors send data to the Splunk platform, and XDR incidents reach Enterprise Security; Enterprise Security detects and prioritises, SOAR automates the response and can act on Cisco products, Attack Analyzer examines samples with Talos intelligence.' },
+    { id: 'splsec', name: 'Splunk for security operations', src: 'es', layer: 'splunk', center: 'splunk', cvd: ['saspl', 'ubl'], nodes: ['splunk', 'es', 'soar', 'saa', 'fw', 'hmf', 'sna', 'cv', 'itd', 'talos', 'aid', 'xdr', 'ep', 'duo', 'email', 'ise', 'sa', 'meraki'],
+      blurb: 'Cisco firewalls, network analytics, Secure Access, Meraki, endpoint, email, identity and OT sensors send data to the Splunk platform, and XDR incidents reach Enterprise Security; Enterprise Security detects and prioritises, SOAR automates the response and can act on Cisco products, Attack Analyzer examines samples with Talos intelligence.' },
     { id: 'splobs', name: 'Splunk and Cisco Observability', src: 'obs', layer: 'splunk', center: 'te', nodes: ['o11y', 'itsi', 'appd', 'splunk', 'te', 'nexus', 'agentic'],
       blurb: 'ThousandEyes sees the network path and Splunk sees applications, infrastructure and service health, so a fault can be placed in the right layer.' },
     { id: 'all', name: 'Everything', all: true, nodes: [],
@@ -1421,9 +1479,9 @@ function evaluate(s, off) {
     if (c.needsTele && !tele.length) continue;
     if (PR[c.at].cat === 'splunk' && !S.splunk) continue;                 /* Splunk layer switched off */
     if (c.needsS && !({ threat: sthreat, detect: sdetect }[c.needsS] || sfeed).length) continue;
-    if (offS.has(c.at)) { gaps.push(c); continue; }
+    if (offS.has(c.at) || (c.needs && c.needs.some(x => offS.has(x)))) { gaps.push(c); continue; }   /* needs: products the action is carried out through */
     trust = clamp(trust + (c.d || 0));
-    const e = { id: c.id, at: c.at, hi, hop: hi < 1e6 ? path[hi] : null, lens: c.lens, c: c.c, r: c.r, d: c.d || 0, sig: c.sig, v: c.v || null, tele: !!c.tele, trust, from: c.from, also: c.also || [] };
+    const e = { id: c.id, at: c.at, hi, hop: hi < 1e6 ? path[hi] : null, lens: c.lens, c: c.c, r: c.r, d: c.d || 0, sig: c.sig, v: c.v || null, tele: !!c.tele, trust, from: c.from, also: c.also || [], cvd: c.cvd || [] };
     if (c.from === '@tele') e.beams = [...new Set(tele)];
     if (c.from === '@sfeed') e.beams = [...new Set(sfeed)];
     if (DATA.splunkFeeds.includes(c.at)) { sfeed.push(c.at); if (c.tele || c.v) sthreat.push(c.at); if (c.tele) sdetect.push(c.at); }
@@ -1799,6 +1857,7 @@ function graph(r) {
     <text x="${W - 8}" y="${Math.max(9, y(r.trust) - 6)}" font-size="10" font-weight="700" text-anchor="end" fill="var(--trust)">${r.trust}</text></svg>
     <ul class="sig">${r.series.map(p => `<li data-k="${p.k}"><b class="${p.d < 0 ? 'dn' : p.d > 0 ? 'up' : ''}">${p.d > 0 ? '+' + p.d : p.d < 0 ? p.d : '·'}</b><span>${h(p.sig)}${p.at ? ` <span class="small">(${h(PR[p.at].s)})</span>` : ''} → <b style="min-width:0">${p.v}</b></span></li>`).join('')}</ul>`;
 }
+const CVDL = k => { const d = DATA.cvd[k]; return d ? `<a href="${d[1]}" target="_blank" rel="noopener noreferrer" title="${h(d[0])} (updated ${d[2]})">${d[3] === 'cvd' ? 'CVD' : 'Ref'}: ${h(d[0])}</a>` : ''; };
 function runHTML(r) {
   const s = r.s, V = DATA.verdicts[r.verdict], multi = S.runs.length > 1;
   const sum = [opt('who', s.who).short, opt('device', s.device).short, opt('loc', s.loc).short, '→ ' + opt('dest', s.dest).short, ...s.beh.map(b => opt('beh', b).label)];
@@ -1815,7 +1874,7 @@ function runHTML(r) {
     <h4>Decision timeline</h4>
     <ol class="tl">${r.tl.map((e, k) => `<li data-k="${k}" data-lens="${e.lens}" style="--c:${LENS[e.lens].color}"><span class="n">${k + 1}</span><div>
       <button class="p" data-id="${e.at}">${h(PR[e.at].s)}</button> <span class="c">· ${h(e.c)}${e.hop && e.hop !== e.at ? ' @ ' + h(nodeName(e.hop)) : ''}</span>
-      <div>${h(e.r)}</div><div class="meta"><span>${LENS[e.lens].label}</span>${e.d ? `<span>trust ${e.d > 0 ? '+' : ''}${e.d} → ${e.trust}</span>` : ''}${e.v ? vchip(e.v) : ''}</div></div></li>`).join('')}</ol>
+      <div>${h(e.r)}</div><div class="meta"><span>${LENS[e.lens].label}</span>${e.d ? `<span>trust ${e.d > 0 ? '+' : ''}${e.d} → ${e.trust}</span>` : ''}${e.v ? vchip(e.v) : ''}</div>${e.cvd.length ? `<div class="meta cvdl">${e.cvd.map(CVDL).join('')}</div>` : ''}</div></li>`).join('')}</ol>
     <p class="small" style="margin-top:6px">Path: ${r.path.map(n => h(nodeName(n))).join(' → ')}${r.stopAt >= 0 ? ' (stopped at ' + h(nodeName(r.path[r.stopAt])) + ')' : ''}. Rules ${r.rules.join(', ')}${r.fallback ? ' — nearest matching rule used' : ''}.</p>
     <h4>Products involved</h4>
     <div class="prods">${r.products.map(p => `<a href="${PR[p].url}" target="_blank" rel="noopener noreferrer" title="Source: ${new URL(PR[p].url).host.replace('www.', '')}">${h(PR[p].s)}</a>`).join('')}</div>
@@ -1829,10 +1888,11 @@ function runHTML(r) {
 function renderResults() {
   const el = $('#result');
   if (S.topo) {
-    const { a, nodes, links } = S.topo, src = a.src ? (PR[a.src] ? PR[a.src].url : DATA.sources[a.src]) : null, su = k => PR[k] ? PR[k].url : DATA.sources[k];
+    const { a, nodes, links } = S.topo, src = a.src ? srcOf(a.src) : null, su = srcOf;
     el.innerHTML = `<div class="rhead"><h2>Topology</h2><button class="btn" id="shareR">Copy link</button>${expMenu()}</div><div class="run">
       <h3 style="font-size:15px">${h(a.name)}</h3><p style="margin:6px 0">${h(a.blurb)}</p>
       ${src ? `<a class="src" style="margin-top:0" href="${src}" target="_blank" rel="noopener noreferrer">Source: ${new URL(src).host.replace('www.', '')} ↗</a>` : ''}
+      ${a.cvd ? `<h4>Cisco Validated and design references</h4><div class="cvdl">${a.cvd.map(CVDL).join('')}</div>` : ''}
       <p class="small" style="margin-top:6px">Conceptual architecture — not a validated design. Positions are illustrative.</p>
       <h4>Building blocks (${nodes.size})</h4><div class="prods">${[...nodes].map(id => `<button class="pb" data-id="${id}">${h(PR[id].s)}</button>`).join('')}</div>
       <h4>How they connect (${links.length})</h4>
@@ -1907,11 +1967,12 @@ function select(id, focusCam) {
   if (PR[id]) {
     const p = PR[id];
     const conn = DATA.links.filter(l => l[0] === id || l[1] === id).map(l => ({ o: l[0] === id ? l[1] : l[0], rel: l[2], src: l[3] }));
-    const srcUrl = k => PR[k] ? PR[k].url : DATA.sources[k];
+    const srcUrl = srcOf;
     el.innerHTML = `<button class="x" aria-label="Close detail">×</button><div class="cat">${h(DATA.categories[p.cat])}</div><h3>${h(p.name)}</h3><p>${h(p.fn)}</p>
       ${p.note ? `<p class="small">${h(p.note)}</p>` : ''}
       <dl><dt>Zone</dt><dd>${h(DATA.zones.find(z => z.id === p.zone).label)}</dd>
       <dt>Lenses</dt><dd><div class="lchips">${Object.entries(p.roles).map(([l, t]) => `<span style="--c:${LENS[l].color}" title="${h(t)}">${LENS[l].label}: ${h(t)}</span>`).join('') || '<span style="--c:#7385aa">Licensing suite — no runtime role</span>'}</div></dd>
+      ${p.cvd ? `<dt>Cisco Validated and design references</dt><dd class="cvdl">${p.cvd.map(CVDL).join('')}</dd>` : ''}
       <dt>Works with</dt><dd class="conn">${conn.map(c => `<div class="row"><button data-id="${c.o}">${h(PR[c.o].s)}</button> <small>— ${h(c.rel)} (<a href="${srcUrl(c.src)}" target="_blank" rel="noopener noreferrer">source</a>)</small></div>`).join('') || '<span class="small">No relationship stated on the pages reviewed.</span>'}</dd></dl>
       <a class="src" href="${p.url}" target="_blank" rel="noopener noreferrer">Source: ${new URL(p.url).host.replace('www.', '')} ↗</a><p class="small">Verified ${DATA.meta.verified}.</p>`;
   } else {
@@ -1992,7 +2053,7 @@ function download(name, mime, data) {
     if (!url.startsWith('data:')) setTimeout(() => URL.revokeObjectURL(url), 4000); toast('Saved ' + name); return true; } catch (e) { toast('This viewer blocks downloads. Open the page directly to export.'); return false; }
 }
 const scenLine = r => [opt('who', r.s.who).short, opt('device', r.s.device).short, opt('loc', r.s.loc).short, '→ ' + opt('dest', r.s.dest).short, ...r.s.beh.map(b => opt('beh', b).label)].join(' · ');
-const srcOf = k => PR[k] ? PR[k].url : DATA.sources[k];
+function srcOf(k) { return PR[k] ? PR[k].url : DATA.sources[k] || (DATA.cvd[k] && DATA.cvd[k][1]); }
 function exportData() {
   if (S.topo) { const { a, nodes, links } = S.topo; return { kind: 'topology', generated: stamp(), architecture: a.name, summary: a.blurb, source: a.src ? srcOf(a.src) : null,
     products: [...nodes].map(k => ({ name: PR[k].name, source: PR[k].url })), relationships: links.map(l => ({ a: PR[l[0]].name, b: PR[l[1]].name, relationship: l[2], source: srcOf(l[3]) })), note: DATA.meta.sceneLabel }; }
