@@ -11,7 +11,7 @@ and checked against the Cisco Validated Designs on 12 November 2026 (see "Cisco 
 
 ## Run it
 
-Open `index.html` (double-click from disk, internet on). One file, inline CSS and JS, no build step, no backend.
+Open `index.html` (double-click from disk, internet on). No build step and no backend. Styles are in `styles.css`. Scripts are plain files in `js/`, loaded in order from `index.html`, so the page still opens from disk. `js/data.js` holds everything the page shows.
 The only external requests are Three.js 0.170.0 and its OrbitControls from jsDelivr. If WebGL or the CDN is unavailable
 the page renders a 2D SVG map of the same data (force it with `index.html?render=svg`).
 
@@ -107,7 +107,7 @@ cycles the camera view, `F` full screen, `T` starts the tour, `L` toggles the Sp
 
 ## Editing
 
-Everything shown lives in the `DATA` object at the top of the script: products, relationships, picker options,
+Everything shown lives in the `DATA` object in `js/data.js`: products, relationships, picker options,
 invalid-combination rules, path rules, checkpoint rules, verdict text, suggestions and presets. A new scenario is a data
 edit. The tables below were generated from that object.
 
