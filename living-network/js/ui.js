@@ -40,7 +40,7 @@ function setMode(m) {
 }
 function loadPreset(n) {
   const p = DATA.presets.find(x => x.n === n); if (!p) return;
-  S.preset = n; S.off = []; S.active = 0; S.slots[0] = fromPreset(p.s); S.compare = !!p.b; if (p.b) S.slots[1] = fromPreset(p.b);
+  S.preset = n; S.off = (p.off || []).filter(k => PR[k]); S.active = 0; S.slots[0] = fromPreset(p.s); S.compare = !!p.b; if (p.b) S.slots[1] = fromPreset(p.b);
   if (p.lens) setLens(p.lens); renderLeft(); rerun();
 }
 function setScenario(slot, s, notes) { S.slots[slot] = s; S.preset = 0; renderLeft(); rerun(); S.notes = notes || []; if (S.notes.length) { toast(S.notes[0]); const n = $('#bnotes'); if (n) n.textContent = S.notes.join(' '); } }

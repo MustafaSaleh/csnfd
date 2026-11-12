@@ -956,7 +956,7 @@ const DATA = {
   /* Guided tour: sel = element to spotlight, act = named action run when the step opens (see TOUR_ACT), sheet = panel to open on phones */
   tour: [
     { sel: '#stage', act: 'start', t: 'The living network', x: 'Five zones run left to right: actors, locations, access edge, WAN and SASE edge, destinations. The operations plane and the Splunk layer float above. Every block is a product placed where it operates. Drag to orbit, scroll to zoom, or use the arrow keys.' },
-    { sel: '#left', sheet: 'left', t: 'Pick a scenario', x: 'Presets fill the five pickers for you. Thirty are grouped from everyday access through to attacker and operations cases.' },
+    { sel: '#left', sheet: 'left', t: 'Pick a scenario', x: 'Presets fill the five pickers for you. Thirty-seven are grouped from everyday access through to attacker and operations cases.' },
     { sel: '#transport', act: 'restart', t: 'Play it', x: 'Play, pause, step one checkpoint at a time, skip to the result, or change speed. Space toggles play. The actor walks the path and pauses at each checkpoint.' },
     { sel: '#lenses', act: 'lens', t: 'Five lenses, one scene', x: 'Data, Identity, Policy, Threat and Trust recolour and relabel the same scene without reloading it. Keys 1 to 5 switch lens.' },
     { sel: '#right', sheet: 'right', act: 'finish', t: 'Read the result', x: 'The verdict with a one-sentence reason, the illustrative trust level with the signal that moved it, the decision timeline, and the products involved with their source links.' },
@@ -1030,6 +1030,14 @@ const DATA = {
     { n: 27, t: 'Insider downloads large volumes before leaving', s: ['insider', 'mgd', 'hq', 'dcapp', ['upload', 'offhours']], lens: 'trust' },
     { n: 28, t: 'Impossible-travel login from a new country', s: ['emp', 'mobile', 'travel', 'saas', ['norm']], lens: 'trust' },
     { g: 'Operations', n: 29, t: 'App is slow: locate the fault', s: ['emp', 'mgd', 'branch', 'saas', ['slow']], lens: 'data' },
-    { n: 30, t: 'Policy authored once, pushed to every enforcement point', s: ['admin', 'mgd', 'hq', 'dcapp', ['mfa_ok', 'push']], lens: 'policy' }
+    { n: 30, t: 'Policy authored once, pushed to every enforcement point', s: ['admin', 'mgd', 'hq', 'dcapp', ['mfa_ok', 'push']], lens: 'policy' },
+    /* off: products removed when the preset loads (the "Without these controls" replay) */
+    { g: 'Attacker: 2026 techniques', n: 31, t: 'Phishing proxy steals a session, attacker replays it', s: ['attacker', 'byod', 'internet', 'saas', ['stolen', 'aitm']], lens: 'identity' },
+    { n: 32, t: 'Fake help-desk call, user starts a remote session', s: ['emp', 'mgd', 'hq', 'eastwest', ['rmm', 'scan']], lens: 'threat' },
+    { n: 33, t: 'Ransomware crew disables the endpoint agent, steals data, then encrypts', s: ['emp', 'compromised', 'hq', 'web_risky', ['exfil', 'ransom']], off: ['ep'], lens: 'threat' },
+    { n: 34, t: 'Exploit of an internet-facing system with a known CVE', s: ['attacker', 'byod', 'internet', 'dcapp', ['exploit']], lens: 'threat' },
+    { n: 35, t: 'Vendor laptop launches a known PLC exploit', s: ['contractor', 'claptop', 'hq', 'ot', ['exploit']], lens: 'threat' },
+    { n: 36, t: 'Poisoned tool steers an internal AI agent', s: ['aiagent', 'server', 'hq', 'intai', ['agentic']], lens: 'threat' },
+    { n: 37, t: 'Stolen vendor login tries remote access to a factory machine', s: ['attacker', 'byod', 'travel', 'ot', ['stolen', 'mfa_fail']], lens: 'identity' }
   ]
 };
