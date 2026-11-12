@@ -7,7 +7,8 @@ stopped, and how **trust** is re-evaluated through a session.
 Independent educational visualization. Not an official Cisco product. Product names are trademarks of Cisco Systems, Inc.
 No Cisco or Splunk logos, icons or artwork are used. Content verified against cisco.com and splunk.com on 10 November 2026,
 and checked against the Cisco Validated Designs on 12 November 2026 (see "Cisco Validated Design check" below and
-[`CVD-REVIEW.md`](CVD-REVIEW.md)).
+[`CVD-REVIEW.md`](CVD-REVIEW.md)). Presets 31 to 37 follow Cisco Talos reports read on the same day (see "Attacker
+presets from 2026 threat reporting").
 
 ## Run it
 
@@ -115,6 +116,14 @@ edit. The tables below were generated from that object.
 and whether it is Cisco Validated or a reference). Products, architectures and checkpoint rules name them in a `cvd` field,
 and a relationship can use a `cvd` key as its source. In a checkpoint rule, `also` credits a second product and `needs`
 lists the products the action is carried out through, so removing one of them with "Without these controls" skips the rule.
+A third kind, `threat`, marks a Cisco Talos report; its date is the publication date and the link is labelled "Threat report".
+
+A checkpoint rule names a product action only where a Cisco, Duo or Talos page states it. A rule without such a page
+carries "(illustrative)" at the end of its checkpoint name, which is what the timeline shows, and is listed under
+"Not verified" below.
+
+A preset may carry `off`, a list of product ids removed when it loads, as if they had been tapped under "Without these
+controls". Preset 33 uses it to replay a ransomware case with Secure Endpoint disabled.
 
 ## How verdicts are produced
 
@@ -183,6 +192,28 @@ lists the products the action is carried out through, so removing one of them wi
   Secure Endpoint and email quarantine in Email Threat Defense as XDR actions (rule Z2). An ISE action is documented only
   for OT assets, in the XDR and Cyber Vision brief, so only rule Z2-ot uses it.
 - **Hypershield availability** varies by capability; the panel says so and no dates are shown.
+- **Hypershield exploit shielding (X4, XP4)**: the Hypershield product page, read on 12 November 2026, states stateful
+  Layer 3 and Layer 4 segmentation on the N9300 Smart Switches and nothing about stopping an exploit there. Both rules
+  are labelled "(illustrative)" and cite no document.
+- **Secure Endpoint and a fake help-desk remote session (R1)**: the Secure Endpoint data sheet (`epds`) states
+  behavioural protection against "the malicious use of living-off-the-land tools and ransomware by terminating the
+  processes of the offending behavior". It does not name remote-management tools or help-desk impersonation, which is
+  the technique the Talos Q3 2026 report (`talosq3`) describes. R1 is labelled "(illustrative)". For that behaviour on
+  its own the CONTAIN comes from Z2, host isolation through Secure Endpoint, which the Breach Protection Suite guide
+  documents as an XDR action.
+- **Replayed session (M11, M12)**: both are stated, with limits. Duo's phishing-prevention page (`duoph`) says Duo
+  Passport with Session Theft Protection "removes cookies from the authentication flow"; an application that issues its
+  own session cookie is outside that, and the M12 verdict text says so. The Identity Intelligence "Compromised Session"
+  check (`ciics`) detects one session used from two address and browser pairs, lists Okta, Duo and Microsoft Entra ID as
+  the supported sources, and recommends revoking the session; it detects, it does not block, so M11 argues for STEP-UP
+  and the BLOCK is Duo's. Neither page prints a date.
+- **Exploit of an OT controller over Secure Equipment Access**: no page read states that Secure Equipment Access or the
+  industrial switch drops an exploit inside an approved remote session. On that path the tool shows the Cyber Vision
+  detection (XP5) and an XDR incident, and the verdict stays ALLOW WITH LIMITS.
+- **Agent tool calls (A7)**: the AI Defense data sheet (`aidds`) states inspection of MCP traffic and tool allowlists
+  and blocklists. The tool does not model how the poisoned tool reached the agent.
+- **Example CVEs**: rule and preset text says "a known vulnerability" and names no CVE. The examples in "Attacker
+  presets from 2026 threat reporting" are from the Talos posts and are not shown in the tool.
 - Listed on cisco.com but out of the requested scope: Secure Web Appliance, Attack Surface Management, Secure Malware
   Analytics, Security Analytics and Logging, Telemetry Broker, Secure DDoS Protection, Vulnerability Management,
   Meraki Systems Manager, Isovalent, Catalyst Center, Splunk.
@@ -197,9 +228,11 @@ Nothing below is done yet. It is kept here so it can be picked up later.
 
 Each item names the document to check. Keys refer to the "Design reference keys" table under "Rule table".
 
-- **Hypershield vulnerability shielding (X4)** has no CVD. The Secure Networking Architecture CVD (`snra`) lists "Cisco
-  Live Protect" under Secure Infrastructure but does not tie it to Hypershield or the N9300. Check the Hypershield and
-  N9300 data sheets before keeping "compensating control" wording.
+- **Hypershield vulnerability shielding (X4, XP4)** has no CVD. The Secure Networking Architecture CVD (`snra`) lists
+  "Cisco Live Protect" under Secure Infrastructure but does not tie it to Hypershield or the N9300. The Hypershield
+  product page, read on 12 November 2026, states only Layer 3 and Layer 4 segmentation, so both rules are now labelled
+  "(illustrative)". Still to check: the Hypershield and N9300 data sheets, then either cite one or drop the
+  "compensating control" wording.
 - **Verified Duo Push (M5) and Duo risk-based authentication** are in no CVD; the Zero Trust User and Device guide (`ztud`,
   2023) uses plain Duo Push. Check the current Duo documentation or a newer Duo design guide.
 - **Trust lens wording**: the Secure Access help page for Identity Intelligence (`sacii`) says user trust levels become
@@ -251,8 +284,10 @@ Each item names the document to check. Keys refer to the "Design reference keys"
   profile that does not belong to the edge network, ISE can automatically remove it from the network", with Cyber
   Vision feeding device properties. This supports T16 for OT; consider a Cyber Vision → ISE beam in the OT anomaly
   preset.
-- **Virtual patching** of OT assets: Cyber Vision finds CVEs and the matching IPS policies are enabled in Secure
-  Firewall. Could become an OT exploit rule credited to the firewall with Cyber Vision.
+- **Virtual patching** of OT assets is now rule XP2, at the IT/OT boundary firewall. Still open: inside the plant
+  (factory floor to controller, and the Secure Equipment Access path) no firewall is on the modelled path, so an
+  exploit there is detected by Cyber Vision but not dropped. The guide's firewall at the cell/area boundary would
+  close that; see the IDMZ and cell/area firewall items in this list.
 - **Secure Firewall routing between OT VLANs, or transparent at the cell/area boundary**, and **SGT enforcement at the
   distribution switch** (cell/area zones classified by subnet). The industrial network node could say so.
 - **Splunk**: the guide validates Splunk ingestion from Cyber Vision (add-on and app), IOS-XE, ISE, Firewall Management
@@ -313,10 +348,17 @@ Not opened yet, likely useful:
   missing. The "verified on" date is fixed text; there is no process to re-check the pages.
 
 **Content**
+- A compromised device exfiltrating to an OT controller from the factory floor ends in ALLOW when the Splunk layer is
+  off: on that path only the endpoint reports it, and no rule acts on exfiltration there. Found while checking the
+  2026 attacker presets; it predates them.
 - Secure Access has no XDR line: no public page naming it was found. ThousandEyes ↔ ITSI and an XDR response action
   through ISE for an IT endpoint also still need a public page.
 - No licensing view: nothing shows which suite or tier a scenario needs.
-- No "exploit" or "denial of service" behaviour, and no multi-stage attack that chains several steps in one run.
+- No "denial of service" behaviour, and no multi-stage attack that chains several steps in one run: presets 32 and 33
+  combine two behaviours, which the engine evaluates together, not one after the other.
+- The "exploit" behaviour is limited to systems the organisation runs (private app, cloud app, internal server,
+  internal AI model, OT controller), and the remote-session behaviour to managed devices, so a contractor cannot be
+  the victim of the fake help-desk call.
 - Products listed on cisco.com but out of scope: Secure Web Appliance, Attack Surface Management, Secure Malware
   Analytics, Security Analytics and Logging, Telemetry Broker, Secure DDoS Protection, Vulnerability Management,
   Meraki Systems Manager, Isovalent, Catalyst Center.
@@ -337,10 +379,80 @@ Not opened yet, likely useful:
 - The 2D fallback has no product models and no fog of war; it keeps the flat map symbols.
 - Fog of war is not applied in split view.
 
-Checked in a headless browser: zero console errors; all 30 presets play to a verdict; every valid picker combination
-(about 206,000 including behaviour sets and removed controls) returns a path, a timeline and a verdict; split-view
-compare, removing controls, link sharing, the tour, and each export format work; every product panel links to its
-source page.
+Checked in a headless browser on 12 November 2026: zero console errors; all 37 presets play to a verdict; every valid
+picker combination (about 244,000 with behaviour sets of up to two, each with the Splunk layer on and off) returns a
+path, a timeline and a verdict; the compare preset runs both scenarios in split view; removing controls and link
+sharing work; all eleven tour steps open; the Markdown, JSON and report exports are produced for the new presets;
+every product has a source link. The PNG export and the print dialog were last checked before the 2026 attacker
+presets were added.
+
+## Attacker presets from 2026 threat reporting, 12 November 2026
+
+Seven presets, 31 to 37, under the heading "Attacker: 2026 techniques". Presets 1 to 30 keep their numbers, inputs and
+verdicts. Each new preset follows a technique that Cisco Talos or a Cisco data sheet describes; the rule that decides
+the verdict cites the page.
+
+| # | Technique | Reported in | What decides the verdict |
+|---|---|---|---|
+| 31 | A phishing proxy sits between the user and the sign-in page, captures the session and the attacker replays it | `talosq2`: MFA bypassed "using adversary-in-the-middle (AitM) proxies, session-token theft, MFA fatigue attacks, and self-enrolled devices" | M11 (Identity Intelligence flags the session), M12 (Duo refuses the replay): BLOCK |
+| 32 | A caller posing as the IT help desk gets the user to start a remote-control session, then explores the network | `talosq3`: "voice phishing (vishing) in tandem with IT desk impersonation to socially engineer the victim into allowing remote access via a legitimate remote monitoring and management (RMM) tool" | R1 (illustrative) reports it; T3 quarantines the scanning host: CONTAIN |
+| 33 | A ransomware crew removes the endpoint agent, copies data out, then encrypts | `talosq3`: Interlock actors "trying to uninstall Cisco Secure Endpoint (CSE) on compromised systems"; in the VYPR case, "exfiltration over multiple days" and vulnerable drivers used to disable endpoint protection | Loads with Secure Endpoint removed. Secure Access blocks the exfiltration channel and the ISE quarantine still contains: CONTAIN, with T1b, T8 and Z2 shown as gaps |
+| 34 | Exploit of a known vulnerability in an internet-facing system | `talosq3`: "Exploitation of public-facing applications was the second most common initial access vector, accounting for 33 percent of engagements"; `talosfmc` for a case with published Snort rules | XP1 (Secure Firewall intrusion prevention): BLOCK |
+| 35 | A vendor laptop on site launches a known exploit at a controller | `isdg` pp. 61 to 62, virtual patching | XP2 (firewall at the IT/OT boundary, policy chosen from the vulnerabilities Cyber Vision found): BLOCK |
+| 36 | A poisoned tool or hidden instruction steers an internal AI agent into a tool call it should not make | `aidds`: runtime protection "extends to MCP traffic, inspecting agent actions and tool calls in real time" | A7 (AI Defense): BLOCK |
+| 37 | A stolen vendor login is tried against remote access to a factory machine | `talosq3`: attackers "routinely gain initial access by leveraging valid credentials"; single-factor authentication "allowed unauthorized access in several incidents". The report does not describe a vendor or factory case; the preset applies the technique to the OT remote-access path | Existing rules only: M4, MFA not completed at Secure Equipment Access: BLOCK |
+
+**Behaviours added** (builder, "Build your own"): "Exploits a known vulnerability (CVE)" and "Starts a remote-control
+session for a fake help-desk caller" under Threat, "Session stolen through a phishing proxy and replayed" under
+Authentication, "AI agent steered by a poisoned tool or hidden instruction" under Data. Their limits are in "Invalid
+combinations".
+
+**Rules added**: M11, M12, XP1 to XP5, A7, R1, Z2-rmm, Z2-otx and Z2-otxc. The exploit behaviour has one rule at each
+place that can act on it: Secure Firewall (XP1, and XP2 for an OT destination), Multicloud Defense (XP3), the smart
+switch in front of a workload (XP4, illustrative) and the Cyber Vision sensor (XP5, which detects and does not block).
+A detection by the sensor on the factory floor leads to the XDR workflow that tags the source in ISE (Z2-otx, Z2-otxc).
+
+**Rules changed**:
+- M1, M3 and M10 do not fire for a replayed session, so the timeline does not say "MFA passed" for it.
+- X1 does not fire for the exploit behaviour; XP1 replaces it there with the intrusion-prevention wording and sources.
+- X4 is relabelled "Vulnerability shielding (illustrative)"; see "Not verified".
+- A6 does not fire when A7 does.
+- Z2 also answers the remote-session behaviour (host isolation through Secure Endpoint).
+- S3 is skipped when the session is stopped at Secure Equipment Access, so a blocked or stepped-up sign-in is no
+  longer followed by a "least-privilege session" line. No verdict changes; 30,722 of the 1,596,228 evaluations
+  compared (798,114 combinations, each with the Splunk layer on and off) lose that one line.
+
+**A block on an exploit is interim.** XP1, XP2 and XP3 say the system still needs its patch.
+
+**Example CVEs.** The tool names none. The Talos posts do, and they show what "a known vulnerability with a published
+rule" means in practice:
+- `talosfmc`: CVE-2026-20079 (CVSS 10.0; Snort rules 66075 to 66080) and CVE-2026-20316 (CVSS 5.3; Snort rule 66883).
+  Both are in Cisco's own Secure Firewall Management Center. XP1 is about a firewall in front of a vulnerable system;
+  it does not claim that the firewall protects its own manager.
+- `talosq3`: CVE-2023-20198, "a known vulnerability … in publicly accessible web-based management interfaces".
+
+**Sources read on 12 November 2026**: the three Talos posts, the AI Defense data sheet, the Secure Endpoint data
+sheet, the Multicloud Defense user guide (Network Intrusion profile), Duo's phishing-prevention page, the Identity
+Intelligence "Compromised Session" page, the Cyber Vision data sheet (Snort engine with Talos rules), the Hypershield
+product page, and pages 61 to 62 of the Industrial Security 3.1 Design Guide: "Virtual patching is typically done by
+leveraging the Intrusion Prevention System of Cisco Secure Firewall. A key capability is the Cyber Vision ability to
+discover CVE information in the operational environment so the relevant IPS policies can be enabled in the Cisco
+Secure Firewall." Keys and dates are in "Design reference keys"; what could not be confirmed is in "Not verified".
+`DATA.cvd` now holds 37 documents: 17 Cisco Validated, 17 references and 3 threat reports.
+
+Checks after these changes, in headless Chrome and in Node against the previous version of the rules:
+- Presets 1 to 30 give the same verdicts as before, with the Splunk layer on and off, in the 3D view and in
+  `?render=svg`. Presets 31 to 37 give the verdicts in the table.
+- Zero console errors in either view, including while presets 31, 35 and 36 play.
+- A link copied from preset 33 reopens on preset 33 with Secure Endpoint removed and the same verdict.
+- Earlier behaviours: 798,114 picker combinations (up to three behaviours each), each with the Splunk layer on and
+  off, give the same verdict as before. The only timeline difference is the S3 line described above.
+- New behaviours: 383,692 combinations that include one of the four (up to three behaviours each), each with the
+  Splunk layer on and off, return a path, a timeline and a verdict, and none ends in plain ALLOW. For the exploit
+  behaviour over Secure Equipment Access the verdict is ALLOW WITH LIMITS; see "Not verified".
+- Every timeline that shows the OT exploit workflow (Z2-otx, Z2-otxc) also shows the Cyber Vision detection (XP5).
+- Removing one product at a time from the single-behaviour cases (35,299 replays) still returns a path, a timeline
+  and a verdict.
 
 ## Cisco Validated Design check, 12 November 2026
 
@@ -866,7 +978,8 @@ Identifiers are the ids used in the `DATA` object (`pickers`, `products`, `place
 
 ### Design reference keys
 
-The "Design refs" column below and the backlog use these keys from `DATA.cvd`.
+The "Design refs" column below and the backlog use these keys from `DATA.cvd`. For a threat report the date is its
+publication date.
 
 | Key | Document | Updated | Kind |
 |---|---|---|---|
@@ -899,6 +1012,14 @@ The "Design refs" column below and the backlog use these keys from `DATA.cvd`.
 | sasdwan | [Secure Access help: Integrate Catalyst SD-WAN with Secure Access](https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/integrate-catalyst-sd-wan.html) | 8 Nov 2026 | Reference |
 | sacii | [Secure Access help: Integrate Cisco Identity Intelligence](https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/integrate-cisco-identity-intelligence.html) | 8 Nov 2026 | Reference |
 | saspl | [Secure Access help: Push Security Events](https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/push-security-events-integration.html) | 8 Nov 2026 | Reference |
+| talosq3 | [Talos: Incident response trends, Q3 2026](https://blog.talosintelligence.com/ir-trends-q3-2026/) | 29 Oct 2026 | Threat report |
+| talosq2 | [Talos: Incident response trends, Q2 2026](https://blog.talosintelligence.com/ir-trends-q2-2026/) | 28 Jul 2026 | Threat report |
+| talosfmc | [Talos: Active exploitation of Cisco Secure Firewall Management Center vulnerabilities](https://blog.talosintelligence.com/fmc-ongoing-exploitation/) | 9 Sep 2026 | Threat report |
+| aidds | [Cisco AI Defense Data Sheet](https://www.cisco.com/c/en/us/products/collateral/security/ai-defense/ai-defense-ds.html) | 26 Oct 2026 | Reference |
+| epds | [Cisco Secure Endpoint Data Sheet](https://www.cisco.com/c/en/us/products/collateral/security/fireamp-endpoints/datasheet-c78-733181.html) | 11 Dec 2024 | Reference |
+| mcdug | [Cisco Multicloud Defense User Guide: Network Intrusion (IDS/IPS) Profile](https://www.cisco.com/c/en/us/td/docs/security/cdo/multicloud-defense/user-guide/cisco-multicloud-defense-userguide/g-security-profiles/c-network-intrusion-ids-ips.html) | 8 Jul 2026 | Reference |
+| duoph | [Duo: End-to-end phishing resistance](https://duo.com/solutions/phishing-prevention) | no date on the page | Reference |
+| ciics | [Cisco Identity Intelligence Knowledge Base: Compromised Session check](https://docs.oort.io/understanding-check-failures/oort-insights/identity-threat-detection-insights/compromised-session) | no date on the page | Reference |
 
 ### Path rules
 
@@ -954,13 +1075,15 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | M7 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {stolen} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Identity analytics → Valid password presented from an unfamiliar context: high-risk sign-in | -25 (Credential risk) | STEP-UP | — |
 | M8 | who ∈ {emp, admin, exec, contractor, insider, attacker}; location ∈ {travel} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Sign-in context → Location is inconsistent with the account’s recent activity | -20 (Impossible travel) | STEP-UP | — |
 | M9 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {offhours} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Access pattern → Access time is outside the identity’s normal pattern | -8 (Unusual time of access) | — | — |
-| M1 | who ∈ {emp, exec, contractor, insider}; behaviour none of {mfa_fail, fatigue, stolen} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → User verified with phishing-resistant MFA | +10 (MFA passed) | — | — |
+| M11 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {aitm} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Compromised session check → The same active session is in use from a second address and browser: flagged as a stolen, replayed session cookie | -25 (Compromised session) | STEP-UP | ciics, talosq2 |
+| M1 | who ∈ {emp, exec, contractor, insider}; behaviour none of {mfa_fail, fatigue, stolen, aitm} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → User verified with phishing-resistant MFA | +10 (MFA passed) | — | — |
 | M1b | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour all of {stolen, mfa_ok} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → MFA challenge completed | +5 (MFA passed) | — | — |
 | M2 | who ∈ {admin}; behaviour any of {mfa_ok}; behaviour none of {stolen} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Privileged authentication → Administrator verified with fresh phishing-resistant MFA | +10 (MFA passed) | — | — |
-| M3 | who ∈ {admin}; behaviour none of {mfa_ok, mfa_fail, fatigue} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Privileged session → Privileged access requires fresh strong authentication | -5 (Fresh authentication required) | STEP-UP | — |
+| M3 | who ∈ {admin}; behaviour none of {mfa_ok, mfa_fail, fatigue, aitm} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Privileged session → Privileged access requires fresh strong authentication | -5 (Fresh authentication required) | STEP-UP | — |
 | M4 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {mfa_fail} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → MFA not completed; no session issued | -30 (MFA failed) | BLOCK | — |
 | M5 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {fatigue} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Push-bombing resistance → Verified Duo Push needs a code from the sign-in screen, so repeated prompts cannot be approved blindly; sign-in refused | -25 (MFA fatigue pattern) | BLOCK | — |
-| M10 | who ∈ {attacker}; behaviour none of {stolen} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → No valid identity presented | -20 (Unauthenticated request) | BLOCK | — |
+| M12 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {aitm} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Session theft protection → Duo Passport keeps no session cookie in the sign-in flow; proof of sign-in is bound to the user’s own device, so the replay from another device is refused | -20 (Replayed session refused) | BLOCK | duoph, talosq2 |
+| M10 | who ∈ {attacker}; behaviour none of {stolen, aitm} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → No valid identity presented | -20 (Unauthenticated request) | BLOCK | — |
 | S1 | who ∈ {contractor}; destination ∈ {dcapp, cloudapp}; path includes {sa} | Secure Access | sa | Zero trust access → Access granted to the one approved application, not to the network | — | ALLOW WITH LIMITS | sasedg, ztud |
 | S1b | who ∈ {contractor}; destination ∈ {dcapp, cloudapp}; path includes {switches, industrial, sdwan}; path lacks {sa} | ISE | switches / industrial / sdwan | Contractor segmentation → Contractor segment permits only the approved application | — | ALLOW WITH LIMITS | — |
 | S2 | who ∈ {contractor}; destination ∈ {eastwest, intai}; path includes {sa} | Secure Access | sa | Zero trust access → Requested resource is not among the contractor’s granted applications | -15 (Out-of-scope request) | BLOCK | ztud |
@@ -969,10 +1092,15 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | S4 | behaviour any of {priv}; path includes {sa} | Secure Access | sa | Least-privilege access → Requested privilege exceeds what the identity’s role allows | -15 (Excess privilege request) | BLOCK | — |
 | S5 | behaviour any of {priv}; path includes {nexus}; path lacks {sa} | Secure Workload | nexus | Microsegmentation policy → Flow is outside the workload’s allowed communication policy | -15 (Excess privilege request) | BLOCK | — |
 | S6 | behaviour any of {priv}; path lacks {sa, nexus} | Identity Intelligence | switches / industrial / sdwan / @dst | Privilege analytics → Privilege request exceeds the role and is flagged as risky | -15 (Excess privilege request) | BLOCK | — |
-| X1 | who ∈ {attacker}; path includes {fw} | Firewall (with Talos) | fw | Inbound threat prevention → Unsolicited inbound connection denied; known attack patterns blocked using Talos intelligence | -25 (Hostile inbound traffic) | BLOCK | — |
+| X1 | who ∈ {attacker}; behaviour none of {exploit}; path includes {fw} | Firewall (with Talos) | fw | Inbound threat prevention → Unsolicited inbound connection denied; known attack patterns blocked using Talos intelligence | -25 (Hostile inbound traffic) | BLOCK | — |
 | X2 | who ∈ {attacker}; path includes {waap} | WAAP | waap | Application and API protection → Malicious requests and automated-client patterns filtered in front of the application | -25 (Application attack pattern) | BLOCK | — |
 | X3 | who ∈ {attacker}; path includes {mcd} | Multicloud Defense | mcd | Cloud ingress protection → Inbound attack blocked at the cloud gateway | -20 (Hostile inbound traffic) | BLOCK | — |
-| X4 | who ∈ {attacker}; path includes {nexus} | Hypershield | nexus | Vulnerability shielding → A compensating control shields the exposed workload from exploitation | -20 (Exploit attempt) | BLOCK | — |
+| X4 | who ∈ {attacker}; path includes {nexus} | Hypershield | nexus | Vulnerability shielding (illustrative) → A compensating control shields the exposed workload from exploitation | -20 (Exploit attempt) | BLOCK | — |
+| XP1 | behaviour any of {exploit}; destination ∉ {ot}; path includes {fw} | Firewall (with Talos) | fw | Intrusion prevention → Exploit attempt for a known vulnerability matches a Snort rule published by Talos; the connection is dropped | -25 (Exploit attempt) | BLOCK | talosfmc, talosq3, isdg |
+| XP2 | destination ∈ {ot}; behaviour any of {exploit}; path includes {fw} | Firewall (with Cyber Vision and Talos) | fw | Virtual patching → Cyber Vision lists the controller’s known vulnerabilities; the matching intrusion prevention policy is enabled on the firewall at the IT/OT boundary and drops the exploit | -25 (Exploit attempt) | BLOCK | isdg |
+| XP3 | behaviour any of {exploit}; path includes {mcd} | Multicloud Defense (with Talos) | mcd | Cloud intrusion prevention → Exploit attempt matches a Talos rule in the gateway’s intrusion profile and is denied | -20 (Exploit attempt) | BLOCK | mcdug |
+| XP4 | behaviour any of {exploit}; who ∉ {attacker}; destination ∉ {ot}; path includes {nexus} | Hypershield | nexus | Vulnerability shielding (illustrative) → A compensating control shields the exposed workload from exploitation | -20 (Exploit attempt) | BLOCK | — |
+| XP5 | behaviour any of {exploit}; path includes {industrial} | Cyber Vision (with Talos) | industrial | OT intrusion detection → Cyber Vision’s Snort intrusion detection engine matches the exploit against Talos rules and raises an alert | -20 (Exploit attempt) | — | cvds |
 | T1a | device ∈ {compromised}; behaviour none of {scan, ransom, exfil} | Secure Endpoint | @src | Endpoint detection → Malware detected on the device; host isolated from the network | -45 (Malware on device) | CONTAIN | bpsdg |
 | T1b | device ∈ {compromised}; behaviour any of {scan, exfil} | Secure Endpoint | @src | Endpoint detection → Malicious activity observed on the device; telemetry raised | -30 (Malware on device) | — | — |
 | T8 | device ∈ {mgd, stale, mobile, compromised}; behaviour any of {ransom} | Secure Endpoint | @src | Endpoint detection and response → Ransomware behaviour detected; host isolated | -45 (Ransomware behaviour) | CONTAIN | bpsdg |
@@ -1004,7 +1132,8 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | A3 | destination ∈ {ai, pubai}; behaviour any of {aipaste}; path includes {sa} | Secure Access | sa | AI Access data-loss control → Confidential data detected in the prompt to a third-party AI app; prompt not sent | -15 (Sensitive data in prompt) | BLOCK | — |
 | A4 | destination ∈ {intai}; behaviour any of {aipaste} | AI Defense | @dst | AI data-leakage guardrail → Sensitive content in the prompt flagged and logged | -5 (Sensitive data in prompt) | ALLOW WITH LIMITS | — |
 | A5 | destination ∈ {intai}; behaviour any of {inject} | AI Defense | @dst | AI runtime guardrail → Prompt-injection pattern detected; request rejected | -25 (Prompt injection attempt) | BLOCK | — |
-| A6 | destination ∈ {intai}; behaviour none of {inject, aipaste} | AI Defense | @dst | AI runtime protection → Model interaction covered by runtime guardrails | — | — | — |
+| A7 | destination ∈ {intai}; behaviour any of {agentic} | AI Defense | @dst | Agent runtime protection → Tool call inspected in the agent’s MCP traffic: the tool is outside the allowlist and the call is blocked | -25 (Unsafe agent action) | BLOCK | aidds |
+| A6 | destination ∈ {intai}; behaviour none of {inject, aipaste, agentic} | AI Defense | @dst | AI runtime protection → Model interaction covered by runtime guardrails | — | — | — |
 | B1 | path includes {wireless} | Wi-Fi 7 | wireless | Air link → WPA3-protected wireless association | — | — | — |
 | B2 | path includes {client} | Secure Client | client | Device tunnel → Secure Client, the unified client for Secure Access, opens the VPN / zero trust access session | — | — | sasedg |
 | B3 | who ∉ {guest}; path includes {sdwan} | Secure Routers · SD-WAN | sdwan | WAN transport → Traffic carried in the encrypted, segmented SD-WAN overlay | — | — | sdwandg |
@@ -1025,9 +1154,13 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | E2 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {phish} | Duo | after path | Phishing-resistant authentication → A captured password cannot be replayed without the phishing-resistant factor | — | — | — |
 | T9 | location ∈ {hq, branch, factory}; behaviour any of {ransom}; device ∉ {server} | ISE | after path | Containment → Adaptive Network Control quarantine sent to ISE over pxGrid; a Change of Authorization moves the endpoint to a quarantine security group | -10 (Endpoint quarantined) | CONTAIN | ztnc, sda |
 | T10 | behaviour any of {ransom} | Hypershield | after path | Segment boundary → Stateful segmentation near workloads keeps the outbreak inside one segment | — | — | n9300 |
+| R1 | device ∈ {mgd, stale, mobile, compromised}; behaviour any of {rmm} | Secure Endpoint | after path | Behavioural protection (illustrative) → After the remote-control session starts, scripted commands and a newly installed remote-management agent match attack patterns on the device | -20 (Remote-control abuse) | — | epds, talosq3 |
 | Z1 | always; needs earlier telemetry | XDR | after path | Cross-domain correlation → Telemetry correlated into one prioritised incident with guided response | -5 (Incident opened) | — | bpsdg |
-| Z2 | behaviour any of {scan, ransom, exfil}; who ∉ {attacker}; path lacks {industrial}; needs earlier telemetry | XDR (with Secure Endpoint) | after path | Response action → Host isolation requested in Secure Endpoint from the incident, manually or by an automation workflow | — | CONTAIN | bpsdg |
+| Z2 | behaviour any of {scan, ransom, exfil, rmm}; who ∉ {attacker}; path lacks {industrial}; needs earlier telemetry | XDR (with Secure Endpoint) | after path | Response action → Host isolation requested in Secure Endpoint from the incident, manually or by an automation workflow | — | CONTAIN | bpsdg |
+| Z2-rmm | behaviour any of {rmm}; path includes {industrial}; needs earlier telemetry | XDR (with Secure Endpoint) | after path | Response action → Host isolation requested in Secure Endpoint from the incident, manually or by an automation workflow | — | CONTAIN | bpsdg |
 | Z2-ot | behaviour any of {scan, anomaly}; who ∉ {attacker}; path includes {industrial}; needs earlier telemetry | XDR (with ISE) | after path | Response workflow → Cyber Vision reports the incident to XDR; a workflow assigns a security group tag in ISE that stops the asset communicating | — | CONTAIN | cvxdr |
+| Z2-otx | location ∈ {factory}; behaviour any of {exploit}; behaviour none of {ransom}; device ∉ {compromised}; path includes {industrial}; needs earlier telemetry | XDR (with ISE) | after path | Response workflow → Cyber Vision reports the intrusion event to XDR; a workflow assigns a security group tag in ISE that stops the source communicating | — | CONTAIN | cvxdr |
+| Z2-otxc | device ∈ {compromised}; location ∈ {factory}; behaviour all of {exploit, exfil}; behaviour none of {ransom, scan}; path includes {industrial}; needs earlier telemetry | XDR (with ISE) | after path | Response workflow → Cyber Vision reports the intrusion event to XDR; a workflow assigns a security group tag in ISE that stops the source communicating | — | CONTAIN | cvxdr |
 | Z3 | behaviour any of {ransom}; needs earlier telemetry | XDR | after path | Recovery → Affected host can be restored from a last-known-good snapshot | — | — | — |
 | SP1 | always | Splunk Platform | after path | Data platform → Logs and events from the connected Cisco sources are ingested, searchable and retained | — | — | — |
 | SP2 | always | Enterprise Security | after path | SIEM detection → Events correlated and prioritised with risk-based alerting, mapped to MITRE ATT&CK | — | — | — |
@@ -1065,10 +1198,13 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | dest | who ∈ {attacker} | not {web_safe, web_risky, web_mal, pubai, ai, shadow} | Not a resource the organisation protects from an outside attacker. |
 | dest | who ∈ {iot, ot} | not {mail, ai, pubai} | A headless device has no mailbox or AI assistant. |
 | dest | who ∈ {aiagent, guest} | not {mail} | This identity has no corporate mailbox. |
-| beh | who ∈ {iot, ot, aiagent, guest} | not {mfa_ok, mfa_fail, fatigue, stolen} | No interactive sign-in for this identity. |
+| beh | who ∈ {iot, ot, aiagent, guest} | not {mfa_ok, mfa_fail, fatigue, stolen, aitm} | No interactive sign-in for this identity. |
 | beh | who ∈ {iot, ot, aiagent} | not {phish, malfile} | Needs a human user. |
-| beh | destination ∈ {dcapp, cloudapp, saas, shadow, web_safe, web_risky, web_mal, eastwest, ot, mail} | not {aipaste, inject} | Needs an AI destination. |
+| beh | device ∈ {byod, claptop, headless, server} | not {rmm} | Modelled on a device the organisation manages and its help desk supports. |
+| beh | destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail} | not {exploit} | Modelled against a system the organisation runs: a private app, an internal server, the internal AI model or an OT controller. |
+| beh | destination ∈ {dcapp, cloudapp, saas, shadow, web_safe, web_risky, web_mal, eastwest, ot, mail} | not {aipaste, inject, agentic} | Needs an AI destination. |
 | beh | destination ∈ {ai, pubai} | not {inject} | Prompt injection is modelled against an AI app the organisation runs; choose the internal AI model. |
+| beh | destination ∈ {ai, pubai} | not {agentic} | Agent tool calls are modelled against an AI agent the organisation runs; choose the internal AI model. |
 | beh | device ∈ {mgd, stale, mobile, byod, claptop, server, compromised} | not {anomaly} | Applies to headless IoT / OT devices. |
 | beh | who ∈ {attacker} | not {norm, slow, push, offhours} | Does not apply to an external attacker. |
 | beh | who ∈ {iot, ot, aiagent, guest, contractor} | not {push} | Policy is authored by an administrator. |
@@ -1107,6 +1243,13 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | 28 | Impossible-travel login from a new country | emp · mobile · travel · saas · [norm] | STEP-UP |
 | 29 | App is slow: locate the fault | emp · mgd · branch · saas · [slow] | ALLOW |
 | 30 | Policy authored once, pushed to every enforcement point | admin · mgd · hq · dcapp · [mfa_ok, push] | ALLOW |
+| 31 | Phishing proxy steals a session, attacker replays it | attacker · byod · internet · saas · [stolen, aitm] | BLOCK |
+| 32 | Fake help-desk call, user starts a remote session | emp · mgd · hq · eastwest · [rmm, scan] | CONTAIN |
+| 33 | Ransomware crew disables the endpoint agent, steals data, then encrypts | emp · compromised · hq · web_risky · [exfil, ransom] · without Secure Endpoint | CONTAIN |
+| 34 | Exploit of an internet-facing system with a known CVE | attacker · byod · internet · dcapp · [exploit] | BLOCK |
+| 35 | Vendor laptop launches a known PLC exploit | contractor · claptop · hq · ot · [exploit] | BLOCK |
+| 36 | Poisoned tool steers an internal AI agent | aiagent · server · hq · intai · [agentic] | BLOCK |
+| 37 | Stolen vendor login tries remote access to a factory machine | attacker · byod · travel · ot · [mfa_fail, stolen] | BLOCK |
 
 ## Appendix: expert review answers (11 November 2026)
 
