@@ -117,7 +117,7 @@ function graph(r) {
     <text x="${W - 8}" y="${Math.max(9, y(r.trust) - 6)}" font-size="10" font-weight="700" text-anchor="end" fill="var(--trust)">${r.trust}</text></svg>
     <ul class="sig">${r.series.map(p => `<li data-k="${p.k}"><b class="${p.d < 0 ? 'dn' : p.d > 0 ? 'up' : ''}">${p.d > 0 ? '+' + p.d : p.d < 0 ? p.d : '·'}</b><span>${h(p.sig)}${p.at ? ` <span class="small">(${h(PR[p.at].s)})</span>` : ''} → <b style="min-width:0">${p.v}</b></span></li>`).join('')}</ul>`;
 }
-const CVDL = k => { const d = DATA.cvd[k]; return d ? `<a href="${d[1]}" target="_blank" rel="noopener noreferrer" title="${h(d[0])} (updated ${d[2]})">${d[3] === 'cvd' ? 'CVD' : 'Ref'}: ${h(d[0])}</a>` : ''; };
+const CVDL = k => { const d = DATA.cvd[k]; return d ? `<a href="${d[1]}" target="_blank" rel="noopener noreferrer" title="${h(d[0])}${d[2] ? ` (${d[3] === 'threat' ? 'published' : 'updated'} ${d[2]})` : ''}">${{ cvd: 'CVD', threat: 'Threat report' }[d[3]] || 'Ref'}: ${h(d[0])}</a>` : ''; };
 function runHTML(r) {
   const s = r.s, V = DATA.verdicts[r.verdict], multi = S.runs.length > 1;
   const sum = [opt('who', s.who).short, opt('device', s.device).short, opt('loc', s.loc).short, '→ ' + opt('dest', s.dest).short, ...s.beh.map(b => opt('beh', b).label)];
