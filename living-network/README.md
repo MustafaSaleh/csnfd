@@ -193,8 +193,11 @@ controls". Preset 33 uses it to replay a ransomware case with Secure Endpoint di
   for OT assets, in the XDR and Cyber Vision brief, so only rule Z2-ot uses it.
 - **Hypershield availability** varies by capability; the panel says so and no dates are shown.
 - **Hypershield exploit shielding (X4, XP4)**: the Hypershield product page, read on 12 November 2026, states stateful
-  Layer 3 and Layer 4 segmentation on the N9300 Smart Switches and nothing about stopping an exploit there. Both rules
-  are labelled "(illustrative)" and cite no document.
+  Layer 3 and Layer 4 segmentation on the N9300 Smart Switches and nothing about stopping an exploit there. The Hybrid
+  Mesh Firewall page, the source of the line drawn between the two products (read 10 November 2026, not re-read), says
+  "Vulnerability shielding powered by Hypershield technology" without saying where it is enforced. The rules place it
+  at the smart switch in front of the workload, which no page read states, so both are labelled "(illustrative)" and
+  cite no document. The Hypershield scene label in the THREAT lens, "Shields vulnerabilities", is unchanged.
 - **Secure Endpoint and a fake help-desk remote session (R1)**: the Secure Endpoint data sheet (`epds`) states
   behavioural protection against "the malicious use of living-off-the-land tools and ransomware by terminating the
   processes of the offending behavior". It does not name remote-management tools or help-desk impersonation, which is
@@ -230,9 +233,10 @@ Each item names the document to check. Keys refer to the "Design reference keys"
 
 - **Hypershield vulnerability shielding (X4, XP4)** has no CVD. The Secure Networking Architecture CVD (`snra`) lists
   "Cisco Live Protect" under Secure Infrastructure but does not tie it to Hypershield or the N9300. The Hypershield
-  product page, read on 12 November 2026, states only Layer 3 and Layer 4 segmentation, so both rules are now labelled
-  "(illustrative)". Still to check: the Hypershield and N9300 data sheets, then either cite one or drop the
-  "compensating control" wording.
+  product page, read on 12 November 2026, states only Layer 3 and Layer 4 segmentation, and the Hybrid Mesh Firewall
+  page names the capability without a place of enforcement, so both rules are now labelled "(illustrative)". Still to
+  check: the Hypershield and N9300 data sheets, then either cite one and remove the label, or drop the "compensating
+  control" wording.
 - **Verified Duo Push (M5) and Duo risk-based authentication** are in no CVD; the Zero Trust User and Device guide (`ztud`,
   2023) uses plain Duo Push. Check the current Duo documentation or a newer Duo design guide.
 - **Trust lens wording**: the Secure Access help page for Identity Intelligence (`sacii`) says user trust levels become
