@@ -89,7 +89,7 @@ const DATA = {
     sasdwan: ['Secure Access help: Integrate Catalyst SD-WAN with Secure Access', 'https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/integrate-catalyst-sd-wan.html', '8 Nov 2026', 'ref'],
     sacii: ['Secure Access help: Integrate Cisco Identity Intelligence', 'https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/integrate-cisco-identity-intelligence.html', '8 Nov 2026', 'ref'],
     saspl: ['Secure Access help: Push Security Events', 'https://www.cisco.com/c/en/us/td/docs/security/secure-access/secure-access-help/CiscoSecureAccessHelp/secure-access-integrations-intro/push-security-events-integration.html', '8 Nov 2026', 'ref'],
-    /* Read on 13 November 2026 for the exploit, aitm, rmm and agentic rules. kind 'threat' = Cisco Talos report, with its publication date; '' = the page prints no date. */
+    /* Read on 12 November 2026 for the exploit, aitm, rmm and agentic rules. kind 'threat' = Cisco Talos report, with its publication date; '' = the page prints no date. */
     talosq3: ['Talos: Incident response trends, Q3 2026', 'https://blog.talosintelligence.com/ir-trends-q3-2026/', '29 Oct 2026', 'threat'],
     talosq2: ['Talos: Incident response trends, Q2 2026', 'https://blog.talosintelligence.com/ir-trends-q2-2026/', '28 Jul 2026', 'threat'],
     talosfmc: ['Talos: Active exploitation of Cisco Secure Firewall Management Center vulnerabilities', 'https://blog.talosintelligence.com/fmc-ongoing-exploitation/', '9 Sep 2026', 'threat'],
@@ -884,8 +884,12 @@ const DATA = {
     { id: 'Z2-ot', cvd: ['cvxdr'], when: { beh: ['scan', 'anomaly'], via: ['industrial'], not: { who: ['attacker'] } }, needsTele: true, needs: ['ise', 'cv'], post: true, at: 'xdr', also: ['ise'], lens: 'threat',
       c: 'Response workflow', r: 'Cyber Vision reports the incident to XDR; a workflow assigns a security group tag in ISE that stops the asset communicating',
       v: 'CONTAIN', why: 'The OT incident is reported to XDR, and a workflow tags the asset in ISE so the network stops its traffic.' },
-    /* not compromised / ransom: those are stopped on the device itself, before the sensor at the industrial hop sees the exploit */
+    /* Z2-otx fires only when the exploit reaches the sensor at the industrial hop. Ransomware (T8) and a compromised device (T1a) are stopped on the device first;
+       a compromised device that is exfiltrating is only reported there (T1b) and travels on, which is Z2-otxc. */
     { id: 'Z2-otx', cvd: ['cvxdr'], when: { beh: ['exploit'], loc: ['factory'], via: ['industrial'], nbeh: ['ransom'], not: { device: ['compromised'] } }, needsTele: true, needs: ['ise', 'cv'], post: true, at: 'xdr', also: ['ise'], lens: 'threat',
+      c: 'Response workflow', r: 'Cyber Vision reports the intrusion event to XDR; a workflow assigns a security group tag in ISE that stops the source communicating',
+      v: 'CONTAIN', why: 'The exploit attempt is detected inside the industrial network and reported to XDR, and a workflow tags the source in ISE so the network stops its traffic.' },
+    { id: 'Z2-otxc', cvd: ['cvxdr'], when: { ball: ['exploit', 'exfil'], device: ['compromised'], loc: ['factory'], via: ['industrial'], nbeh: ['ransom', 'scan'] }, needsTele: true, needs: ['ise', 'cv'], post: true, at: 'xdr', also: ['ise'], lens: 'threat',
       c: 'Response workflow', r: 'Cyber Vision reports the intrusion event to XDR; a workflow assigns a security group tag in ISE that stops the source communicating',
       v: 'CONTAIN', why: 'The exploit attempt is detected inside the industrial network and reported to XDR, and a workflow tags the source in ISE so the network stops its traffic.' },
     { id: 'Z3', when: { beh: ['ransom'] }, needsTele: true, post: true, at: 'xdr', lens: 'threat',
