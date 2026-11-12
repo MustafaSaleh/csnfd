@@ -5,7 +5,7 @@ Checked on 12 November 2026 against the Cisco Validated index
 guides it leads to. Every statement below names its source page and the "Updated" date printed on that page.
 Where a page was long and only part of it could be read verbatim, the item says "verify wording".
 
-**Status, 12 November 2026.** Sections 2 to 5 are applied in the tool, except the items listed in the README backlog
+**Status, 12 November 2026.** Sections 2 to 5 and the S3 change in section 8 are applied in the tool, except the items listed in the README backlog
 under "From the Cisco Validated Design check". The long guides that were only partly read are listed there too, under
 "Long guides and PDFs to read in full later". The README section "Cisco Validated Design check" lists what changed.
 
@@ -169,3 +169,25 @@ Keep these hedged exactly as the README does now:
 3. In "Expert review results", add a row "CVD check, 12 November 2026" pointing at this file.
 4. Update the "verified on" sentence to name the three October–November 2026 CVDs that were read, since they are newer
    than the 10 November product-page pass for several products.
+
+---
+
+## 8. Industrial Security 3.1 Design Guide (read 12 November 2026)
+
+Source: https://www.cisco.com/c/dam/en/us/td/docs/Technology/Industrial-Security-3-1-DG.pdf (PDF, 254 pages, June 2025,
+about 18 MB). The web reader could not open it, so it was downloaded and its text extracted with `pdftotext`. Chapters 1
+to 4 were read in full; chapter 5 (Splunk) and the appendices were read for their integration lists only.
+
+| Topic | What the guide says | Effect on the tool |
+|---|---|---|
+| Cyber Vision → ISE | "Cisco Cyber Vision shares endpoints and attributes with ISE using pxGrid." "In Cyber Vision, when devices and components are placed inside groups, that group tag is shared to ISE via pxGrid." "After the group tag has been shared with ISE, a change of authorization (CoA) is sent to the access switch". Enforcement in the plant is at the distribution switch: "classify and enforce at the distribution switch". | Confirms N7 credited to ISE with Cyber Vision. Applied as an extra source. |
+| Automatic removal | "Use Cyber Vision to constantly monitor the network and feed device properties to ISE. If a device property results in an endpoint profile that does not belong to the edge network, ISE can automatically remove it from the network." | Supports T16 for OT. Source added; a Cyber Vision beam is in the backlog. |
+| Cyber Vision → Secure Firewall | "Cisco FMC pulls asset group information from Cyber Vision using CSDAC." "Each Cyber Vision group becomes a dynamic object in FMC". Changes are "automatically enforced by Cisco Secure Firewalls, without the need to redeploy policies." | Same as the working-together brief; already drawn. |
+| Where internet policy belongs | "Internet policies should have been covered by the IT/OT boundary firewall". For field sites: "the demarcation point between field assets and the internet should not be the industrial router" and "Internet traffic is backhauled to a central location"; for direct internet access, "consider a security service edge (SSE) such as Cisco Secure Access". | The tool sends factory internet traffic industrial → SD-WAN → Secure Access. Rerouting through the IT/OT firewall is in the backlog. |
+| IDMZ | "A common deployment method is an Industrial Demilitarized Zone (IDMZ) network with firewalls to prevent network traffic from passing directly between the corporate and OT networks." Three control points in order: IT/OT boundary, industrial data center, plant floor. | IDMZ hop in the backlog. |
+| Secure Firewall in OT | Routes between OT VLANs or sits transparently at the cell/area boundary; OT application control down to function codes (for example Modbus read vs write); "Virtual patching is typically done by leveraging the Intrusion Prevention System of Cisco Secure Firewall. A key capability is the Cyber Vision ability to discover CVE information". Management "assumes the use of Cisco FMC"; Security Cloud Control is listed as an option. | Backlog: virtual patching rule. |
+| Secure Equipment Access | Browser access over "HTTP(S), SSH, RDP for Windows-based systems, VNC, and Telnet"; SEA Plus client for any IP protocol, with Duo natively integrated and Secure Endpoint checks. Access groups "Always Active", "Scheduled Access" and "Request Access", where "the connection will only be granted after an access manager has approved the request". Users "must undergo a session approval flow, and only during the time window allocated to them". Agent platforms: IR1101, IR1800, IR8340, IE9300, IE3400, IE3300, IE3100, Catalyst 9300. Session recording is listed under generic remote-access auditing requirements, not as an SEA feature. | **Applied**: S3 names approval and the scheduled window. Session recording still not claimed. |
+| Duo with Secure Endpoint | "Duo automates the response by leveraging telemetry from Secure Endpoint to block access from devices infected with malware." Duo can block on "OS, browser, and plug-in versions and how long they have been out of date". | Supports P4 and T1a; matches the Zero Trust User and Device guide. |
+| Splunk | Validated ingestion from Cyber Vision, IOS-XE, ISE, Firewall Management Center and Duo. Cisco Security Cloud app list: Duo, Secure Malware Analytics, Firewall Management Center, Multicloud Defense, XDR, Email Threat Defense, Secure Network Analytics, Secure Endpoint, Vulnerability Intelligence. | Matches the Splunk lines already drawn. Source swap in the backlog. |
+| Secure Network Analytics vs Cyber Vision | Secure Network Analytics "is recommended for network devices in Levels 3 to 5"; Cyber Vision "is recommended for Levels 0 to 3". | Consistent with the tool. |
+| XDR | The SecureX appendix notes "Cisco SecureX is end of life and has been replaced with Cisco XDR". It shows a "Quarantine Device using SGT" orchestration workflow. | Supports Z2-ot. |
