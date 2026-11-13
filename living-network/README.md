@@ -16,6 +16,12 @@ Open `index.html` (double-click from disk, internet on). No build step and no ba
 The only external requests are Three.js 0.170.0 and its OrbitControls from jsDelivr. If WebGL or the CDN is unavailable
 the page renders a 2D SVG map of the same data (force it with `index.html?render=svg`).
 
+**File to host elsewhere:** `dist/index.html` is the same page as one file, with the stylesheet and the scripts inside it.
+The script is obfuscated, so a view-source of the hosted file is not the readable source. That is not secrecy: the browser
+has to run it, and a determined reader can still recover the text from the running page. Three.js still comes from
+jsDelivr; without that network the file shows the 2D map. Regenerate it from this folder with `npm install` and
+`npm run build` after changing `index.html`, `styles.css` or `js/`. The source files stay the ones to edit.
+
 Four modes: **Presets**, **Build your own**, **Free explore** and **Topology**. Topology isolates one architecture
 (SASE, Zero Trust Access, Hybrid Mesh Firewall, secure campus, data center, industrial, detection and response, AI, or
 one of the three suites), lays its building blocks out as a diagram and numbers each relationship stated on cisco.com,
