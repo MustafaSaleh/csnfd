@@ -1,0 +1,143 @@
+/* Hand-edited input for build-portfolio.mjs. Everything else in js/portfolio.js is generated.
+   Run `npm run portfolio` after changing this file or ../data/cisco-industries-portfolio.json. */
+
+/* Names Cisco's portfolio pages still use for Umbrella. Umbrella is retiring and is not in the scene:
+   Secure Access incorporates its DNS-layer security and secure web gateway, so these count as Secure Access
+   and the use case is flagged so the page can say so. */
+export const umbrella = /\bUmbrella\b/i;
+
+/* Product name on Cisco's page -> product id in DATA.products. Every pattern that matches applies,
+   so "Cisco Duo and Secure Endpoint" counts for both. Names matching none stay "listed, not in this scene". */
+export const aliases = [
+  [/Catalyst 9100|Catalyst Access Points|Meraki MR\b|^Cisco Wireless$|Cisco Wireless \(Wi-Fi 7\)|Catalyst 9800|Wireless LAN Controller|Cloud-managed Wi-Fi|Wireless access points and controllers|Wireless anchor controller/i, 'wireless'],
+  [/Catalyst 9(000|300|500)\b|^Cisco Catalyst Switches$|Cisco Smart Switches|Meraki MS\b|Meraki MS120|^Meraki Switches$/i, 'switches'],
+  [/Catalyst IE|Catalyst IR\d|Catalyst IW\d|Catalyst Industrial|\bIE(3\d00|3x00|9300)\b|Cisco IE Switch|Industrial Ethernet \(IE\)|Cisco Industrial Ethernet|Cisco Industrial Wireless|Ultra-Reliable Wireless Backhaul/i, 'industrial'],
+  [/SD-WAN|Catalyst 8000 Series (Edge|Routers)|Catalyst 8200|Meraki MX|1000 Series Integrated Services Routers/i, 'sdwan'],
+  [/\bNexus\b|N9000 Series|NX[- ]OS|\bACI\b|\(APIC\)/i, 'nexus'],
+  [/ThousandEyes/i, 'te'],
+  [/Meraki Dashboard|^Cisco Meraki$/i, 'meraki'],
+  [/Cisco AI Canvas/i, 'agentic'],
+  [/\bDuo\b/i, 'duo'],
+  [/Identity Services? Engine/i, 'ise'],
+  [/Identity Intelligence/i, 'cii'],
+  [/Secure Client|AnyConnect/i, 'client'],
+  [/Secure Access(?! Manager)/i, 'sa'],
+  [umbrella, 'sa'],
+  [/Secure Firewall|^Cisco Firewalls?$/i, 'fw'],
+  [/Hybrid Mesh Firewall/i, 'hmf'],
+  [/Multicloud Defense/i, 'mcd'],
+  [/Defense Orchestrator/i, 'scc'],
+  [/Hypershield/i, 'hs'],
+  [/Secure Workload/i, 'wl'],
+  [/AI Defense/i, 'aid'],
+  [/Secure Endpoint/i, 'ep'],
+  [/^Cisco Secure Email( Threat Defense)?$/i, 'email'],
+  [/\bXDR\b/i, 'xdr'],
+  [/Secure Network Analytics/i, 'sna'],
+  [/\bTalos\b/i, 'talos'],
+  [/Cyber Vision/i, 'cv'],
+  [/Industrial Threat Defense/i, 'itd'],
+  [/Secure Equipment Access/i, 'sea'],
+  [/^Splunk( Cloud( Platform)?| Enterprise)?$/i, 'splunk'],
+  [/Splunk Enterprise Security/i, 'es'],
+  [/SOAR/, 'soar'],
+  [/Splunk Observability Cloud|Splunk Cloud Observability/i, 'o11y'],
+  [/IT Service Intelligence|\bITSI\b/i, 'itsi'],
+  [/AppDynamics/i, 'appd']
+];
+
+/* Rows that are product families, not products (five government use cases list these). Never mapped. */
+export const families = ['Branch routers', 'Cloud connectors', 'Cloud edge', 'Core and distribution', 'Data center', 'Data center and cloud',
+  'Industrial Ethernet', 'Industrial routers and gateways', 'Interconnect platforms', 'Network functions virtualization', 'Network management',
+  'Service provider core routers', 'Service provider edge routers', 'Service provider infrastructure software', 'Small business and LAN compact',
+  'Small business routers', 'Virtual routers', 'WAN aggregation and Internet edge routers', 'Wireless WAN'];
+
+/* One spelling for names Cisco's pages write several ways. [pattern, name shown]. */
+export const canonical = [
+  [/Catalyst 9800/i, 'Cisco Catalyst 9800 Series Wireless Controllers'],
+  [/^(Cisco )?Wireless LAN Controllers?$/i, 'Cisco Wireless LAN Controllers'],
+  [/^Cisco AI Pods$/i, 'Cisco AI PODs'],
+  [/^(Cisco )?Catalyst Center$/i, 'Cisco Catalyst Center'],
+  [/^(Cisco )?Nexus Dashboard$/i, 'Cisco Nexus Dashboard'],
+  [/^Cisco Application[- ]Centric Infrastructure \(ACI\)$|^Cisco ACI$/i, 'Cisco Application Centric Infrastructure (ACI)'],
+  [/^Cisco AI Assist$/i, 'Cisco AI Assistant'],
+  [/^(Cisco )?UCS AI-ready GPU servers$|^Cisco UCS servers for AI$/i, 'Cisco UCS AI-ready GPU servers'],
+  [/OT\/IT segmentation/i, 'Cisco OT/IT segmentation'],
+  [/^Splunk User (and Entity )?Behavior Analytics( \(UEBA\))?$/i, 'Splunk User and Entity Behavior Analytics (UEBA)'],
+  [/^Splunk Asset and Risk Intelligence/i, 'Splunk Asset and Risk Intelligence'],
+  [/^Splunk Security( Portfolio)?$/i, 'Splunk Security Portfolio'],
+  [/^(Cisco |Webex )?Headset 900, 700, 500 Series$/i, 'Cisco Headset 900, 700, 500 Series'],
+  [/^Webex Edge/i, 'Webex Edge'],
+  [/^Cisco Webex( Suite)?$|^Webex( Suite)?$/i, 'Webex Suite'],
+  [/^(Cisco )?collaboration devices$|^Webex Devices$/i, 'Cisco Collaboration Devices'],
+  [/^Cisco 6000 & 8000 series switches$/i, 'Cisco 6000 & 8000 Series Switches'],
+  [/^Cisco Unified Computing System \(UCS\) AI Series Servers$/i, 'Cisco AI UCS Series Servers'],
+  [/^Meraki MT sensors$/i, 'Meraki MT Sensors'],
+  [/^Meraki MG Cellular Gateways/i, 'Meraki MG Cellular Gateways'],
+  [/^Cisco Private 5G/i, 'Cisco Private 5G'],
+  [/^Wireless WAN \(Cisco Private 5G\)$/i, 'Cisco Private 5G'],
+  [/^Cisco Network Convergence System \(NCS\)/i, 'Cisco Network Convergence System (NCS) Series'],
+  [/^Cisco Aggregation Services Router \(ASR\)$/i, 'Cisco Aggregation Services Router (ASR)']
+];
+
+/* Use case code -> the scenarios that illustrate it. Curated by hand: the portfolio has products and text,
+   not actors or behaviours, so nothing here is derived from Cisco's pages.
+   presets: numbers in DATA.presets. build: [who, device, loc, dest, [behaviours]] for the builder.
+   arch: id in DATA.architectures. The generator checks all three against js/data.js. */
+const BRANCH = { presets: [3, 29], build: ['emp', 'mgd', 'branch', 'saas', ['norm']], arch: 'sase' };
+const OT_SOC = { presets: [11, 35], build: ['ot', 'headless', 'factory', 'ot', ['anomaly']], arch: 'ot' };
+const HYBRID_WORK = { presets: [2, 4, 28], build: ['emp', 'byod', 'home', 'saas', ['norm']], arch: 'zta' };
+const HYBRID_CLOUD = { presets: [25, 26, 34], build: ['attacker', 'byod', 'internet', 'dcapp', ['exploit']], arch: 'dc' };
+const AI_INFRA = { presets: [19, 26, 36], build: ['aiagent', 'server', 'hq', 'intai', ['agentic']], arch: 'dc' };
+
+export const links = {
+  /* Government */
+  CIT4I: { presets: [1, 5, 9], build: ['emp', 'mgd', 'hq', 'dcapp', ['norm']], arch: 'campus' },
+  CIT4J: { presets: [3, 29, 30], build: ['emp', 'mgd', 'branch', 'saas', ['slow']], arch: 'campus' },
+  CIT4K: { presets: [3, 26], build: ['emp', 'mgd', 'branch', 'cloudapp', ['norm']], arch: 'sase' },
+  CIT4H: { presets: [26, 29], build: ['emp', 'mgd', 'branch', 'saas', ['slow']], arch: 'splobs' },
+  CIT7A: { presets: [11, 35, 8], build: ['ot', 'headless', 'factory', 'ot', ['anomaly']], arch: 'ot' },
+  CIT7D: { presets: [1, 2, 4, 20, 28], build: ['emp', 'byod', 'home', 'saas', ['norm']], arch: 'zta' },
+  CIT7E: { presets: [22, 23, 33], build: ['emp', 'compromised', 'hq', 'eastwest', ['scan']], arch: 'xdr' },
+  CIT2I: { presets: [2, 28], build: ['emp', 'mobile', 'public', 'dcapp', ['norm']], arch: 'zta' },
+  CIT6C: { presets: [15, 18], build: ['insider', 'mgd', 'hq', 'intai', ['inject']], arch: 'ai' },
+  /* Healthcare */
+  HEA2D: { presets: [9, 10], build: ['iot', 'headless', 'hq', 'eastwest', ['norm']], arch: 'campus' },
+  HEA3B: { presets: [13, 22, 23, 33], build: ['emp', 'compromised', 'hq', 'eastwest', ['ransom']], arch: 'xdr' },
+  HEA3D: { presets: [7, 17, 27], build: ['insider', 'mgd', 'hq', 'dcapp', ['offhours', 'upload']], arch: 'zta' },
+  HEA4F: { presets: [1, 5, 9], build: ['iot', 'headless', 'hq', 'eastwest', ['norm']], arch: 'campus' },
+  HEA4E: BRANCH,
+  HEA4B: HYBRID_WORK,
+  HEA1E: { presets: [4, 29], build: ['emp', 'mgd', 'home', 'saas', ['slow']], arch: 'sase' },
+  HEA4C: AI_INFRA,
+  /* Manufacturing */
+  MAN1E: { presets: [8, 37], build: ['contractor', 'claptop', 'home', 'ot', ['mfa_ok']], arch: 'ot' },
+  MAN3D: OT_SOC,
+  MAN1D: { presets: [9, 11], build: ['ot', 'headless', 'factory', 'ot', ['norm']], arch: 'ot' },
+  MAN1A: { presets: [11], build: ['ot', 'headless', 'factory', 'ot', ['norm']], arch: 'ot' },
+  MAN6A: { presets: [19, 29, 36], build: ['aiagent', 'server', 'hq', 'dcapp', ['priv']], arch: 'ai' },
+  /* Retail */
+  RET4D: BRANCH,
+  RET4A: { presets: [3, 5, 9], build: ['guest', 'byod', 'hq', 'web_safe', ['norm']], arch: 'campus' },
+  RET1A: { presets: [2, 3, 29], build: ['emp', 'mgd', 'branch', 'saas', ['slow']], arch: 'sase' },
+  RET1G: { presets: [9, 10], build: ['iot', 'headless', 'hq', 'web_risky', ['anomaly']], arch: 'campus' },
+  RET3C: AI_INFRA,
+  /* Financial services */
+  FIN1F: BRANCH,
+  FIN2F: { presets: [1, 22, 23], build: ['emp', 'compromised', 'hq', 'eastwest', ['scan']], arch: 'campus' },
+  FIN3B: { presets: [15, 16, 17, 18, 36], build: ['emp', 'mgd', 'hq', 'ai', ['aipaste']], arch: 'ai' },
+  FIN1G: HYBRID_WORK,
+  FIN3E: { presets: [20, 21, 31], build: ['attacker', 'byod', 'internet', 'saas', ['stolen', 'aitm']], arch: 'zta' },
+  FIN4G: HYBRID_CLOUD,
+  FIN4J: { presets: [25, 34], build: ['attacker', 'byod', 'internet', 'cloudapp', []], arch: 'dc' },
+  FIN4F: { presets: [29], build: ['emp', 'mgd', 'branch', 'saas', ['slow']], arch: 'splobs' },
+  FIN4N: { presets: [21, 31, 32], build: ['attacker', 'byod', 'internet', 'saas', ['fatigue', 'stolen']], arch: 'zta' },
+  /* Education */
+  EDU1A: { presets: [1, 5, 9], build: ['guest', 'byod', 'hq', 'web_safe', ['norm']], arch: 'campus' },
+  EDU4A: { presets: [12, 13, 14], build: ['emp', 'mgd', 'hq', 'web_risky', ['malfile']], arch: 'sase' },
+  EDU4B: { presets: [1, 4, 5, 20, 28], build: ['emp', 'byod', 'home', 'saas', ['norm']], arch: 'zta' },
+  EDU5C: { presets: [12, 14, 22], build: ['emp', 'mgd', 'hq', 'web_risky', ['malfile']], arch: 'hmf' },
+  EDU5D: { presets: [29, 30], build: ['admin', 'mgd', 'hq', 'dcapp', ['mfa_ok', 'push']], arch: 'campus' },
+  EDU5F: { presets: [17, 24, 27], build: ['insider', 'mgd', 'hq', 'dcapp', ['offhours', 'upload']], arch: 'zta' },
+  EDU3D: { presets: [15, 16], build: ['emp', 'mgd', 'hq', 'pubai', ['norm']], arch: 'ai' }
+};

@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "portfolio": "node build-portfolio.mjs",
     "build": "node build-standalone.mjs"
   },
   "devDependencies": {
