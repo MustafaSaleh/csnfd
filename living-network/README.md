@@ -12,7 +12,7 @@ presets from 2026 threat reporting").
 
 ## Run it
 
-Open `index.html` (double-click from disk, internet on). No build step and no backend. Styles are in `styles.css`. Scripts are plain files in `js/`, loaded in order from `index.html`, so the page still opens from disk. `js/data.js` holds everything the page shows.
+Open `index.html` (double-click from disk, internet on). No build step and no backend. Styles are in `styles.css`. Scripts are plain files in `js/`, loaded in order from `index.html`, so the page still opens from disk. `js/data.js` holds everything the page shows, except the industry use cases, which are in the generated `js/portfolio.js`.
 The only external requests are Three.js 0.170.0 and its OrbitControls from jsDelivr. If WebGL or the CDN is unavailable
 the page renders a 2D SVG map of the same data (force it with `index.html?render=svg`).
 
@@ -22,12 +22,22 @@ has to run it, and a determined reader can still recover the text from the runni
 jsDelivr; without that network the file shows the 2D map. Regenerate it from this folder with `npm install` and
 `npm run build` after changing `index.html`, `styles.css` or `js/`. The source files stay the ones to edit.
 
-Four modes: **Presets**, **Build your own**, **Free explore** and **Topology**. Topology isolates one architecture
+Five modes: **Presets**, **Build your own**, **Free explore**, **Topology** and **Industries**. Topology isolates one architecture
 (SASE, Zero Trust Access, Hybrid Mesh Firewall, secure campus, data center, industrial, detection and response, AI, or
 one of the three suites), lays its building blocks out as a diagram and numbers each relationship stated on cisco.com,
 with the source link beside it, and lists the Cisco Validated Designs and design references that cover it. The architecture
 list is `DATA.architectures`. Product panels and decision-timeline steps also link the Cisco Validated Design ("CVD") or
 reference ("Ref") that backs them.
+
+**Industries** lists the 105 use cases of Cisco's Industries Portfolio Explorer under six industries (Government,
+Healthcare, Manufacturing, Retail, Financial services, Education). Opening a use case keeps the products Cisco lists for
+it solid, fades the rest of the scene and draws in white the relationships already stated between those products. The
+panel shows Cisco's description, drivers, capabilities, benefits and "Why Cisco" text, the listed products that are in
+the scene, the listed products that are not, and the Cisco services. 43 use cases carry a **Try it** block: related
+presets, a prefilled builder scenario and the closest architecture in Topology. The use case then stays above the result
+as "Industry context" until another preset or architecture is picked. The links run the other way too: a run lists the
+use cases linked to its preset and the three whose product lists cover most of the run, the preset library can be
+narrowed to one industry, and each product panel says how many use cases name the product. See "Industry use cases" below.
 
 **Playback**: choosing a preset (or changing the builder) sets the scenario up and waits; press Play (`Space`), which
 pulses until then. The **Auto** button in the playback bar starts each scenario as soon as it is chosen; it is off by
@@ -62,9 +72,9 @@ bar, legend and the checkpoint and verdict captions stay. Two tabs on the scene'
 result panel. On phones the tabs open the panels as bottom sheets. In viewers that block browser full screen the layout still
 expands to the whole window.
 
-**Guided tour** (header button **Tour**, or `T`; offered once on a first visit): eleven steps that spotlight each part
+**Guided tour** (header button **Tour**, or `T`; offered once on a first visit): twelve steps that spotlight each part
 of the tool and drive it as they go — the scene, presets, playback, lenses, the result panel, removing controls, the
-builder, camera views, topology, the header switches, and share/export. Steps live in `DATA.tour`.
+builder, camera views, topology, industries, the header switches, and share/export. Steps live in `DATA.tour`.
 
 **Export** (button in the result and topology panels): a printable report for "Save as PDF" (scene image, verdict,
 trust table, decision timeline, products with source URLs, disclaimer), the scene as a PNG with its labels, the report
@@ -118,6 +128,12 @@ Everything shown lives in the `DATA` object in `js/data.js`: products, relations
 invalid-combination rules, path rules, checkpoint rules, verdict text, suggestions and presets. A new scenario is a data
 edit. The tables below were generated from that object.
 
+The industry use cases are the exception. `js/portfolio.js` is generated: edit `portfolio-map.mjs` (name aliases and the
+links from use cases to scenarios) or replace `../data/cisco-industries-portfolio.json`, then run `npm run portfolio`.
+The generator stops if an alias names a product id that is not in `DATA.products`, a linked preset or architecture does
+not exist, or a builder scenario is not valid as written. `npm run portfolio -- --report` also prints the listed names
+that are not in the scene and, for each link, how many of the scenario's products the use case lists.
+
 `DATA.cvd` lists the Cisco Validated Designs and design references (title, URL, the "Updated" date printed on the page,
 and whether it is Cisco Validated or a reference). Products, architectures and checkpoint rules name them in a `cvd` field,
 and a relationship can use a `cvd` key as its source. In a checkpoint rule, `also` credits a second product and `needs`
@@ -141,6 +157,90 @@ controls". Preset 33 uses it to replay a ransomware case with Secure Endpoint di
 4. "Without these controls" removes the rules of one or more products (or a whole suite) and replays, to show the gap.
    It is labelled illustrative.
 
+## Industry use cases
+
+Source: Cisco's Industries Portfolio Explorer (https://www.cisco.com/c/m/en_us/solutions/industries/portfolio-explorer.html),
+the six data files behind it, collected 13 November 2026 and kept in `../data/cisco-industries-portfolio.json`. The use
+case text and the product and service lists are Cisco's. Everything that ties a use case to this scene is this tool's
+own work and is labelled that way on the page.
+
+- **What the portfolio is.** 105 use cases: Government 18, Healthcare 16, Manufacturing 17, Retail 18, Financial
+  services 17, Education 19. Each has a description, text blocks, a list of product names and a list of services. It has
+  no actors, behaviours or outcomes, so it cannot drive a verdict and no rule was changed for it.
+- **Two shapes.** 90 use cases have Industry drivers, Capabilities, Benefits and Differentiators ("Why Cisco"); 15 have
+  Industry drivers, Business needs, Capabilities and Business outcomes. The generator reads blocks by title, so each
+  use case shows the blocks it has.
+- **Product names.** `portfolio-map.mjs` maps Cisco's names onto the 40 products in the scene by pattern. 34 of the 40
+  are named by at least one use case; Silicon One, WAAP, Attack Analyzer and the three suites are named by none. Every
+  use case maps to at least one scene product. Names with no counterpart are listed as "Also listed by Cisco, not in
+  this scene" (143 distinct names, led by Catalyst Center in 54 use cases, Intersight in 36 and the Webex suite in 35).
+  Old names with a successor in the scene count as the successor: Umbrella as Secure Access, Defense Orchestrator as
+  Security Cloud Control, AnyConnect as Secure Client. Five government use cases list product families ("Branch
+  routers", "Cloud edge") instead of products; those rows are never mapped.
+- **Cleaning.** HTML tags, zero-width and vertical-tab characters and a "PRODUCTS TABLE #2" scrape artefact are
+  removed, and spelling variants of one name are merged. The image fields, success stories, partnerships, promotions
+  and design-guide links in the source are not used: the images are file-name suffixes with no address, and the other
+  sections are empty or one generic sentence.
+- **Relationships.** The white lines and the numbered list in a use case are the relationships already in
+  `DATA.links`, from cisco.com and splunk.com product pages. Cisco's use case page lists products; it does not state
+  those links.
+- **Not an architecture.** A use case view is "products Cisco lists for this use case", placed where the scene already
+  has them. It is not a Cisco reference design.
+- **Size.** `js/portfolio.js` is 286 KB. The share build grew from 511 KB to 1,012 KB.
+
+### Links from use cases to scenarios
+
+Chosen by hand in `portfolio-map.mjs`, not taken from Cisco. A link means "this scenario illustrates something the
+use case is about"; it does not mean the verdict is what Cisco promises for the use case. 43 of 105 use cases are
+linked: Government 9, Healthcare 8, Manufacturing 5, Retail 5, Financial services 9, Education 7. The rest show their
+products and the product-overlap count only.
+
+| Code | Industry | Use case | Presets | Builder scenario | Topology |
+|---|---|---|---|---|---|
+| CIT6C | Government | AI-powered resident services | 15, 18 | insider · mgd · hq · intai · [inject] | Securing AI use |
+| CIT4H | Government | Application modernization | 26, 29 | emp · mgd · branch · saas · [slow] | Splunk and Cisco Observability |
+| CIT4I | Government | Secure networking for government | 1, 5, 9 | emp · mgd · hq · dcapp · [norm] | Secure campus and branch |
+| CIT4J | Government | Network modernization | 3, 29, 30 | emp · mgd · branch · saas · [slow] | Secure campus and branch |
+| CIT4K | Government | Secure government hybrid clouds | 3, 26 | emp · mgd · branch · cloudapp · [norm] | SASE: network and security edge |
+| CIT2I | Government | Mobile operations | 2, 28 | emp · mobile · public · dcapp · [norm] | Zero Trust Access |
+| CIT7A | Government | Secure industrial control systems | 11, 35, 8 | ot · headless · factory · ot · [anomaly] | Industrial (OT) security |
+| CIT7D | Government | Security for government zero trust | 1, 2, 4, 20, 28 | emp · byod · home · saas · [norm] | Zero Trust Access |
+| CIT7E | Government | Threat detection and incident response | 22, 23, 33 | emp · compromised · hq · eastwest · [scan] | Detection and response |
+| HEA1E | Healthcare | Telehealth and virtual care | 4, 29 | emp · mgd · home · saas · [slow] | SASE: network and security edge |
+| HEA4C | Healthcare | Hybrid cloud and AI infrastructure | 19, 26, 36 | aiagent · server · hq · intai · [agentic] | Data center and cloud |
+| HEA2D | Healthcare | Medical device integration | 9, 10 | iot · headless · hq · eastwest · [norm] | Secure campus and branch |
+| HEA3B | Healthcare | Healthcare threat defense and response | 13, 22, 23, 33 | emp · compromised · hq · eastwest · [ransom] | Detection and response |
+| HEA3D | Healthcare | Patient privacy and compliance | 7, 17, 27 | insider · mgd · hq · dcapp · [offhours, upload] | Zero Trust Access |
+| HEA4F | Healthcare | Secure networking for healthcare | 1, 5, 9 | iot · headless · hq · eastwest · [norm] | Secure campus and branch |
+| HEA4B | Healthcare | Hybrid workforce | 2, 4, 28 | emp · byod · home · saas · [norm] | Zero Trust Access |
+| HEA4E | Healthcare | Unified branch for healthcare | 3, 29 | emp · mgd · branch · saas · [norm] | SASE: network and security edge |
+| MAN6A | Manufacturing | Agentic operations | 19, 29, 36 | aiagent · server · hq · dcapp · [priv] | Securing AI use |
+| MAN1A | Manufacturing | Industrial automation and process optimization | 11 | ot · headless · factory · ot · [norm] | Industrial (OT) security |
+| MAN1D | Manufacturing | Asset visibility and control | 9, 11 | ot · headless · factory · ot · [norm] | Industrial (OT) security |
+| MAN3D | Manufacturing | Operational technology security operations | 11, 35 | ot · headless · factory · ot · [anomaly] | Industrial (OT) security |
+| MAN1E | Manufacturing | Secure remote access | 8, 37 | contractor · claptop · home · ot · [mfa_ok] | Industrial (OT) security |
+| RET1G | Retail | Safety and surveillance | 9, 10 | iot · headless · hq · web_risky · [anomaly] | Secure campus and branch |
+| RET3C | Retail | AI-infrastructure and hybrid cloud | 19, 26, 36 | aiagent · server · hq · intai · [agentic] | Data center and cloud |
+| RET1A | Retail | Secure connectivity and optimization | 2, 3, 29 | emp · mgd · branch · saas · [slow] | SASE: network and security edge |
+| RET4A | Retail | Secure networking for retail | 3, 5, 9 | guest · byod · hq · web_safe · [norm] | Secure campus and branch |
+| RET4D | Retail | Unified branch for retail | 3, 29 | emp · mgd · branch · saas · [norm] | SASE: network and security edge |
+| FIN1F | Financial services | Unified branch for financial services | 3, 29 | emp · mgd · branch · saas · [norm] | SASE: network and security edge |
+| FIN1G | Financial services | Digital worker connectivity | 2, 4, 28 | emp · byod · home · saas · [norm] | Zero Trust Access |
+| FIN2F | Financial services | Secure networking for financial services | 1, 22, 23 | emp · compromised · hq · eastwest · [scan] | Secure campus and branch |
+| FIN3B | Financial services | AI governance and risk management | 15, 16, 17, 18, 36 | emp · mgd · hq · ai · [aipaste] | Securing AI use |
+| FIN3E | Financial services | Fraud and financial crime | 20, 21, 31 | attacker · byod · internet · saas · [stolen, aitm] | Zero Trust Access |
+| FIN4G | Financial services | Sovereign, hybrid, and multicloud strategy | 25, 26, 34 | attacker · byod · internet · dcapp · [exploit] | Data center and cloud |
+| FIN4J | Financial services | Open banking and payments | 25, 34 | attacker · byod · internet · cloudapp · [] | Data center and cloud |
+| FIN4F | Financial services | Financial experiences and assurance | 29 | emp · mgd · branch · saas · [slow] | Splunk and Cisco Observability |
+| FIN4N | Financial services | Deepfake detection and anchor of trust | 21, 31, 32 | attacker · byod · internet · saas · [fatigue, stolen] | Zero Trust Access |
+| EDU3D | Education | AI-driven student experiences | 15, 16 | emp · mgd · hq · pubai · [norm] | Securing AI use |
+| EDU1A | Education | Campus network and wireless | 1, 5, 9 | guest · byod · hq · web_safe · [norm] | Secure campus and branch |
+| EDU4A | Education | Network, endpoint, and web security | 12, 13, 14 | emp · mgd · hq · web_risky · [malfile] | SASE: network and security edge |
+| EDU4B | Education | Identity and access control | 1, 4, 5, 20, 28 | emp · byod · home · saas · [norm] | Zero Trust Access |
+| EDU5C | Education | Application security | 12, 14, 22 | emp · mgd · hq · web_risky · [malfile] | Hybrid Mesh Firewall |
+| EDU5D | Education | Infrastructure automation and assurance | 29, 30 | admin · mgd · hq · dcapp · [mfa_ok, push] | Secure campus and branch |
+| EDU5F | Education | Secure data and intellectual property | 17, 24, 27 | insider · mgd · hq · dcapp · [offhours, upload] | Zero Trust Access |
+
 ## Not verified, so left out or hedged
 
 - **AgenticOps** has no standalone page that could be found on cisco.com (the guessed URL returned 404). The node uses the
@@ -161,7 +261,9 @@ controls". Preset 33 uses it to replay a ransomware case with Secure Endpoint di
 - **Umbrella** is retiring and is no longer in the scene. Secure Access is described as the SSE that incorporates the
   DNS-layer security and secure web gateway (SWG) capabilities that were previously the core of Umbrella and expands
   them into a full SSE platform. Its three former lines (Secure Client, Secure Endpoint, SD-WAN) were removed, and
-  Secure Access replaces it in the secure campus and branch architecture.
+  Secure Access replaces it in the secure campus and branch architecture. Cisco's industry portfolio still lists
+  Umbrella in 59 of its 105 use cases (33 of them without Secure Access). In the Industries mode those mentions count
+  as Secure Access, the use case panel says so, and Umbrella is not added as a product.
 - **WAAP** states no Cisco integration on its own page; its single line comes from the Firewall page's integration list.
 - **Talos**: its page says it powers Cisco security products in general. Lines are drawn only to products whose own pages
   name Talos (Firewall, Secure Endpoint, Cyber Vision, AI Defense, Industrial Threat Defense, two suites).
