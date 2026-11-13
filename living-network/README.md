@@ -33,7 +33,7 @@ reference ("Ref") that backs them.
 Healthcare, Manufacturing, Retail, Financial services, Education). Opening a use case keeps the products Cisco lists for
 it solid, fades the rest of the scene and draws in white the relationships already stated between those products. The
 panel shows Cisco's description, drivers, capabilities, benefits and "Why Cisco" text, the listed products that are in
-the scene, the listed products that are not, and the Cisco services. 43 use cases carry a **Try it** block: related
+the scene, the listed products that are not, and the Cisco services. Every use case carries a **Try it** block: related
 presets, a prefilled builder scenario and the closest architecture in Topology. The use case then stays above the result
 as "Industry context" until another preset or architecture is picked. The links run the other way too: a run lists the
 use cases linked to its preset and the three whose product lists cover most of the run, the preset library can be
@@ -131,7 +131,8 @@ edit. The tables below were generated from that object.
 The industry use cases are the exception. `js/portfolio.js` is generated: edit `portfolio-map.mjs` (name aliases and the
 links from use cases to scenarios) or replace `../data/cisco-industries-portfolio.json`, then run `npm run portfolio`.
 The generator stops if an alias names a product id that is not in `DATA.products`, a linked preset or architecture does
-not exist, or a builder scenario is not valid as written. `npm run portfolio -- --report` also prints the listed names
+not exist, a builder scenario is not valid as written, a use case has no preset, or one of presets 38 to 99 does not match
+the builder scenario linked to it. `npm run portfolio -- --report` also prints the listed names
 that are not in the scene and, for each link, how many of the scenario's products the use case lists.
 
 `DATA.cvd` lists the Cisco Validated Designs and design references (title, URL, the "Updated" date printed on the page,
@@ -186,14 +187,16 @@ own work and is labelled that way on the page.
   those links.
 - **Not an architecture.** A use case view is "products Cisco lists for this use case", placed where the scene already
   has them. It is not a Cisco reference design.
-- **Size.** `js/portfolio.js` is 286 KB. The share build grew from 511 KB to 1,012 KB.
+- **Size.** `js/portfolio.js` is 298 KB. The share build is 1,042 KB.
 
 ### Links from use cases to scenarios
 
 Chosen by hand in `portfolio-map.mjs`, not taken from Cisco. A link means "this scenario illustrates something the
-use case is about"; it does not mean the verdict is what Cisco promises for the use case. 43 of 105 use cases are
-linked: Government 9, Healthcare 8, Manufacturing 5, Retail 5, Financial services 9, Education 7. The rest show their
-products and the product-overlap count only.
+use case is about"; it does not mean the verdict is what Cisco promises for the use case. All 105 use cases are linked:
+Government 18, Healthcare 16, Manufacturing 17, Retail 18, Financial services 17, Education 19. Presets 1 to 37 were already
+in the library. Presets 38 to 99 were added for the use cases those did not illustrate. Each is the closest scenario the
+existing pickers can play (a camera, a hologram or a contact centre is shown as a sensor, an AI assistant or a remote
+worker), and no new verdict rule was added for them.
 
 | Code | Industry | Use case | Presets | Builder scenario | Topology |
 |---|---|---|---|---|---|
@@ -240,6 +243,68 @@ products and the product-overlap count only.
 | EDU5C | Education | Application security | 12, 14, 22 | emp · mgd · hq · web_risky · [malfile] | Hybrid Mesh Firewall |
 | EDU5D | Education | Infrastructure automation and assurance | 29, 30 | admin · mgd · hq · dcapp · [mfa_ok, push] | Secure campus and branch |
 | EDU5F | Education | Secure data and intellectual property | 17, 24, 27 | insider · mgd · hq · dcapp · [offhours, upload] | Zero Trust Access |
+| CIT1D | Government | Agency collaboration | 38 | emp · mgd · home · saas · [mfa_ok] | Zero Trust Access |
+| CIT6B | Government | Community broadband | 39 | iot · headless · branch · eastwest · [anomaly] | Secure campus and branch |
+| CIT4G | Government | Transportation infrastructure | 40 | emp · mobile · public · dcapp · [mfa_ok] | Zero Trust Access |
+| CIT1E | Government | Enterprise solution delivery | 41 | emp · mgd · branch · cloudapp · [slow] | Splunk and Cisco Observability |
+| CIT4F | Government | Critical infrastructure planning and resiliency | 42 | emp · mgd · hq · eastwest · [norm] | Secure campus and branch |
+| CIT2G | Government | Connected justice | 43 | exec · mgd · home · saas · [mfa_ok] | Zero Trust Access |
+| CIT2H | Government | Public safety and emergency response | 44 | emp · mobile · public · saas · [mfa_ok] | Zero Trust Access |
+| CIT2F | Government | Operations centers | 45 | admin · mgd · hq · eastwest · [norm] | Secure campus and branch |
+| CIT7B | Government | Trusted Internet connections | 46 | emp · mgd · branch · web_safe · [norm] | SASE: network and security edge |
+| HEA1C | Healthcare | Patient engagement and digital front door | 47 | emp · mgd · hq · saas · [slow] | Splunk and Cisco Observability |
+| HEA1F | Healthcare | Remote patient room monitoring | 48 | iot · headless · hq · eastwest · [anomaly] | Secure campus and branch |
+| HEA1B | Healthcare | Mobile digital experiences and wayfinding | 49 | emp · mobile · branch · dcapp · [mfa_ok] | Zero Trust Access |
+| HEA2C | Healthcare | Clinical communications and collaboration | 50 | emp · mobile · home · saas · [mfa_ok] | Zero Trust Access |
+| HEA2B | Healthcare | Digital experiences and wayfinding | 51 | iot · headless · hq · cloudapp · [norm] | Secure campus and branch |
+| HEA3A | Healthcare | Claims automation and anomaly detection | 52 | emp · mgd · hq · intai · [aipaste] | Securing AI use |
+| HEA3C | Healthcare | Care environment safety and security | 53 | iot · headless · branch · web_risky · [anomaly] | Secure campus and branch |
+| HEA4A | Healthcare | Smart and sustainable hospitals | 54 | iot · headless · branch · eastwest · [norm] | Secure campus and branch |
+| MAN1G | Manufacturing | AI-assisted design and digital twin | 55 | aiagent · server · hq · cloudapp · [norm] | Data center and cloud |
+| MAN3E | Manufacturing | Machine vision | 56 | iot · headless · factory · eastwest · [anomaly] | Industrial (OT) security |
+| MAN1H | Manufacturing | Predictive maintenance | 57 | emp · mgd · factory · eastwest · [slow] | Industrial (OT) security |
+| MAN3F | Manufacturing | Quality inspection and anomaly detection | 58 | iot · headless · factory · ot · [anomaly] | Industrial (OT) security |
+| MAN5A | Manufacturing | Advanced warehouse operations | 59 | ot · headless · factory · eastwest · [anomaly] | Industrial (OT) security |
+| MAN5C | Manufacturing | Industrial mobility | 60 | iot · headless · factory · eastwest · [norm] | Industrial (OT) security |
+| MAN2A | Manufacturing | Software-defined automation | 61 | ot · headless · factory · eastwest · [norm] | Industrial (OT) security |
+| MAN1F | Manufacturing | Energy control and fault-managed power | 62 | iot · headless · factory · dcapp · [anomaly] | Industrial (OT) security |
+| MAN5B | Manufacturing | Inventory management | 63 | iot · headless · factory · cloudapp · [norm] | Industrial (OT) security |
+| MAN1C | Manufacturing | Data collection and management | 64 | iot · headless · factory · web_risky · [anomaly] | Industrial (OT) security |
+| MAN2F | Manufacturing | Worker upskilling | 65 | emp · mgd · home · dcapp · [mfa_ok] | Zero Trust Access |
+| MAN2D | Manufacturing | Workforce augmentation | 66 | iot · headless · factory · saas · [anomaly] | Industrial (OT) security |
+| RET1B | Retail | Loss prevention and fraud detection | 67 | insider · mgd · branch · dcapp · [offhours, upload] | Zero Trust Access |
+| RET1E | Retail | Omnichannel operational visibility | 68 | emp · mgd · home · cloudapp · [slow] | Splunk and Cisco Observability |
+| RET1I | Retail | Supply chain visibility | 69 | emp · mgd · branch · eastwest · [slow] | SASE: network and security edge |
+| RET2C | Retail | Associate engagement and productivity | 70 | exec · mobile · public · dcapp · [mfa_ok] | Zero Trust Access |
+| RET2G | Retail | Digital merchandising | 71 | insider · mgd · hq · intai · [aipaste] | Securing AI use |
+| RET2F | Retail | Hologram store associate | 72 | emp · mgd · home · ai · [norm] | Securing AI use |
+| RET3D | Retail | Intelligent contact center and chatbots | 73 | emp · mgd · branch · ai · [norm] | Securing AI use |
+| RET3A | Retail | Mobile engagement | 74 | emp · mobile · home · dcapp · [mfa_ok] | Zero Trust Access |
+| RET4C | Retail | Demand forecasting | 75 | emp · mobile · branch · cloudapp · [slow] | Splunk and Cisco Observability |
+| RET4E | Retail | Drive-thru optimization | 76 | emp · mgd · public · saas · [slow] | Splunk and Cisco Observability |
+| RET5A | Retail | Intelligent fulfillment | 77 | admin · mgd · branch · cloudapp · [slow] | Splunk and Cisco Observability |
+| RET5B | Retail | Inventory management | 78 | emp · mgd · branch · dcapp · [slow] | SASE: network and security edge |
+| RET5C | Retail | Wireless and video analytics | 79 | iot · headless · branch · dcapp · [anomaly] | Secure campus and branch |
+| FIN1E | Financial services | Digital engagement and contact center | 80 | emp · mobile · home · ai · [norm] | Securing AI use |
+| FIN2E | Financial services | Virtual and collaboration workflows | 81 | emp · mgd · public · saas · [mfa_ok] | Zero Trust Access |
+| FIN2G | Financial services | Branch analytics | 82 | emp · mgd · home · saas · [slow] | Splunk and Cisco Observability |
+| FIN3D | Financial services | Unified financial operations | 83 | admin · mgd · hq · cloudapp · [mfa_ok, push] | Data center and cloud |
+| FIN3C | Financial services | Secure communications compliance | 84 | emp · byod · home · dcapp · [mfa_ok] | Zero Trust Access |
+| FIN4K | Financial services | Algorithmic trading automation | 85 | emp · mgd · hq · cloudapp · [slow] | Splunk and Cisco Observability |
+| FIN4L | Financial services | Legacy infrastructure and application modernization | 86 | emp · stale · hq · cloudapp · [norm] | Data center and cloud |
+| FIN4M | Financial services | Claims, underwriting, and document processing | 87 | emp · mgd · branch · intai · [aipaste] | Securing AI use |
+| EDU3A | Education | Teaching, learning, and faculty collaboration | 88 | emp · mgd · home · cloudapp · [mfa_ok] | Zero Trust Access |
+| EDU3F | Education | Esports and entertainment | 89 | emp · mobile · hq · cloudapp · [norm] | Data center and cloud |
+| EDU1D | Education | Personalized residential experiences | 90 | iot · headless · hq · saas · [norm] | Secure campus and branch |
+| EDU3C | Education | Hybrid teaching and professional development | 91 | emp · stale · home · saas · [mfa_ok] | Zero Trust Access |
+| EDU2B | Education | Communications | 92 | admin · mgd · home · saas · [mfa_ok] | Zero Trust Access |
+| EDU2E | Education | Administrative efficiency | 93 | emp · mgd · public · dcapp · [mfa_ok] | Zero Trust Access |
+| EDU1E | Education | Community broadband and equitable access | 94 | iot · headless · branch · web_safe · [norm] | Secure campus and branch |
+| EDU1C | Education | Smart and sustainable buildings | 95 | iot · headless · hq · dcapp · [norm] | Secure campus and branch |
+| EDU2A | Education | Hybrid cloud management | 96 | emp · mgd · public · cloudapp · [slow] | Splunk and Cisco Observability |
+| EDU4C | Education | Physical safety | 97 | iot · headless · hq · web_safe · [anomaly] | Secure campus and branch |
+| EDU5A | Education | Remote research and collaboration | 98 | emp · mobile · home · cloudapp · [mfa_ok] | Zero Trust Access |
+| EDU5B | Education | Research and academic computing | 99 | aiagent · server · hq · intai · [norm] | Data center and cloud |
 
 ## Not verified, so left out or hedged
 
@@ -1362,6 +1427,68 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | 35 | Vendor laptop launches a known PLC exploit | contractor · claptop · hq · ot · [exploit] | BLOCK |
 | 36 | Poisoned tool steers an internal AI agent | aiagent · server · hq · intai · [agentic] | BLOCK |
 | 37 | Stolen vendor login tries remote access to a factory machine | attacker · byod · travel · ot · [mfa_fail, stolen] | BLOCK |
+| 38 | Agency collaboration: managed laptop at home → sanctioned SaaS, MFA passed | emp · mgd · home · saas · [mfa_ok] | ALLOW |
+| 39 | Community broadband: branch sensor talks to an internal server | iot · headless · branch · eastwest · [anomaly] | CONTAIN |
+| 40 | Transportation infrastructure: mobile worker on public Wi-Fi → private app, MFA passed | emp · mobile · public · dcapp · [mfa_ok] | ALLOW |
+| 41 | Enterprise solution delivery: branch user, a private cloud app is slow | emp · mgd · branch · cloudapp · [slow] | ALLOW |
+| 42 | Critical infrastructure resiliency: employee at HQ → an internal server | emp · mgd · hq · eastwest · [norm] | ALLOW |
+| 43 | Connected justice: executive at home → sanctioned SaaS, MFA passed | exec · mgd · home · saas · [mfa_ok] | ALLOW |
+| 44 | Public safety and emergency response: mobile worker on public Wi-Fi → sanctioned SaaS, MFA passed | emp · mobile · public · saas · [mfa_ok] | ALLOW |
+| 45 | Operations centers: administrator at HQ → an internal server | admin · mgd · hq · eastwest · [norm] | STEP-UP |
+| 46 | Trusted Internet connections: branch user opens a safe site vs a malicious site | emp · mgd · branch · web_safe · [norm] | ALLOW vs BLOCK |
+| 47 | Patient engagement: employee at HQ, sanctioned SaaS is slow | emp · mgd · hq · saas · [slow] | ALLOW |
+| 48 | Remote patient room monitoring: campus sensor behaves unlike its profile | iot · headless · hq · eastwest · [anomaly] | CONTAIN |
+| 49 | Mobile digital experiences: mobile worker at a branch → private app, MFA passed | emp · mobile · branch · dcapp · [mfa_ok] | ALLOW |
+| 50 | Clinical communications: mobile worker at home → sanctioned SaaS, MFA passed | emp · mobile · home · saas · [mfa_ok] | ALLOW |
+| 51 | Digital experiences and wayfinding: campus sensor reaches a private cloud app | iot · headless · hq · cloudapp · [norm] | BLOCK |
+| 52 | Claims automation: employee pastes data into an internal AI model | emp · mgd · hq · intai · [aipaste] | ALLOW WITH LIMITS |
+| 53 | Care environment safety: branch sensor talks to a risky internet host | iot · headless · branch · web_risky · [anomaly] | CONTAIN |
+| 54 | Smart and sustainable hospitals: branch sensor talks to an internal server | iot · headless · branch · eastwest · [norm] | ALLOW WITH LIMITS |
+| 55 | AI-assisted design: workload in the data center → a private cloud app | aiagent · server · hq · cloudapp · [norm] | ALLOW |
+| 56 | Machine vision: factory sensor behaves unlike its profile | iot · headless · factory · eastwest · [anomaly] | CONTAIN |
+| 57 | Predictive maintenance: worker on the factory floor, an internal server is slow | emp · mgd · factory · eastwest · [slow] | ALLOW |
+| 58 | Quality inspection: factory sensor reaches an OT controller, unlike its profile | iot · headless · factory · ot · [anomaly] | CONTAIN |
+| 59 | Advanced warehouse operations: factory OT device behaves unlike its profile | ot · headless · factory · eastwest · [anomaly] | CONTAIN |
+| 60 | Industrial mobility: factory sensor talks to an internal server | iot · headless · factory · eastwest · [norm] | ALLOW WITH LIMITS |
+| 61 | Software-defined automation: factory OT device talks to an internal server | ot · headless · factory · eastwest · [norm] | ALLOW WITH LIMITS |
+| 62 | Energy control: factory sensor reaches a private app in the data center | iot · headless · factory · dcapp · [anomaly] | CONTAIN |
+| 63 | Inventory management (factory): factory sensor reaches a private cloud app | iot · headless · factory · cloudapp · [norm] | BLOCK |
+| 64 | Data collection: factory sensor talks to a risky internet host | iot · headless · factory · web_risky · [anomaly] | CONTAIN |
+| 65 | Worker upskilling: managed laptop at home → private app, MFA passed | emp · mgd · home · dcapp · [mfa_ok] | ALLOW |
+| 66 | Workforce augmentation: factory sensor reaches sanctioned SaaS, unlike its profile | iot · headless · factory · saas · [anomaly] | CONTAIN |
+| 67 | Loss prevention: insider at a branch uploads data outside working hours | insider · mgd · branch · dcapp · [offhours, upload] | ALLOW WITH LIMITS |
+| 68 | Omnichannel visibility: worker at home, a private cloud app is slow | emp · mgd · home · cloudapp · [slow] | ALLOW |
+| 69 | Supply chain visibility: branch user, an internal server is slow | emp · mgd · branch · eastwest · [slow] | ALLOW |
+| 70 | Associate engagement: executive on public Wi-Fi → private app, MFA passed | exec · mobile · public · dcapp · [mfa_ok] | ALLOW |
+| 71 | Digital merchandising: insider pastes data into an internal AI model | insider · mgd · hq · intai · [aipaste] | ALLOW WITH LIMITS |
+| 72 | Hologram store associate: employee at home uses the approved AI assistant | emp · mgd · home · ai · [norm] | ALLOW |
+| 73 | Intelligent contact center: branch user uses the approved AI assistant | emp · mgd · branch · ai · [norm] | ALLOW |
+| 74 | Mobile engagement: mobile worker at home → private app, MFA passed | emp · mobile · home · dcapp · [mfa_ok] | ALLOW |
+| 75 | Demand forecasting: mobile worker at a branch, a private cloud app is slow | emp · mobile · branch · cloudapp · [slow] | ALLOW |
+| 76 | Drive-thru optimization: worker on public Wi-Fi, sanctioned SaaS is slow | emp · mgd · public · saas · [slow] | ALLOW |
+| 77 | Intelligent fulfillment: administrator at a branch, a private cloud app is slow | admin · mgd · branch · cloudapp · [slow] | STEP-UP |
+| 78 | Inventory management (store): branch user, a private app in the data center is slow | emp · mgd · branch · dcapp · [slow] | ALLOW |
+| 79 | Wireless and video analytics: branch sensor reaches a private app, unlike its profile | iot · headless · branch · dcapp · [anomaly] | CONTAIN |
+| 80 | Digital engagement and contact center: mobile worker at home uses the approved AI assistant | emp · mobile · home · ai · [norm] | ALLOW |
+| 81 | Virtual and collaboration workflows: worker on public Wi-Fi → sanctioned SaaS, MFA passed | emp · mgd · public · saas · [mfa_ok] | ALLOW |
+| 82 | Branch analytics: worker at home, sanctioned SaaS is slow | emp · mgd · home · saas · [slow] | ALLOW |
+| 83 | Unified financial operations: administrator pushes policy for a private cloud app | admin · mgd · hq · cloudapp · [mfa_ok, push] | ALLOW |
+| 84 | Secure communications compliance: personal laptop at home → private app, MFA passed | emp · byod · home · dcapp · [mfa_ok] | ALLOW WITH LIMITS |
+| 85 | Algorithmic trading automation: employee at HQ, a private cloud app is slow | emp · mgd · hq · cloudapp · [slow] | ALLOW |
+| 86 | Legacy infrastructure modernization: out-of-date laptop at HQ → a private cloud app | emp · stale · hq · cloudapp · [norm] | ALLOW WITH LIMITS |
+| 87 | Claims, underwriting and document processing: branch user pastes data into an internal AI model | emp · mgd · branch · intai · [aipaste] | ALLOW WITH LIMITS |
+| 88 | Teaching and faculty collaboration: managed laptop at home → private cloud app, MFA passed | emp · mgd · home · cloudapp · [mfa_ok] | ALLOW |
+| 89 | Esports and entertainment: mobile worker at HQ → a private cloud app | emp · mobile · hq · cloudapp · [norm] | ALLOW |
+| 90 | Personalized residential experiences: campus sensor reaches sanctioned SaaS | iot · headless · hq · saas · [norm] | ALLOW WITH LIMITS |
+| 91 | Hybrid teaching: out-of-date laptop at home → sanctioned SaaS, MFA passed | emp · stale · home · saas · [mfa_ok] | ALLOW WITH LIMITS |
+| 92 | Communications: administrator at home → sanctioned SaaS, MFA passed | admin · mgd · home · saas · [mfa_ok] | ALLOW |
+| 93 | Administrative efficiency: worker on public Wi-Fi → private app, MFA passed | emp · mgd · public · dcapp · [mfa_ok] | ALLOW |
+| 94 | Community broadband and equitable access: branch sensor opens a safe website | iot · headless · branch · web_safe · [norm] | ALLOW WITH LIMITS |
+| 95 | Smart and sustainable buildings: campus sensor reaches a private app | iot · headless · hq · dcapp · [norm] | BLOCK |
+| 96 | Hybrid cloud management: worker on public Wi-Fi, a private cloud app is slow | emp · mgd · public · cloudapp · [slow] | ALLOW |
+| 97 | Physical safety: campus sensor opens a safe website, unlike its profile | iot · headless · hq · web_safe · [anomaly] | CONTAIN |
+| 98 | Remote research and collaboration: mobile worker at home → private cloud app, MFA passed | emp · mobile · home · cloudapp · [mfa_ok] | ALLOW |
+| 99 | Research and academic computing: workload in the data center → the internal AI model | aiagent · server · hq · intai · [norm] | ALLOW |
 
 ## Appendix: expert review answers (11 November 2026)
 

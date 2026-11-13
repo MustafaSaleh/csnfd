@@ -92,10 +92,30 @@ for (const ind of src.industries) for (const u of ind.useCases) {
     const [who, device, loc, dest, beh] = l.build, want = { who, device, loc, dest, beh }, got = game.normalize(want).s;
     if (JSON.stringify(got) !== JSON.stringify(want)) fail.push(`${code}: builder scenario is not valid as written. normalize() gives ${JSON.stringify(Object.values(got))}`);
     Object.assign(o, { presets: l.presets, build: l.build, arch: l.arch });
+    /* Presets 38–99 each belong to one use case, and the builder opens that same scenario. */
+    if (l.presets.length === 1 && l.presets[0] >= 38) {
+      const p = DATA.presets.find(x => x.n === l.presets[0]);
+      if (p && JSON.stringify(p.s) !== JSON.stringify(l.build)) fail.push(`${code}: preset ${p.n} plays ${JSON.stringify(p.s)}, but the builder scenario is ${JSON.stringify(l.build)}`);
+      if (p && p.b) {
+        const [who, device, loc, dest, beh] = p.b, got = game.normalize({ who, device, loc, dest, beh }).s;
+        if (JSON.stringify(got) !== JSON.stringify({ who, device, loc, dest, beh })) fail.push(`${code}: preset ${p.n} compare scenario is not valid`);
+      }
+    }
   }
   uc.push(o);
 }
 for (const code of Object.keys(links)) if (!codes.has(code)) fail.push(`link for unknown use case code ${code}`);
+const unlinked = uc.filter(u => !u.presets);
+if (unlinked.length) fail.push(`${unlinked.length} use cases have no preset: ${unlinked.map(u => u.code).join(', ')}`);
+{
+  const nums = DATA.presets.map(p => p.n), dup = nums.filter((n, i) => nums.indexOf(n) !== i);
+  if (dup.length) fail.push(`duplicate preset numbers: ${[...new Set(dup)].join(', ')}`);
+  for (const p of DATA.presets) {
+    const [who, device, loc, dest, beh] = p.s, got = game.normalize({ who, device, loc, dest, beh }).s;
+    if (p.n >= 38 && JSON.stringify(got) !== JSON.stringify({ who, device, loc, dest, beh })) fail.push(`preset ${p.n} is changed by normalize()`);
+    if (!game.evaluate(got, null).verdict) fail.push(`preset ${p.n} produces no verdict`);
+  }
+}
 
 if (fail.length) { console.error('portfolio build failed:\n  ' + fail.join('\n  ')); process.exit(1); }
 
