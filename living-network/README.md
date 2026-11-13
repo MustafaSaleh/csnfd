@@ -48,6 +48,7 @@ puck on a mast for Wi-Fi, stacked switches with port rows, a router with antenna
 Silicon One, laptops for Secure Client and Secure Endpoint, a phone for Duo, an envelope for Email Threat Defense, a
 radar dish for XDR, a bar chart for Network Analytics, a cloud with a gate for Secure Access, and so on. They are
 recognisable shapes, not Cisco hardware or artwork. The suites and the Splunk products keep their abstract shapes.
+Past the slabs, a faint grid marks the edge of the diagram, and a short red tint sits under Open internet.
 
 Human actors (employee, admin, executive, contractor, guest, insider, external attacker) are walking 3D figures with
 their name and live trust level above them; the attacker is a red hooded figure on a dashed path. The figure's clothes

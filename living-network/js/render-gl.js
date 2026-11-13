@@ -63,6 +63,26 @@ function createGL(THREE, OrbitControls, PP) {
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
     zoneG.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x22304f, transparent: true, opacity: .7 }))); }
 
+  /* floor past the slabs: a static blueprint grid, so the empty space is the edge of the diagram.
+     A short red tint sits on the slab under Open internet, the one place marked hostile. No motion. */
+  const groundG = new THREE.Group(); scene.add(groundG);
+  const gridMat = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 1 });
+  const discMat = new THREE.MeshBasicMaterial({ color: 0x8a4a55, transparent: true, opacity: .2, depthWrite: false });
+  {
+    const x0 = -62, x1 = 46, z0 = -46, z1 = 46, step = 4, y = -.62;
+    const sx0 = -44, sx1 = 28, sz0 = -28, sz1 = 29;   /* slab footprint; lines fade from here out to the grid edge */
+    const maxD = Math.hypot(Math.max(sx0 - x0, x1 - sx1), Math.max(sz0 - z0, z1 - sz1));
+    const near = new THREE.Color(0x1a2744), far = new THREE.Color(0x070b16), c = new THREE.Color();
+    const pos = [], col = [];
+    const push = (x, z) => { pos.push(x, y, z); const dx = x < sx0 ? sx0 - x : x > sx1 ? x - sx1 : 0, dz = z < sz0 ? sz0 - z : z > sz1 ? z - sz1 : 0; c.copy(near).lerp(far, Math.min(1, Math.hypot(dx, dz) / maxD)); col.push(c.r, c.g, c.b); };
+    for (let x = x0; x <= x1 + 1e-4; x += step) { push(x, z0); push(x, z1); }
+    for (let z = z0; z <= z1 + 1e-4; z += step) { push(x0, z); push(x1, z); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    groundG.add(new THREE.LineSegments(g, gridMat));
+    const ip = DATA.places.internet.p, disc = new THREE.Mesh(new THREE.CircleGeometry(5.5, 40), discMat);
+    disc.rotation.x = -Math.PI / 2; disc.position.set(ip[0], -.1, ip[2]); disc.renderOrder = 2; groundG.add(disc);   /* above the slab top (y -0.2) so the tint stays visible */
+  }
+
   /* node geometry: one original abstract shape per category */
   const GEO = {
     net: new THREE.CylinderGeometry(.95, .95, .9, 6), id: new THREE.OctahedronGeometry(.95), netsec: new THREE.BoxGeometry(1.45, 1.05, 1.45),
@@ -261,6 +281,7 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
   }
   function select(id) {
     selected = id; dirty = true; for (const k in nodes) nodes[k].el.classList.toggle('sel', k === id);
+    const dim = id ? 1 / 3 : 1; gridMat.opacity = dim; discMat.opacity = .2 * dim;   /* the white focus ring stays the bright thing */
     if (selLine) { scene.remove(selLine); selLine.geometry.dispose(); selLine = null; }
     if (id && PR[id]) { selLine = lineSet(DATA.links.filter(l => l[0] === id || l[1] === id), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .85 })); scene.add(selLine); }
   }
@@ -275,7 +296,7 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
     const was = topo; topo = t; if (topoLine) { scene.remove(topoLine); topoLine.geometry.dispose(); topoLine = null; } topoChips.forEach(c => c.el.remove()); topoChips = [];
     /* an architecture is re-laid-out as a diagram: most-connected block in the middle, the rest on a ring; everything else is hidden */
     diagram = topoLayout(t);
-    zoneG.visible = !diagram;
+    zoneG.visible = groundG.visible = !diagram;   /* a ring diagram has no floor slabs, so the grid would mean the wrong thing */
     for (const id in nodes) { const n = nodes[id], p = POS(id); n.g.position.set(p[0], p[1], p[2]); n.anchor.set(p[0], p[1] + n.top, p[2]); }
     refreshVis();
     applyTopo(); dirty = true; if (selected) select(selected);
@@ -458,6 +479,7 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
     if (tw) { const k = clamp((now - tw.t0) / tw.d, 0, 1), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
       controls.target.lerpVectors(tw.ft, tw.tt, e); cam.position.lerpVectors(tw.fp, tw.tp, e); cam.zoom = tw.fz + (tw.tz - tw.fz) * e; cam.updateProjectionMatrix(); if (k >= 1) tw = null; }
     controls.update(); const fol = updateFollow(now), fp = fol && viewMode === 'first'; applyWar(fol); updateFx(now); const sh = shakeVec(now);
+    groundG.visible = !diagram && viewMode === 'orbit';   /* overview only; follow cameras keep fog of war as the thing that hides the next hop */
     /* frame-rate guard: bloom and fog stay only if roughly 50 fps or better holds over two seconds */
     if (gfxWant && gfxOK && !gfxForce) {   /* watch the frame time in short windows (20 frames or 0.7 s, whichever comes first); two slow windows in a row, under about 45 fps, switch bloom and fog off */
       const d = now - gfxPrev; if (d < 1000 && ++gfxSkip > 3) { gfxSum += d; gfxN++; if (gfxN >= 20 || gfxSum >= 700) { gfxBad = gfxSum / gfxN > 22 ? gfxBad + 1 : 0; gfxSum = gfxN = 0;
