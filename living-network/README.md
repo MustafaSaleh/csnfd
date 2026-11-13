@@ -40,7 +40,8 @@ use cases linked to its preset and the three whose product lists cover most of t
 narrowed to one industry, and each product panel says how many use cases name the product. See "Industry use cases" below.
 
 **Playback**: choosing a preset (or changing the builder) sets the scenario up and waits; press Play (`Space`), which
-pulses until then. The **Auto** button in the playback bar starts each scenario as soon as it is chosen; it is off by
+pulses until then. Playback starts at 0.5×. A different speed lasts for the visit, and the next load returns to 0.5×.
+The **Auto** button in the playback bar starts each scenario as soon as it is chosen; it is off by
 default and remembered between visits.
 
 Each product is a small generic 3D model of its kind, built from simple shapes in the `MODEL` table: an access point
@@ -111,13 +112,16 @@ default; a switch turned off stays off on later visits. Sound starts on the firs
 allow it earlier) and pauses while the tab is hidden.
 
 **3rd person is the default view.** The view you pick is remembered between visits, and a shared link opens in the
-view it was copied in. Three camera views, switched from the playback bar or with `V`: **Overview** (orbit, zoom, pan), **3rd person** (camera
-follows behind the actor) and **1st person** (through the actor's eyes). The follow views need a running scenario and
-the 3D scene; in split view each half follows its own actor. Dragging the scene in 3rd person switches to Overview
+view it was copied in. Two camera views, switched from the playback bar or with `V`: **Overview** (orbit, zoom, pan) and **3rd person**.
+The camera follows behind the actor. Over the second half of a walk it looks ahead toward the next checkpoint. At a
+checkpoint the actor turns to face the product that is checking them, and the camera eases to a raised position beside
+that product, looking back at the actor, then returns behind the actor for the next walk. 3rd person needs a running
+scenario and the 3D scene; in split view each half follows its own actor. Dragging the scene in 3rd person switches to Overview
 from the current camera position, so the view carries on from where it was instead of jumping back; the reset-view
-button returns to the standard Overview. In the 2D fallback both follow views keep the actor centred.
+button returns to the standard Overview. In the 2D fallback, 3rd person keeps the actor centred. A link saved from the
+old 1st person view opens in 3rd person.
 
-**Fog of war** (header switch **Fog**, or `G`; on by default, remembered between visits): in the follow views (one
+**Fog of war** (header switch **Fog**, or `G`; on by default, remembered between visits): in 3rd person (one
 scenario, not Topology) only the hops already reached, the products that have already checked the session and anything
 close to the actor are visible. The next step stays dark until the actor gets there, and the relationship lines are
 hidden. Checkpoint captions, pop-ups, sounds and the decision timeline keep working. Overview always shows everything.

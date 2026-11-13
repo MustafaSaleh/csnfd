@@ -44,9 +44,9 @@ async function boot() {
   $('#gl').addEventListener('ln-handover', () => setView('orbit'));
   let warOn = true; try { warOn = localStorage.getItem('ln-fog') !== '0'; } catch (e) { }
   const warUI = () => { $('#warT').setAttribute('aria-pressed', warOn); R.setFogWar && R.setFogWar(warOn); };
-  $('#warT').onclick = () => { warOn = !warOn; try { localStorage.setItem('ln-fog', warOn ? '1' : '0'); } catch (e) { } warUI(); toast('Fog of war ' + (warOn ? 'on: in the follow views only what the actor has reached is visible' : 'off')); };
+  $('#warT').onclick = () => { warOn = !warOn; try { localStorage.setItem('ln-fog', warOn ? '1' : '0'); } catch (e) { } warUI(); toast('Fog of war ' + (warOn ? 'on: in 3rd person only what the actor has reached is visible' : 'off')); };
   warUI();
-  if (R.kind === 'svg') $('#viewSel').title = 'In the 2D view, 3rd and 1st person both follow the actor';
+  if (R.kind === 'svg') $('#viewSel').title = 'In the 2D view, 3rd person keeps the actor centred';
   setView(S.view, true);
   /* sound switches; the audio context can only start from a user gesture */
   const sndUI = () => { $('#sndT').setAttribute('aria-pressed', SND.st.sfx); $('#musT').setAttribute('aria-pressed', SND.st.music); };
@@ -66,7 +66,7 @@ async function boot() {
   { let seen = false; try { seen = !!localStorage.getItem('ln-tour'); } catch (e) { } if (!seen && !hadHash) $('#tourHint').hidden = false; }
   $('#fxT').onclick = () => { VFX.set(!VFX.st.on); R.setGfx && R.setGfx(VFX.st.on); $('#fxT').setAttribute('aria-pressed', VFX.st.on); toast('Visual effects ' + (VFX.st.on ? 'on' : 'off')); }; $('#fxT').setAttribute('aria-pressed', VFX.st.on); R.setGfx && R.setGfx(VFX.st.on);
   $('#spT').onclick = () => setSplunk(!S.splunk); $('#spT').setAttribute('aria-pressed', S.splunk); $('#spT').textContent = S.splunk ? 'Splunk layer: on' : 'Splunk layer: off';
-  $('#speed').onchange = e => S.speed = +e.target.value;
+  $('#speed').value = S.speed; $('#speed').onchange = e => S.speed = +e.target.value;
   $('#q').addEventListener('input', doSearch); $('#qcat').addEventListener('change', doSearch);
   $('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { const f = $('#qres button[data-id]'); if (f) f.click(); } if (e.key === 'Escape') { $('#q').value = ''; doSearch(); } });
   $('#qres').addEventListener('click', e => { const b = e.target.closest('button[data-id]'); if (b) { select(b.dataset.id, true); $('#qres').hidden = true; } });
@@ -95,7 +95,7 @@ async function boot() {
     if (e.key === 'n' || e.key === 'N') { $('#musT').click(); return; }
     if (e.key === 'l' || e.key === 'L') { setSplunk(!S.splunk); return; }
     if (e.key === 'g' || e.key === 'G') { $('#warT').click(); return; }
-    if (e.key === 'v' || e.key === 'V') { setView({ orbit: 'third', third: 'first', first: 'orbit' }[S.view]); return; }
+    if (e.key === 'v' || e.key === 'V') { setView(S.view === 'orbit' ? 'third' : 'orbit'); return; }
     if (e.key >= '1' && e.key <= '5') { setLens(DATA.lenses[+e.key - 1].id); writeHash(); return; }
     if (e.key === ' ' && (!t.matches('button,a,[role=button]') || t.matches('.lbl,.n'))) { e.preventDefault(); $('#bPlay').click(); }
   });

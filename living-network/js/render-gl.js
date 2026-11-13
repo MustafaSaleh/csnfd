@@ -5,8 +5,8 @@ function createGL(THREE, OrbitControls, PP) {
   const scene = new THREE.Scene(); scene.background = new THREE.Color(0x070b16);
   const fog = new THREE.FogExp2(0x070b16, .0021);   /* depth haze; switched off with bloom if the frame rate does not hold */
   const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 600);   /* positive near plane: ray picking starts at the camera */
-  /* follow cameras: a perspective camera rides behind the actor (3rd person) or at its eyes (1st person) */
-  const pcam = new THREE.PerspectiveCamera(58, 1, .3, 900), camP = new THREE.Vector3(), camL = new THREE.Vector3(), tP = new THREE.Vector3(), tL = new THREE.Vector3(), tA = new THREE.Vector3();
+  /* follow camera: 3rd person behind the actor, and beside the product during a checkpoint */
+  const pcam = new THREE.PerspectiveCamera(58, 1, .3, 900), camP = new THREE.Vector3(), camL = new THREE.Vector3(), tP = new THREE.Vector3(), tL = new THREE.Vector3(), tA = new THREE.Vector3(), aim = new THREE.Vector3(), lat = new THREE.Vector3();
   let view = cam, viewMode = 'orbit', lastNow = 0;
   const HOME_T = new THREE.Vector3(-7, 3, 1), HOME_O = new THREE.Vector3(68, 116, 100), VS = 36;
   const controls = new OrbitControls(cam, canvas);
@@ -330,7 +330,7 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
     for (let i = 0; i < n; i++) { const m = new THREE.Mesh(CYL, mat); m.scale.set(.14, dashed ? len / n * .55 : 1, .14); m.position.y = (i + .5) * len / n; m.visible = false; g.add(m); parts.push(m); }
     return { g, len, a, b, mat, fm, set(p) { if (dashed) parts.forEach((m, i) => m.visible = p > 0 && (i + .5) / n <= p + 1e-6); else { const m = parts[0]; m.visible = p > .001; m.scale.y = Math.max(.001, p * len); m.position.y = p * len / 2; } } };
   }
-  function setView(m) { viewMode = m; rv.forEach(v => v.camInit = false); dirty = true; }
+  function setView(m) { viewMode = m === 'orbit' ? 'orbit' : 'third'; rv.forEach(v => v.camInit = false); dirty = true; }
   /* fog of war (follow views): only what the actor has reached, what is close to it and the products that have already acted are visible */
   const warFog = new THREE.FogExp2(0x070b16, .018), WAR_R = 7.5;
   let warWant = true, warOn = false;
@@ -353,20 +353,45 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
       n.g.visible = vis; if (!!n.fog === vis) { n.fog = !vis; n.el.classList.toggle('fog', !vis); dirty = true; }
     }
   }
+  /* where a check comes from: a telemetry or feed beam, a named product, or the hop the actor is on */
+  const shotSrc = e => (e.beams && e.beams.find(id => PR[id] || PL[id])) || (e.from && e.from[0] !== '@' && (PR[e.from] || PL[e.from]) ? e.from : null) || (e.hop && e.hop !== e.at && (PR[e.hop] || PL[e.hop]) ? e.hop : null);
   /* every run keeps its own follow-camera pose, so in split view each half follows its own actor */
   function updateFollow(now) {
-    const dt = Math.min(100, now - lastNow); lastNow = now; const fol = viewMode !== 'orbit' && rv.length > 0, fp = viewMode === 'first';
+    const dt = Math.min(100, now - lastNow); lastNow = now; const fol = viewMode === 'third' && rv.length > 0;
     controls.enabled = !fol;
     for (const v of rv) {
-      if (!fol || (!split && v !== rv[0])) { v.camInit = false; continue; }
-      const sg = v.segs[v.si || 0], hs = v.isHuman ? 1 : .45, P = v.head.position;
+      const sg = v.segs[v.si || 0], hs = v.isHuman ? 1 : .45, P = v.head.position, followThis = fol && (split || v === rv[0]);
       tA.copy(sg.b).sub(sg.a).setY(0); if (tA.lengthSq() < 1e-6) tA.set(1, 0, 0); tA.normalize();
-      if (!v.dirS) { v.dirS = tA.clone(); v.camP = new THREE.Vector3(); v.camL = new THREE.Vector3(); }
+      if (!v.dirS) { v.dirS = tA.clone(); v.camP = new THREE.Vector3(); v.camL = new THREE.Vector3(); v.face = Math.atan2(tA.x, tA.z); }
       v.dirS.lerp(tA, RM.matches ? 1 : 1 - Math.exp(-dt * .004)).normalize();   /* turn corners smoothly */
-      const d = v.dirS;
-      if (fp) { tP.copy(P).addScaledVector(d, .9 * hs); tP.y = P.y + 6.6 * hs + (v.isHuman ? 0 : .8); tL.copy(tP).addScaledVector(d, 12); tL.y = tP.y - 2.8 * hs; }
-      else { tP.copy(P).addScaledVector(d, -30 * hs); tP.y = P.y + 21 * hs; tL.copy(P).addScaledVector(d, 12 * hs); tL.y = P.y + 3 * hs; }
-      if (!v.camInit || RM.matches) { v.camP.copy(tP); v.camL.copy(tL); v.camInit = true; } else { const k = 1 - Math.exp(-dt * .006); v.camP.lerp(tP, k); v.camL.lerp(tL, k); }
+      const d = v.dirS, pb = v.r.pb, steps = v.r.steps, st = steps[pb.i];
+      const chk = st && st.t === 'check' ? v.r.tl[st.k] : null, known = id => PR[id] || PL[id];
+      /* behind the actor along the path; late in a walk, glance toward the next checkpoint */
+      tP.copy(P).addScaledVector(d, -30 * hs); tP.y = P.y + 21 * hs; tL.copy(P).addScaledVector(d, 12 * hs); tL.y = P.y + 3 * hs;
+      if (st && st.t === 'move' && pb.p > .55) {
+        let nxt = null; for (let i = pb.i + 1; i < steps.length && !nxt; i++) if (steps[i].t === 'check') nxt = v.r.tl[steps[i].k];
+        if (nxt && known(nxt.at)) { const q = POS(nxt.at); aim.set(q[0], q[1] + 2, q[2]); tL.lerp(aim, (pb.p - .55) / .45 * .7); }
+      }
+      /* a checkpoint: raised, beside the product and biased toward where the check comes from, looking back at the actor.
+         The offset grows with the gap so a nearby product sits beside the actor and a distant one stays in frame. */
+      if (chk && known(chk.at)) {
+        const ap = POS(chk.at), sep = Math.hypot(P.x - ap[0], P.z - ap[2]);
+        lat.set(P.x - ap[0], 0, P.z - ap[2]); if (sep < 2) lat.copy(d); else lat.multiplyScalar(1 / sep);
+        tA.set(-lat.z, 0, lat.x);
+        const sid = shotSrc(chk);
+        if (sid) { const sp = POS(sid); aim.set(sp[0] - ap[0], 0, sp[2] - ap[2]); if (aim.lengthSq() > 1 && aim.normalize().dot(tA) < 0) tA.negate(); }
+        const sc = v.isHuman ? 1 : hs;
+        tP.set(ap[0], ap[1] + (v.isHuman ? 6.5 : 4 * hs), ap[2]).addScaledVector(lat, -(0.7 * sep + 4) * sc).addScaledVector(tA, (0.25 * sep + 12) * sc);
+        tL.set(P.x, v.isHuman ? P.y - v.lift + 6.2 : P.y + 1.4 * hs, P.z);
+      }
+      const ease = RM.matches ? 1 : 1 - Math.exp(-dt * (chk ? .0035 : .006));
+      if (!followThis) v.camInit = false;
+      else if (!v.camInit || RM.matches) { v.camP.copy(tP); v.camL.copy(tL); v.camInit = true; }
+      else { v.camP.lerp(tP, ease); v.camL.lerp(tL, ease); }
+      let face = Math.atan2(d.x, d.z);
+      if (chk && known(chk.at)) { const ap = POS(chk.at), dx = ap[0] - P.x, dz = ap[2] - P.z; if (dx * dx + dz * dz > 4) face = Math.atan2(dx, dz); }
+      let df = face - v.face; while (df > Math.PI) df -= Math.PI * 2; while (df < -Math.PI) df += Math.PI * 2;
+      v.face += df * (RM.matches ? 1 : 1 - Math.exp(-dt * .005));
     }
     return fol;
   }
@@ -434,7 +459,7 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
       if (v.isHuman) {   /* the figure walks the path: faces its direction of travel, limbs swing while moving */
         const sg = v.segs[si], st = v.r.steps[v.r.pb.i], moving = S.playing && st && st.t === 'move' && !RM.matches, ph = now * .012, sw = moving ? Math.sin(ph) * .75 : 0, u = v.actor.userData;
         v.actor.position.set(v.head.position.x, v.head.position.y - v.lift + (moving ? Math.abs(Math.sin(ph)) * .14 : 0), v.head.position.z);
-        v.actor.rotation.y = Math.atan2(sg.b.x - sg.a.x, sg.b.z - sg.a.z);
+        v.actor.rotation.y = v.face != null ? v.face : Math.atan2(sg.b.x - sg.a.x, sg.b.z - sg.a.z);
         u.legL.rotation.x = sw; u.legR.rotation.x = -sw; u.armL.rotation.x = -sw * .8; u.armR.rotation.x = sw * .8;
       }
       tc.set(lens === 'trust' ? trustColor(curTrust) : v.hostile ? '#ff7a6b' : v.r.slot ? '#ffd9a8' : '#ffffff'); v.head.material.color.copy(tc); v.trail.material.color.copy(tc);
@@ -478,7 +503,7 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
   function frame(now) {
     if (tw) { const k = clamp((now - tw.t0) / tw.d, 0, 1), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
       controls.target.lerpVectors(tw.ft, tw.tt, e); cam.position.lerpVectors(tw.fp, tw.tp, e); cam.zoom = tw.fz + (tw.tz - tw.fz) * e; cam.updateProjectionMatrix(); if (k >= 1) tw = null; }
-    controls.update(); const fol = updateFollow(now), fp = fol && viewMode === 'first'; applyWar(fol); updateFx(now); const sh = shakeVec(now);
+    controls.update(); const fol = updateFollow(now); applyWar(fol); updateFx(now); const sh = shakeVec(now);
     groundG.visible = !diagram && viewMode === 'orbit';   /* overview only; follow cameras keep fog of war as the thing that hides the next hop */
     /* frame-rate guard: bloom and fog stay only if roughly 50 fps or better holds over two seconds */
     if (gfxWant && gfxOK && !gfxForce) {   /* watch the frame time in short windows (20 frames or 0.7 s, whichever comes first); two slow windows in a row, under about 45 fps, switch bloom and fog off */
@@ -511,11 +536,10 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
       if (fol && lead && lead.camInit) { pcam.position.copy(lead.camP); pcam.lookAt(lead.camL); view = pcam; } else view = cam;
       view.position.add(sh); view.updateMatrixWorld();
       if (split) { rv.forEach(x => x.g.visible = x === lead); renderer.setViewport(vx, 0, Wv, H); renderer.setScissor(vx, 0, Wv, H); }
-      for (const x of rv) if (x.isHuman) x.actor.visible = !(fp && x === lead);   /* in 1st person you do not see yourself */
       for (const x of runs) x.mk.quaternion.copy(view.quaternion);
       fxVisible(split && lead ? lead.r.slot : null);
       if (composer && gfxWant && gfxOK && !split) { rpass.camera = view; composer.render(); } else renderer.render(scene, view);
-      for (const x of runs) chipRun(x, fp && x === lead);
+      for (const x of runs) chipRun(x, false);
       /* signature of everything label positions depend on: camera pose and zoom, viewport, playhead */
       let sig = W + '|' + H + '|' + vx + '|' + (view.zoom || 0); const me = view.matrixWorld.elements; for (let i = 0; i < 16; i++) sig += '|' + me[i].toFixed(3); for (const x of rv) sig += '|' + x.r.pb.i + (x.r.pb.done ? 'd' : '') + x.head.position.x.toFixed(2) + x.head.position.z.toFixed(2);
       const moved = relaid || sig !== labelSig[pi]; labelSig[pi] = sig; if (moved) labelCull[pi] = true;

@@ -7,7 +7,7 @@ const UC = Object.fromEntries(PORTFOLIO.uc.map(u => [u.code, u])), INDN = Object
 const fromPreset = a => normalize({ who: a[0], device: a[1], loc: a[2], dest: a[3], beh: a[4] }).s;
 const S = {
   mode: 'presets', lens: 'data', split: true, splunk: true,
-  view: (() => { try { const v = localStorage.getItem('ln-view'); return ['orbit', 'third', 'first'].includes(v) ? v : 'third'; } catch (e) { return 'third'; } })(),   /* 3rd person by default */ arch: 'sase', preset: 1, compare: false, active: 0, off: [], speed: 1, playing: false,
+  view: (() => { try { const v = localStorage.getItem('ln-view'); return v === 'orbit' || v === 'third' ? v : 'third'; } catch (e) { return 'third'; } })(),   /* 3rd person by default; a remembered 1st person opens as 3rd */ arch: 'sase', preset: 1, compare: false, active: 0, off: [], speed: .5, playing: false,
   autoplay: (() => { try { return localStorage.getItem('ln-autoplay') === '1'; } catch (e) { return false; } })(),
   slots: [fromPreset(DATA.presets[0].s), fromPreset(DATA.presets[5].s)],
   runs: [], selected: null, notes: [], filter: null,
@@ -99,7 +99,7 @@ function readHash() {
   S.compare = q.get('cmp') === '1'; S.active = 0;
   S.off = (q.get('off') || '').split(',').filter(k => PR[k]); S.preset = +q.get('p') || 0;
   S.splunk = q.get('sp') !== '0'; S.split = q.get('split') !== '0';
-  if (['orbit', 'third', 'first'].includes(q.get('view'))) S.view = q.get('view');
+  if (q.get('view') === 'orbit') S.view = 'orbit'; else if (q.get('view') === 'third' || q.get('view') === 'first') S.view = 'third';
   S.selected = (PR[q.get('sel')] || PL[q.get('sel')]) ? q.get('sel') : null;
   return true;
 }

@@ -19,12 +19,13 @@ function setLens(id) {
   $('#legend').innerHTML = `<b>${L.label}</b> · ${h(L.blurb)}<ul>${L.legend.map(([k, t]) => `<li><svg width="18" height="12" viewBox="0 0 18 12">${sw[k]}</svg>${h(t)}</li>`).join('')}</ul>`;
   R && R.setLens(id); markTimeline(); lastSig = '';
 }
-/* camera view: overview (orbit), 3rd person (behind the actor) or 1st person (through the actor's eyes) */
+/* camera view: overview (orbit) or 3rd person (behind the actor, and beside the product at a checkpoint) */
 function setView(v, quiet) {
   if (!R.setView) v = 'orbit';
+  if (v === 'first') v = 'third';
   S.view = v; $('#viewSel').value = v; R.setView && R.setView(v);
   if (!quiet) SND.play('view');
-  if (v !== 'orbit' && !S.runs.length && !quiet) toast('Follow views need a running scenario: pick a preset or build one.');
+  if (v !== 'orbit' && !S.runs.length && !quiet) toast('3rd person needs a running scenario: pick a preset or build one.');
   if (!quiet) { try { localStorage.setItem('ln-view', v); } catch (e) { } writeHash(); }
 }
 /* Splunk layer on/off: nodes, relationships and Splunk checkpoints appear or disappear together */
