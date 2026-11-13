@@ -115,7 +115,8 @@ allow it earlier) and pauses while the tab is hidden.
 view it was copied in. Two camera views, switched from the playback bar or with `V`: **Overview** (orbit, zoom, pan) and **3rd person**.
 The camera follows behind the actor. Over the second half of a walk it looks ahead toward the next checkpoint. At a
 checkpoint the actor turns to face the product that is checking them, and the camera eases to a raised position beside
-that product, looking back at the actor, then returns behind the actor for the next walk. 3rd person needs a running
+that product, looking back at the actor, then returns behind the actor for the next walk. When that product is on a
+raised layer, the shot opens wider and aims up so the product's name stays in frame. 3rd person needs a running
 scenario and the 3D scene; in split view each half follows its own actor. Dragging the scene in 3rd person switches to Overview
 from the current camera position, so the view carries on from where it was instead of jumping back; the reset-view
 button returns to the standard Overview. In the 2D fallback, 3rd person keeps the actor centred. A link saved from the

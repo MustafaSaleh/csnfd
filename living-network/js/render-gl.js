@@ -383,7 +383,13 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
         const sc = v.isHuman ? 1 : hs;
         tP.set(ap[0], ap[1] + (v.isHuman ? 6.5 : 4 * hs), ap[2]).addScaledVector(lat, -(0.7 * sep + 4) * sc).addScaledVector(tA, (0.25 * sep + 12) * sc);
         tL.set(P.x, v.isHuman ? P.y - v.lift + 6.2 : P.y + 1.4 * hs, P.z);
-      }
+        /* a raised product's name sits above this aim; open the lens and lift it so the name stays in frame */
+        const above = ap[1] + 3.4 - tL.y;
+        v.fovWant = above > 18 ? 80 : above > 8 ? 72 : 64;
+        if (above > 8) tL.y += above * (above > 18 ? .5 : .35);
+      } else v.fovWant = 58;
+      if (v.fov == null) v.fov = v.fovWant;
+      v.fov += (v.fovWant - v.fov) * (RM.matches ? 1 : 1 - Math.exp(-dt * (chk ? .0035 : .006)));
       const ease = RM.matches ? 1 : 1 - Math.exp(-dt * (chk ? .0035 : .006));
       if (!followThis) v.camInit = false;
       else if (!v.camInit || RM.matches) { v.camP.copy(tP); v.camL.copy(tL); v.camInit = true; }
@@ -533,7 +539,7 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
     renderer.setScissorTest(split);
     passes.forEach((runs, pi) => {
       const lead = runs[0]; vx = split ? pi * Wv : 0;
-      if (fol && lead && lead.camInit) { pcam.position.copy(lead.camP); pcam.lookAt(lead.camL); view = pcam; } else view = cam;
+      if (fol && lead && lead.camInit) { pcam.position.copy(lead.camP); pcam.lookAt(lead.camL); if (lead.fov && Math.abs(pcam.fov - lead.fov) > .15) { pcam.fov = lead.fov; pcam.updateProjectionMatrix(); } view = pcam; } else view = cam;
       view.position.add(sh); view.updateMatrixWorld();
       if (split) { rv.forEach(x => x.g.visible = x === lead); renderer.setViewport(vx, 0, Wv, H); renderer.setScissor(vx, 0, Wv, H); }
       for (const x of runs) x.mk.quaternion.copy(view.quaternion);
