@@ -968,6 +968,7 @@ const DATA = {
     { sel: '#left', sheet: 'left', act: 'build', t: 'Build your own', x: 'Compose who, device, location, destination and behaviour. Impossible combinations are struck through with the reason. Compare runs two scenarios side by side in a split view.' },
     { sel: '#viewSel', act: 'presets', t: 'Change the camera', x: 'Overview, 3rd person behind the actor, or 1st person through its eyes. V cycles through them.' },
     { sel: '#left', sheet: 'left', act: 'topo', t: 'Topology', x: 'Isolate one architecture as a diagram. Each numbered line is a relationship stated on cisco.com or splunk.com, listed on the right with its source.' },
+    { sel: '#left', sheet: 'left', act: 'ind', t: 'Industries', x: 'Cisco’s industry use cases over the same scene. Pick one to keep the products Cisco lists for it and fade the rest, then open a linked preset, a prefilled builder scenario or the closest architecture.' },
     { sel: '#top', act: 'presets', t: 'Layers, effects and sound', x: 'Switch the Splunk layer, visual effects, sound effects and music on or off. Search finds any product by name or category.' },
     { sel: '#right .rhead', sheet: 'right', act: 'finish', t: 'Share and export', x: 'Copy link reproduces this exact scenario. Export saves a printable PDF report, an image of the scene, Markdown or JSON. That is the tour: pick a preset and press play.' }
   ],

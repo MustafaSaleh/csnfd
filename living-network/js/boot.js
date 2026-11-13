@@ -24,7 +24,6 @@ async function boot() {
   $$('.modes button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === S.mode));
   setLens(S.lens);
   if (!hadHash) loadPreset(1); else { renderLeft(); rerun(); if (S.selected) select(S.selected, false); }
-  R.setFilter(null);
 
   /* events */
   $('#lenses').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { setLens(b.dataset.lens); writeHash(); } });
@@ -108,6 +107,6 @@ async function boot() {
   document.addEventListener('visibilitychange', () => { SND.hidden(document.hidden); cancelAnimationFrame(raf); if (!document.hidden) { last = performance.now(); raf = requestAnimationFrame(loop); } });
   raf = requestAnimationFrame(loop);
   /* test / automation hook: engine only, no network */
-  window.__LN = { DATA, S, SND, VFX, setFull, TOUR, tourGo, tourEnd, exportData, exportMarkdown, reportHTML, doExport, setSplunk, setView, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
+  window.__LN = { DATA, PORTFOLIO, UC, openUC, ucTry, S, SND, VFX, setFull, TOUR, tourGo, tourEnd, exportData, exportMarkdown, reportHTML, doExport, setSplunk, setView, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
 }
 boot();

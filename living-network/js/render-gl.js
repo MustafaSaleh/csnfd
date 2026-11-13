@@ -223,9 +223,9 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
   /* a node is shown unless a topology diagram excludes it or it belongs to the hidden Splunk layer */
   const shown = id => (!diagram || topo.nodes.has(id)) && (layer || !isSp(id) || (!!topo && topo.nodes.has(id)));
   function refreshVis() { for (const id in nodes) { const on = shown(id); nodes[id].g.visible = on; nodes[id].el.classList.toggle('gone', !on); }
-    spZone.forEach(o => o.visible = layer); zoneLbl.forEach(z => z.el.style.display = diagram || (z.sp && !layer) ? 'none' : ''); spLinks.visible = layer && !topo; dirty = true; }
+    spZone.forEach(o => o.visible = layer); zoneLbl.forEach(z => z.el.style.display = diagram || (z.sp && !layer) ? 'none' : ''); spLinks.visible = layer && !topo && !focusSet; dirty = true; }
   function setLayer(on) { layer = on; refreshVis(); }
-  let lensLine = null, selLine = null, flow = [], topo = null, topoLine = null, topoChips = [];
+  let lensLine = null, selLine = null, flow = [], topo = null, topoLine = null, topoChips = [], focusSet = null, focusLine = null;
   /* ambient traffic: one instanced mesh */
   const NP = 150, amb = new THREE.InstancedMesh(new THREE.SphereGeometry(.13, 6, 5), new THREE.MeshBasicMaterial({ color: 0xffffff }), NP); amb.frustumCulled = false; scene.add(amb);
   const dummy = new THREE.Object3D(), va = new THREE.Vector3(), vb = new THREE.Vector3(), tv3 = new THREE.Vector3(), tc = new THREE.Color();
@@ -241,7 +241,7 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
     flow = lensLinks(l); const dashed = l === 'policy' || l === 'threat';
     lensLine = lineSet(flow, dashed ? new THREE.LineDashedMaterial({ color: lensCol, transparent: true, opacity: .75, dashSize: .7, gapSize: .5 }) : new THREE.LineBasicMaterial({ color: lensCol, transparent: true, opacity: .5 }));
     scene.add(lensLine); amb.material.color.copy(lensCol); colorRuns(); dirty = true;
-    if (topo) applyTopo();
+    if (topo) applyTopo(); else if (focusSet) setFocus(focusSet);
   }
   function select(id) {
     selected = id; dirty = true; for (const k in nodes) nodes[k].el.classList.toggle('sel', k === id);
@@ -250,8 +250,9 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
   }
   /* topology mode: isolate an architecture, draw its stated relationships and number them */
   function applyTopo() {
-    baseLinks.visible = !topo; spLinks.visible = layer && !topo; if (lensLine) lensLine.visible = !topo;
-    for (const id in nodes) { const n = nodes[id], on = !topo || topo.nodes.has(id); for (const mt of n.dmat ? [n.mat, n.dmat] : [n.mat]) { mt.transparent = !on; mt.opacity = on ? 1 : .1; mt.depthWrite = on; mt.needsUpdate = true; } if (n.isP) n.ring.visible = on && ringOn(n.p, lens); }
+    const only = topo || focusSet;   /* an architecture or an industry use case: everything outside it is ghosted */
+    baseLinks.visible = !only; spLinks.visible = layer && !only; if (lensLine) lensLine.visible = !only;
+    for (const id in nodes) { const n = nodes[id], on = !only || only.nodes.has(id); for (const mt of n.dmat ? [n.mat, n.dmat] : [n.mat]) { mt.transparent = !on; mt.opacity = on ? 1 : .1; mt.depthWrite = on; mt.needsUpdate = true; } if (n.isP) n.ring.visible = on && ringOn(n.p, lens); }
     flow = topo ? topo.links : lensLinks(lens);
   }
   function setTopo(t) {
@@ -269,6 +270,13 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
     const c = new THREE.Vector3(); let r = 0; t.nodes.forEach(id => { const p = POS(id); c.add(tv3.set(p[0], p[1], p[2])); }); c.multiplyScalar(1 / t.nodes.size);
     t.nodes.forEach(id => { const p = POS(id); r = Math.max(r, tv3.set(p[0], p[1], p[2]).distanceTo(c)); });
     const fz = fitZoom(); tween(c, c.clone().add(HOME_O), t.a.all ? fz : clamp(fz * 40 / (r + 6), fz, 2.6));
+  }
+  /* industry use case: the scene keeps its layout, the products Cisco lists stay solid and the stated relationships among them are drawn */
+  function setFocus(f) {
+    focusSet = topo ? null : f; if (focusLine) { scene.remove(focusLine); focusLine.geometry.dispose(); focusLine = null; }
+    if (topo) return;
+    applyTopo(); if (focusSet) { flow = focusSet.links; focusLine = lineSet(focusSet.links, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .9 })); scene.add(focusLine); }
+    dirty = true;
   }
   function setFilter(f) { filter = f; dirty = true; for (const k in nodes) nodes[k].el.classList.toggle('filtered', !!f && !f.has(k)); }
   function focus(id) { const p = POS(id), t = new THREE.Vector3(p[0], p[1], p[2]); tween(t, t.clone().add(cam.position.clone().sub(controls.target)), Math.max(cam.zoom, 1.7)); }
@@ -293,7 +301,7 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
   function applyWar(fol) {
     const lead = rv[0], on = warWant && fol && !split && !topo && !!lead;
     if (!on) {
-      if (warOn) { warOn = false; refreshVis(); for (const id in nodes) nodes[id].fog = false, nodes[id].el.classList.remove('fog'); baseLinks.visible = !topo; if (lensLine) lensLine.visible = !topo; if (selLine) selLine.visible = true;
+      if (warOn) { warOn = false; refreshVis(); for (const id in nodes) nodes[id].fog = false, nodes[id].el.classList.remove('fog'); baseLinks.visible = !topo && !focusSet; if (lensLine) lensLine.visible = !topo && !focusSet; if (selLine) selLine.visible = true;
         rv.forEach(v => v.segs.forEach(s => s.fm.visible = true)); gfxApply(); dirty = true; }
       return;
     }
@@ -591,6 +599,6 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
     g.globalAlpha = 1; g.textAlign = 'left'; g.fillStyle = '#a9b6d3'; g.font = '500 11px system-ui, sans-serif'; g.fillText('Living Network · ' + DATA.meta.sceneLabel + ' · independent educational visualization', 12, H - 12);
     return cv;
   }
-  return { kind: 'webgl', stats: () => ({ calls: renderer.info.render.calls, tris: renderer.info.render.triangles, geos: renderer.info.memory.geometries }), fx, nudge, snapshot, setSplit, setGfx, setFogWar, isSplit: () => split, gfx: () => ({ bloom: !!composer && gfxWant && gfxOK, fog: !!scene.fog, ok: gfxOK }), setLens, setRuns, setTopo, setLayer, setView, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
+  return { kind: 'webgl', stats: () => ({ calls: renderer.info.render.calls, tris: renderer.info.render.triangles, geos: renderer.info.memory.geometries }), fx, nudge, snapshot, setSplit, setGfx, setFogWar, isSplit: () => split, gfx: () => ({ bloom: !!composer && gfxWant && gfxOK, fog: !!scene.fog, ok: gfxOK }), setLens, setRuns, setTopo, setFocus, setLayer, setView, frame, focus, setFilter, select, resetView: () => home(false), screenOf, pickAt: (x, y) => pick({ clientX: x, clientY: y }) };
 }
 

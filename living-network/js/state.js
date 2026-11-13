@@ -2,26 +2,37 @@
    STATE
    ===================================================================================== */
 const RM = matchMedia('(prefers-reduced-motion: reduce)');
+/* industry use cases (js/portfolio.js): by code, and industry names by id */
+const UC = Object.fromEntries(PORTFOLIO.uc.map(u => [u.code, u])), INDN = Object.fromEntries(PORTFOLIO.industries.map(i => [i.id, i.name]));
 const fromPreset = a => normalize({ who: a[0], device: a[1], loc: a[2], dest: a[3], beh: a[4] }).s;
 const S = {
   mode: 'presets', lens: 'data', split: true, splunk: true,
   view: (() => { try { const v = localStorage.getItem('ln-view'); return ['orbit', 'third', 'first'].includes(v) ? v : 'third'; } catch (e) { return 'third'; } })(),   /* 3rd person by default */ arch: 'sase', preset: 1, compare: false, active: 0, off: [], speed: 1, playing: false,
   autoplay: (() => { try { return localStorage.getItem('ln-autoplay') === '1'; } catch (e) { return false; } })(),
   slots: [fromPreset(DATA.presets[0].s), fromPreset(DATA.presets[5].s)],
-  runs: [], selected: null, notes: [], filter: null
+  runs: [], selected: null, notes: [], filter: null,
+  /* Industries mode: ind = industry, uc = open use case, ucProd = list only use cases naming this product,
+     ctx = use case a scenario or topology was opened from, pind = industry filter on the preset library */
+  ind: PORTFOLIO.industries[0].id, uc: null, ucProd: null, ctx: null, pind: null
 };
+/* the open use case as the renderers need it: its scene products and the stated relationships among them */
+function ucFocus() {
+  const u = S.mode === 'ind' && UC[S.uc]; if (!u) return null;
+  const nodes = new Set(u.prods.filter(k => S.splunk || PR[k].cat !== 'splunk'));
+  return { u, nodes, links: DATA.links.filter(l => l[4] !== 'suite' && nodes.has(l[0]) && nodes.has(l[1])) };
+}
 let R = null;   /* renderer */
 
 function rerun() {
   S.notes = [];
-  if (S.mode === 'explore' || S.mode === 'topo') S.runs = [];
+  if (S.mode === 'explore' || S.mode === 'topo' || S.mode === 'ind') S.runs = [];
   else S.runs = (S.compare ? [0, 1] : [S.active]).map(i => {
     const r = evaluate(S.slots[i], S.off); r.slot = i; r.base = S.off.length ? evaluate(S.slots[i], null) : null;
     r.steps = buildSteps(r); r.pb = { i: 0, p: 0, done: false }; r.sug = suggestions(r.s, r); return r;
   });
   if (S.off.length && !S.runs.length) S.off = [];
   document.body.dataset.cmp = S.runs.length > 1 ? '1' : '0';
-  S.topo = S.mode === 'topo' ? topoOf(S.arch) : null; R.setLayer(S.splunk); R.setSplit && R.setSplit(S.split); R.setTopo(S.topo); if (S.runs.length) SND.play("start"); R.setRuns(S.runs); R.setFilter(S.topo ? S.topo.nodes : S.filter); renderResults(); S.playing = S.autoplay && S.runs.length > 0; lastSig = ''; writeHash();
+  S.topo = S.mode === 'topo' ? topoOf(S.arch) : null; S.focus = ucFocus(); R.setLayer(S.splunk); R.setSplit && R.setSplit(S.split); R.setTopo(S.topo); R.setFocus && R.setFocus(S.focus); if (S.runs.length) SND.play("start"); R.setRuns(S.runs); R.setFilter(S.topo ? S.topo.nodes : S.filter || (S.focus && S.focus.nodes)); renderResults(); S.playing = S.autoplay && S.runs.length > 0; lastSig = ''; writeHash();
 }
 /* playback */
 const DUR = { move: 620, check: 1250, end: 1 };
@@ -66,6 +77,8 @@ function writeHash() {
   if (S.off.length) q.set('off', S.off.join(','));
   if (S.mode === 'presets' && S.preset) q.set('p', S.preset);
   if (S.mode === 'topo') q.set('arch', S.arch);
+  if (S.mode === 'ind') { q.set('ind', S.ind); if (S.uc) q.set('uc', S.uc); if (S.ucProd) q.set('ucp', S.ucProd); }
+  else if (S.ctx) q.set('ctx', S.ctx);
   if (S.selected) q.set('sel', S.selected);
   if (S.view !== 'third') q.set('view', S.view);
   if (!S.splunk) q.set('sp', '0');
@@ -76,7 +89,10 @@ function writeHash() {
 }
 function readHash() {
   const q = new URLSearchParams(location.hash.slice(1)); if (!q.has('a')) return false;
-  if (['presets', 'build', 'explore', 'topo'].includes(q.get('mode'))) S.mode = q.get('mode');
+  if (['presets', 'build', 'explore', 'topo', 'ind'].includes(q.get('mode'))) S.mode = q.get('mode');
+  if (INDN[q.get('ind')]) S.ind = q.get('ind');
+  S.uc = UC[q.get('uc')] ? q.get('uc') : null; if (S.uc) S.ind = UC[S.uc].ind;
+  S.ucProd = PR[q.get('ucp')] ? q.get('ucp') : null; S.ctx = S.mode !== 'ind' && UC[q.get('ctx')] && UC[q.get('ctx')].presets ? q.get('ctx') : null;
   if (DATA.architectures.some(a => a.id === q.get('arch'))) S.arch = q.get('arch');
   if (LENS[q.get('lens')]) S.lens = q.get('lens');
   S.slots[0] = unkey(q.get('a')); if (q.get('b')) S.slots[1] = unkey(q.get('b'));

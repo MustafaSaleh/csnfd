@@ -56,6 +56,23 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr) 350px;min-height:0}
 .modes{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;padding:10px 14px;position:sticky;top:0;background:var(--panel);z-index:5;border-bottom:1px solid var(--line)}
 .modes button{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px 2px;font-size:11.5px;font-weight:600;color:var(--tx2);white-space:nowrap}
 .modes button[aria-selected=true]{background:var(--panel2);border-color:var(--lens);color:var(--tx)}
+.modes button[data-mode=ind]{grid-column:1/-1}
+
+/* industries: use case list, use case card, links back to scenarios */
+.indbar{margin:8px 0 2px}
+.preset.uc{justify-content:space-between;gap:8px}
+.preset.uc small{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--lens);white-space:nowrap}
+.ucf{font-size:12px;margin:8px 0 0;color:var(--tx2)}
+.ucard .cat{font-size:11px;color:var(--tx3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.ucard .others{font-size:12px;color:var(--tx2);margin-top:3px;line-height:1.5}
+.umb{font-size:12px;border-left:2px solid var(--policy);padding:2px 0 2px 8px;margin-top:8px;color:var(--tx2)}
+.ucb{border-bottom:1px solid var(--line);font-size:12.5px}
+.ucb summary{cursor:pointer;padding:7px 0;font-weight:600}
+.ucb summary small{color:var(--tx3);font-weight:400;margin-left:4px}
+.ucb ul{margin:0 0 8px;padding-left:18px;color:var(--tx2)} .ucb li{margin-top:3px}
+.ucs small{font-size:10.5px;color:var(--tx3);white-space:nowrap;text-align:right}
+.ctx{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 14px;border-bottom:1px solid var(--line);background:var(--panel2);font-size:12px}
+.ctx span{flex:1;min-width:140px;color:var(--tx2)} .ctx b{color:var(--tx)}
 
 /* presets */
 .pg{margin:12px 0 4px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3)}

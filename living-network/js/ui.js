@@ -33,10 +33,74 @@ function setSplunk(on) {
   SND.play(on ? 'splunk' : 'toggle', false);
   if (R) { R.setLayer(on); setLens(S.lens); renderLeft(); rerun(); }
 }
+const markTabs = () => $$('.modes button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === S.mode));
 function setMode(m) {
-  S.mode = m; $$('.modes button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === m));
+  S.mode = m; markTabs();
   if (m === 'presets' && !S.preset) S.preset = 0;
   renderLeft(); rerun();
+}
+const splunkOn = () => { if (S.splunk) return; S.splunk = true; $('#spT').setAttribute('aria-pressed', true); $('#spT').textContent = 'Splunk layer: on'; R.setLayer(true); setLens(S.lens); };
+
+/* ---- industry use cases (PORTFOLIO): the Industries mode and its links to presets, the builder and Topology ---- */
+const ucLabel = u => INDN[u.ind] + ' · ' + u.name;
+const presetOf = n => DATA.presets.find(p => p.n === n);
+const archOf = id => DATA.architectures.find(a => a.id === id);
+const buildLine = a => { const s = fromPreset(a); return [opt('who', s.who).short, opt('device', s.device).short, opt('loc', s.loc).short, '→ ' + opt('dest', s.dest).short, ...s.beh.map(b => opt('beh', b).label)].join(' · '); };
+const UMB_NOTE = 'Cisco’s page lists Umbrella, which is retiring and is not in this scene. It is shown here as Secure Access, which incorporates Umbrella’s DNS-layer security and secure web gateway.';
+/* blocks of a use case in reading order; the source has two shapes and each use case carries the blocks it has */
+const UC_BLOCKS = [['drivers', 'Industry drivers'], ['needs', 'Business needs'], ['caps', 'Capabilities'], ['benefits', 'Benefits'], ['why', 'Why Cisco'], ['outcomes', 'Business outcomes']];
+function openUC(code, quiet) {
+  const u = UC[code]; if (!u) return;
+  S.mode = 'ind'; S.ind = u.ind; S.uc = code; S.ctx = null; if (S.ucProd && !u.prods.includes(S.ucProd)) S.ucProd = null;
+  S.selected = null; R.select(null); $('#detail').hidden = true;
+  markTabs(); renderLeft(); rerun(); $('#right').scrollTop = 0;
+  const cur = $('#left .preset[aria-current=true]'); if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
+  if (!quiet && matchMedia('(max-width:900px)').matches) sheet('right');
+}
+/* leave a use case for one of its scenarios; the use case stays as context until another scenario is picked */
+function ucTry(kind, n) {
+  const u = UC[S.uc]; if (!u || !u.presets) return;
+  S.ctx = u.code;
+  if (kind === 'preset') { S.mode = 'presets'; S.pind = null; markTabs(); loadPreset(n); }
+  else if (kind === 'build') { S.mode = 'build'; S.compare = false; S.active = 0; S.preset = 0; S.off = []; S.slots[0] = fromPreset(u.build); markTabs(); renderLeft(); rerun(); }
+  else { S.arch = u.arch; if (archOf(u.arch).layer === 'splunk') splunkOn(); setMode('topo'); }
+  $('#right').scrollTop = 0;
+}
+const ctxHTML = () => { const u = S.mode !== 'ind' && UC[S.ctx]; return u ? `<div class="ctx"><span>Industry context: <b>${h(ucLabel(u))}</b></span><button class="btn" data-uc="${u.code}">Back to use case</button><button class="btn" data-ctxclear aria-label="Dismiss industry context">×</button></div>` : ''; };
+/* use cases that relate to a run: those curated to the loaded preset, then those whose listed products cover most of the run */
+function ucForRun(r) {
+  const cur = S.mode === 'presets' && S.preset ? PORTFOLIO.uc.filter(u => u.presets && u.presets.includes(S.preset)) : [];
+  const near = PORTFOLIO.uc.filter(u => !cur.includes(u)).map(u => ({ u, c: r.products.filter(p => u.prods.includes(p)).length }))
+    .filter(x => x.c >= 2).sort((a, b) => b.c - a.c || a.u.prods.length - b.u.prods.length).slice(0, 3);
+  if (!cur.length && !near.length) return '';
+  return `<h4>Industry use cases</h4><div class="sug ucs">${cur.map(u => `<button data-uc="${u.code}"><span>${h(ucLabel(u))}</span><small>linked to this preset</small></button>`).join('')}${near.map(x => `<button data-uc="${x.u.code}"><span>${h(ucLabel(x.u))}</span><small>names ${x.c} of the ${r.products.length} products in this run</small></button>`).join('')}</div>
+    <p class="small" style="margin-top:5px">From Cisco’s industry portfolio. A count compares product lists only; it says nothing about this verdict.</p>`;
+}
+function ucCard(u) {
+  const f = S.focus, hidden = u.prods.filter(k => !f.nodes.has(k)), sec = (t, items) => `<details class="ucb"><summary>${h(t)} <small>${items.length}</small></summary><ul>${items.map(x => `<li>${h(x)}</li>`).join('')}</ul></details>`;
+  const tryit = u.presets ? `<h4>Try it</h4><div class="sug ucs">
+      ${u.presets.map(n => `<button data-ucpreset="${n}"><span>Preset ${n}: ${h(presetOf(n).t)}</span><small>Presets</small></button>`).join('')}
+      <button data-ucbuild><span>${h(buildLine(u.build))}</span><small>Build your own</small></button>
+      <button data-uctopo><span>${h(archOf(u.arch).name)}</span><small>Topology</small></button></div>
+      <p class="small" style="margin-top:5px">These scenario links are chosen by this tool, not by Cisco. Verdicts are illustrative.</p>`
+    : `<p class="small" style="margin-top:10px">No scenario in this tool is linked to this use case. The scene shows the products Cisco lists for it.</p>`;
+  return `<div class="rhead"><h2>Use case</h2><button class="btn" id="shareR">Copy link</button>${expMenu()}</div><div class="run ucard">
+    <div class="cat">${h(INDN[u.ind])} · ${u.code}</div><h3 style="font-size:15px">${h(u.name)}</h3><p style="margin:6px 0">${h(u.desc)}</p>
+    ${tryit}
+    <h4>Products Cisco lists for this use case</h4>
+    <p class="small">In this scene (${f.nodes.size})</p><div class="prods">${[...f.nodes].map(id => `<button class="pb" data-id="${id}">${h(PR[id].s)}</button>`).join('')}</div>
+    ${hidden.length ? `<p class="small" style="margin-top:5px">Hidden with the Splunk layer off: ${h(hidden.map(k => PR[k].s).join(', '))}.</p>` : ''}
+    ${u.umb ? `<p class="umb">${h(UMB_NOTE)}</p>` : ''}
+    ${u.other.length ? `<p class="small" style="margin-top:10px">Also listed by Cisco, not in this scene (${u.other.length})</p><p class="others">${u.other.map(i => h(PORTFOLIO.names[i])).join(' · ')}</p>` : ''}
+    <h4>Stated relationships among these products (${f.links.length})</h4>
+    ${f.links.length ? `<details class="ucb"${f.links.length <= 8 ? ' open' : ''}><summary>Drawn in white in the scene <small>${f.links.length}</small></summary><ol class="tl">${f.links.map((l, i) => `<li style="--c:#fff"><span class="n">${i + 1}</span><div><button class="p" data-id="${l[0]}">${h(PR[l[0]].s)}</button> ↔ <button class="p" data-id="${l[1]}">${h(PR[l[1]].s)}</button>
+      <div>${h(l[2])}</div><div class="meta"><a href="${srcOf(l[3])}" target="_blank" rel="noopener noreferrer">source</a></div></div></li>`).join('')}</ol></details>` : '<p class="small">None stated on the pages reviewed.</p>'}
+    <p class="small" style="margin-top:6px">Relationships come from cisco.com and splunk.com product pages, as in Topology. Cisco’s use case page lists the products; it does not state these links.</p>
+    <h4>What Cisco says</h4>
+    ${UC_BLOCKS.filter(([k]) => u[k]).map(([k, t]) => sec(t, u[k])).join('')}
+    ${u.svc.length ? sec('Cisco services', u.svc.map(i => PORTFOLIO.services[i])) : ''}
+    <a class="src" href="${PORTFOLIO.source}" target="_blank" rel="noopener noreferrer">Source: Cisco Industries Portfolio Explorer ↗</a>
+    <p class="small">Use case text and product lists are Cisco’s, collected ${PORTFOLIO.collected}. Products Cisco lists for this use case, placed where this scene already has them — not an architecture or a validated design.</p></div>`;
 }
 function loadPreset(n) {
   const p = DATA.presets.find(x => x.n === n); if (!p) return;
@@ -49,7 +113,23 @@ function renderLeft() {
   const el = $('#leftBody');
   if (S.mode === 'presets') {
     el.innerHTML = `<h2>Preset library</h2><p class="small" style="margin:4px 0 2px">One click fills the five pickers and runs the scenario.</p>` +
-      DATA.presets.map(p => `${p.g ? `<div class="pg">${h(p.g)}</div>` : ''}<button class="preset" data-n="${p.n}" aria-current="${S.preset === p.n}"><b>${p.n}</b><span>${h(p.t)}</span></button>`).join('');
+      `<div class="chips indbar" role="radiogroup" aria-label="Show presets linked to an industry"><button class="chip" role="radio" data-pind="" aria-checked="${!S.pind}">All</button>${PORTFOLIO.industries.map(i => `<button class="chip" role="radio" data-pind="${i.id}" aria-checked="${S.pind === i.id}">${h(i.name)}</button>`).join('')}</div>` +
+      (() => {
+        const keep = S.pind && new Set(PORTFOLIO.uc.filter(u => u.ind === S.pind && u.presets).flatMap(u => u.presets));
+        let g = '', shown = '';
+        return (keep ? `<p class="small" style="margin:6px 0 0">${keep.size} presets are linked from ${h(INDN[S.pind])} use cases.</p>` : '') + DATA.presets.map(p => {
+          if (p.g) g = p.g; if (keep && !keep.has(p.n)) return '';
+          const head = g !== shown ? `<div class="pg">${h(shown = g)}</div>` : '';
+          return `${head}<button class="preset" data-n="${p.n}" aria-current="${S.preset === p.n}"><b>${p.n}</b><span>${h(p.t)}</span></button>`;
+        }).join('');
+      })();
+  } else if (S.mode === 'ind') {
+    const list = PORTFOLIO.uc.filter(u => u.ind === S.ind && (!S.ucProd || u.prods.includes(S.ucProd)));
+    el.innerHTML = `<h2>Industries</h2><p class="small" style="margin:4px 0 8px">Cisco’s industry use cases over this scene. Pick one to see the products Cisco lists for it and the scenarios that illustrate it.</p>
+      <div class="chips indbar" role="radiogroup" aria-label="Industry">${PORTFOLIO.industries.map(i => `<button class="chip" role="radio" data-ind="${i.id}" aria-checked="${S.ind === i.id}">${h(i.name)}</button>`).join('')}</div>
+      ${S.ucProd ? `<p class="ucf">Use cases that name <b>${h(PR[S.ucProd].s)}</b> <button class="chip" data-ucpclear>Show all</button></p>` : ''}
+      <div class="pg">${h(INDN[S.ind])} · ${list.length} use case${list.length === 1 ? '' : 's'}</div>` +
+      (list.map(u => `<button class="preset uc" data-uc="${u.code}" aria-current="${S.uc === u.code}"><span>${h(u.name)}</span>${u.presets ? `<small title="Linked to ${u.presets.length} preset${u.presets.length === 1 ? '' : 's'}, a builder scenario and a topology">scenarios</small>` : ''}</button>`).join('') || '<p class="small">No use case in this industry names it.</p>');
   } else if (S.mode === 'build') {
     const s = S.slots[S.active];
     const group = k => {
@@ -85,8 +165,12 @@ function renderLeft() {
 $('#left').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.dataset.mode) return setMode(b.dataset.mode);
-  if (b.dataset.arch) { SND.play('topo'); S.arch = b.dataset.arch; if (DATA.architectures.find(a => a.id === S.arch).layer === 'splunk' && !S.splunk) { S.splunk = true; $('#spT').setAttribute('aria-pressed', true); $('#spT').textContent = 'Splunk layer: on'; R.setLayer(true); setLens(S.lens); } renderLeft(); rerun(); if (matchMedia('(max-width:900px)').matches) sheet('right'); return; }
-  if (b.dataset.n) { loadPreset(+b.dataset.n); if (matchMedia('(max-width:900px)').matches) sheet('none'); return; }
+  if (b.dataset.ind) { if (S.ind !== b.dataset.ind) { S.ind = b.dataset.ind; S.uc = null; } renderLeft(); return rerun(); }
+  if (b.dataset.pind !== undefined) { S.pind = b.dataset.pind || null; return renderLeft(); }
+  if (b.hasAttribute('data-ucpclear')) { S.ucProd = null; renderLeft(); return writeHash(); }
+  if (b.dataset.uc) return openUC(b.dataset.uc);
+  if (b.dataset.arch) { SND.play('topo'); S.arch = b.dataset.arch; if (UC[S.ctx] && UC[S.ctx].arch !== S.arch) S.ctx = null; if (archOf(S.arch).layer === 'splunk') splunkOn(); renderLeft(); rerun(); if (matchMedia('(max-width:900px)').matches) sheet('right'); return; }
+  if (b.dataset.n) { if (UC[S.ctx] && !UC[S.ctx].presets.includes(+b.dataset.n)) S.ctx = null; loadPreset(+b.dataset.n); if (matchMedia('(max-width:900px)').matches) sheet('none'); return; }
   if (b.id === 'cmpT') { S.compare = !S.compare; S.active = 0; S.preset = 0; renderLeft(); return rerun(); }
   if (b.dataset.slot) { S.active = +b.dataset.slot; return renderLeft(); }
   if (b.id === 'runB') { rerun(); if (matchMedia('(max-width:900px)').matches) sheet('none'); return; }
@@ -138,6 +222,7 @@ function runHTML(r) {
     <p class="small" style="margin-top:6px">Path: ${r.path.map(n => h(nodeName(n))).join(' → ')}${r.stopAt >= 0 ? ' (stopped at ' + h(nodeName(r.path[r.stopAt])) + ')' : ''}. Rules ${r.rules.join(', ')}${r.fallback ? ' — nearest matching rule used' : ''}.</p>
     <h4>Products involved</h4>
     <div class="prods">${r.products.map(p => `<a href="${PR[p].url}" target="_blank" rel="noopener noreferrer" title="Source: ${new URL(PR[p].url).host.replace('www.', '')}">${h(PR[p].s)}</a>`).join('')}</div>
+    ${ucForRun(r)}
     ${sug.length ? `<h4>Change one thing</h4><div class="sug">${sug.map((g, i) => `<button data-sug="${i}"><span>${h(g.l)}</span>${vchip(g.v)}</button>`).join('')}</div>` : ''}
     <h4>Without these controls</h4>
     <div class="ctl"><div class="chips" role="group" aria-label="Disable products and replay">${(r.base || r).products.filter(p => PR[p].cat !== 'net' || PR[p].inspect).map(p => `<button class="chip off" role="checkbox" data-off="${p}" aria-checked="${S.off.includes(p)}">${h(PR[p].s)}</button>`).join('')}</div>
@@ -149,7 +234,7 @@ function renderResults() {
   const el = $('#result');
   if (S.topo) {
     const { a, nodes, links } = S.topo, src = a.src ? srcOf(a.src) : null, su = srcOf;
-    el.innerHTML = `<div class="rhead"><h2>Topology</h2><button class="btn" id="shareR">Copy link</button>${expMenu()}</div><div class="run">
+    el.innerHTML = `<div class="rhead"><h2>Topology</h2><button class="btn" id="shareR">Copy link</button>${expMenu()}</div>${ctxHTML()}<div class="run">
       <h3 style="font-size:15px">${h(a.name)}</h3><p style="margin:6px 0">${h(a.blurb)}</p>
       ${src ? `<a class="src" style="margin-top:0" href="${src}" target="_blank" rel="noopener noreferrer">Source: ${new URL(src).host.replace('www.', '')} ↗</a>` : ''}
       ${a.cvd ? `<h4>Cisco Validated and design references</h4><div class="cvdl">${a.cvd.map(CVDL).join('')}</div>` : ''}
@@ -160,8 +245,16 @@ function renderResults() {
         <div>${h(l[2])}</div><div class="meta"><a href="${su(l[3])}" target="_blank" rel="noopener noreferrer">source</a></div></div></li>`).join('') || '<li>No relationship stated.</li>'}</ol></div>`;
     return;
   }
+  if (S.mode === 'ind') {
+    if (S.focus) { el.innerHTML = ucCard(S.focus.u); return; }
+    const linked = PORTFOLIO.uc.filter(u => u.presets).length;
+    el.innerHTML = `<div class="rhead"><h2>Industries</h2></div><div class="pad"><p>Pick a use case on the left. The scene keeps the products Cisco lists for it and fades the rest.</p>
+      <p class="small" style="margin-top:8px">${PORTFOLIO.uc.length} use cases across ${PORTFOLIO.industries.length} industries, from Cisco’s Industries Portfolio Explorer, collected ${PORTFOLIO.collected}. ${linked} are linked to presets, a builder scenario and a topology; those links are chosen by this tool.</p>
+      <div class="exlist" style="margin-top:10px">${PORTFOLIO.industries.map(i => `<button data-indgo="${i.id}"><span>${h(i.name)}</span><small>${PORTFOLIO.uc.filter(u => u.ind === i.id).length} use cases</small></button>`).join('')}</div></div>`;
+    return;
+  }
   if (!S.runs.length) { el.innerHTML = `<div class="rhead"><h2>Free explore</h2></div><div class="pad"><p>Select a product in the scene or the list to see what it does and which other products cisco.com says it works with.</p><p class="small" style="margin-top:8px">${Object.keys(PR).length} products · ${DATA.links.length} stated relationships · verified ${DATA.meta.verified}.</p></div>`; return; }
-  el.innerHTML = `<div class="rhead"><h2>Result</h2>${S.compare && R.setSplit ? `<button class="btn" id="splitB" aria-pressed="${S.split}" title="Show the two scenarios side by side, each in its own view">Split view</button>` : ''}<button class="btn" id="cmpR" aria-pressed="${S.compare}">${S.compare ? 'Exit compare' : 'Compare'}</button><button class="btn" id="shareR">Copy link</button>${expMenu()}</div>
+  el.innerHTML = `<div class="rhead"><h2>Result</h2>${S.compare && R.setSplit ? `<button class="btn" id="splitB" aria-pressed="${S.split}" title="Show the two scenarios side by side, each in its own view">Split view</button>` : ''}<button class="btn" id="cmpR" aria-pressed="${S.compare}">${S.compare ? 'Exit compare' : 'Compare'}</button><button class="btn" id="shareR">Copy link</button>${expMenu()}</div>${ctxHTML()}
     <div class="runs ${S.runs.length > 1 ? 'cmp' : ''}">${S.runs.map(runHTML).join('')}</div>`;
   markTimeline();
 }
@@ -169,6 +262,13 @@ function markTimeline() { $$('.tl li').forEach(li => li.classList.toggle('unl', 
 $('#right').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.id === 'shareR') return share();
+  if (b.dataset.uc) return openUC(b.dataset.uc);
+  if (b.dataset.ucpreset) return ucTry('preset', +b.dataset.ucpreset);
+  if (b.hasAttribute('data-ucbuild')) return ucTry('build');
+  if (b.hasAttribute('data-uctopo')) return ucTry('topo');
+  if (b.hasAttribute('data-ctxclear')) { S.ctx = null; renderResults(); lastSig = ''; return writeHash(); }
+  if (b.dataset.indgo) { S.ind = b.dataset.indgo; S.uc = null; renderLeft(); rerun(); if (matchMedia('(max-width:900px)').matches) sheet('left'); return; }
+  if (b.dataset.ucind) { S.mode = 'ind'; S.ind = b.dataset.ucind; S.ucProd = b.dataset.ucprod; S.uc = null; S.ctx = null; S.selected = null; R.select(null); $('#detail').hidden = true; markTabs(); renderLeft(); rerun(); if (matchMedia('(max-width:900px)').matches) sheet('left'); return; }
   if (b.dataset.exp) { b.closest('details').open = false; return doExport(b.dataset.exp); }
   if (b.id === 'splitB') { S.split = !S.split; R.setSplit(S.split); b.setAttribute('aria-pressed', S.split); return writeHash(); }
   if (b.id === 'cmpR') { S.compare = !S.compare; S.active = 0; S.preset = 0; if (S.mode === 'presets') { S.mode = 'build'; $$('.modes button').forEach(x => x.setAttribute('aria-selected', x.dataset.mode === 'build')); } renderLeft(); return rerun(); }
@@ -233,6 +333,8 @@ function select(id, focusCam) {
       <dl><dt>Zone</dt><dd>${h(DATA.zones.find(z => z.id === p.zone).label)}</dd>
       <dt>Lenses</dt><dd><div class="lchips">${Object.entries(p.roles).map(([l, t]) => `<span style="--c:${LENS[l].color}" title="${h(t)}">${LENS[l].label}: ${h(t)}</span>`).join('') || '<span style="--c:#7385aa">Licensing suite — no runtime role</span>'}</div></dd>
       ${p.cvd ? `<dt>Cisco Validated and design references</dt><dd class="cvdl">${p.cvd.map(CVDL).join('')}</dd>` : ''}
+      <dt>Industry use cases</dt><dd>${(() => { const named = PORTFOLIO.uc.filter(u => u.prods.includes(id)), umb = id === 'sa' ? named.filter(u => u.umb).length : 0;
+        return named.length ? `Named in ${named.length} of ${PORTFOLIO.uc.length} Cisco industry use cases.${umb ? ` ${umb} of them list Umbrella, counted here as Secure Access.` : ''}<div class="prods" style="margin-top:4px">${PORTFOLIO.industries.map(i => [i, named.filter(u => u.ind === i.id).length]).filter(x => x[1]).map(([i, c]) => `<button class="pb" data-ucind="${i.id}" data-ucprod="${id}" title="Show the ${h(i.name)} use cases that name ${h(p.s)}">${h(i.name)} ${c}</button>`).join('')}</div>` : '<span class="small">Not named in Cisco’s industry portfolio.</span>'; })()}</dd>
       <dt>Works with</dt><dd class="conn">${conn.map(c => `<div class="row"><button data-id="${c.o}">${h(PR[c.o].s)}</button> <small>— ${h(c.rel)} (<a href="${srcUrl(c.src)}" target="_blank" rel="noopener noreferrer">source</a>)</small></div>`).join('') || '<span class="small">No relationship stated on the pages reviewed.</span>'}</dd></dl>
       <a class="src" href="${p.url}" target="_blank" rel="noopener noreferrer">Source: ${new URL(p.url).host.replace('www.', '')} ↗</a><p class="small">Verified ${DATA.meta.verified}.</p>`;
   } else {
@@ -282,7 +384,8 @@ const TOUR_ACT = {
   lens() { TOUR_ACT.presets(); setLens('trust'); },
   finish() { TOUR_ACT.presets(); finish(); lastSig = ''; syncUI(); },
   build() { setMode('build'); },
-  topo() { setMode('topo'); }
+  topo() { setMode('topo'); },
+  ind() { openUC('MAN1E', true); }
 };
 const TOUR = { i: -1 };
 function tourPlace() {
@@ -315,6 +418,12 @@ function download(name, mime, data) {
 const scenLine = r => [opt('who', r.s.who).short, opt('device', r.s.device).short, opt('loc', r.s.loc).short, '→ ' + opt('dest', r.s.dest).short, ...r.s.beh.map(b => opt('beh', b).label)].join(' · ');
 function srcOf(k) { return PR[k] ? PR[k].url : DATA.sources[k] || (DATA.cvd[k] && DATA.cvd[k][1]); }
 function exportData() {
+  if (S.focus) { const { u, nodes, links } = S.focus; return { kind: 'usecase', generated: stamp(), link: S.hash, industry: INDN[u.ind], code: u.code, useCase: u.name, summary: u.desc, source: PORTFOLIO.source, collected: PORTFOLIO.collected,
+    products: [...nodes].map(k => ({ name: PR[k].name, source: PR[k].url })), alsoListed: u.other.map(i => PORTFOLIO.names[i]), umbrellaNote: u.umb ? UMB_NOTE : null,
+    relationships: links.map(l => ({ a: PR[l[0]].name, b: PR[l[1]].name, relationship: l[2], source: srcOf(l[3]) })),
+    sections: UC_BLOCKS.filter(([k]) => u[k]).map(([k, t]) => ({ title: t, items: u[k] })), services: u.svc.map(i => PORTFOLIO.services[i]),
+    scenarios: u.presets ? { presets: u.presets.map(n => ({ number: n, title: presetOf(n).t })), builder: buildLine(u.build), topology: archOf(u.arch).name } : null,
+    note: 'Use case text and product lists are Cisco’s. Scenario links are chosen by this tool. ' + DATA.meta.sceneLabel }; }
   if (S.topo) { const { a, nodes, links } = S.topo; return { kind: 'topology', generated: stamp(), architecture: a.name, summary: a.blurb, source: a.src ? srcOf(a.src) : null,
     products: [...nodes].map(k => ({ name: PR[k].name, source: PR[k].url })), relationships: links.map(l => ({ a: PR[l[0]].name, b: PR[l[1]].name, relationship: l[2], source: srcOf(l[3]) })), note: DATA.meta.sceneLabel }; }
   return { kind: 'scenario', generated: stamp(), link: S.hash, note: DATA.meta.verdictNote, runs: S.runs.map(r => ({ label: S.runs.length > 1 ? 'AB'[r.slot] : '', scenario: scenLine(r), pickers: r.s, verdict: DATA.verdicts[r.verdict].label, reason: r.why,
@@ -323,7 +432,17 @@ function exportData() {
     products: r.products.map(k => ({ name: PR[k].name, source: PR[k].url })) })) };
 }
 function exportMarkdown() {
-  const d = exportData(), o = [`# Living Network — ${d.kind === 'topology' ? d.architecture : 'scenario report'}`, '', `Generated ${d.generated}. ${DATA.meta.footer.replace('{date}', DATA.meta.verified)}`, ''];
+  const d = exportData(), o = [`# Living Network — ${d.kind === 'topology' ? d.architecture : d.kind === 'usecase' ? d.industry + ': ' + d.useCase : 'scenario report'}`, '', `Generated ${d.generated}. ${DATA.meta.footer.replace('{date}', DATA.meta.verified)}`, ''];
+  if (d.kind === 'usecase') {
+    o.push(d.summary, '', `Source: ${d.source} (collected ${d.collected})`, '', '## Products Cisco lists for this use case', '', '### In this scene', '', ...d.products.map(p => `- ${p.name} — ${p.source}`), '');
+    if (d.umbrellaNote) o.push(d.umbrellaNote, '');
+    if (d.alsoListed.length) o.push('### Also listed by Cisco, not in this scene', '', ...d.alsoListed.map(n => `- ${n}`), '');
+    o.push('## Stated relationships among these products', '', '| # | A | B | Stated relationship | Source |', '|---|---|---|---|---|', ...d.relationships.map((r, i) => `| ${i + 1} | ${r.a} | ${r.b} | ${r.relationship} | ${r.source} |`), '');
+    for (const s of d.sections) o.push(`## ${s.title}`, '', ...s.items.map(x => `- ${x}`), '');
+    if (d.services.length) o.push('## Cisco services', '', ...d.services.map(x => `- ${x}`), '');
+    if (d.scenarios) o.push('## Scenarios in this tool', '', ...d.scenarios.presets.map(p => `- Preset ${p.number}: ${p.title}`), `- Builder: ${d.scenarios.builder}`, `- Topology: ${d.scenarios.topology}`, '');
+    o.push(`_${d.note}_`); return o.join('\n');
+  }
   if (d.kind === 'topology') { o.push(d.summary, '', d.source ? `Source: ${d.source}` : '', '', '## Building blocks', '', ...d.products.map(p => `- ${p.name} — ${p.source}`), '', '## How they connect', '', '| # | A | B | Stated relationship | Source |', '|---|---|---|---|---|', ...d.relationships.map((r, i) => `| ${i + 1} | ${r.a} | ${r.b} | ${r.relationship} | ${r.source} |`), '', `_${d.note}_`); }
   else for (const r of d.runs) { o.push(`## Scenario ${r.label}`.trim(), '', r.scenario, '', `**Verdict: ${r.verdict}** — ${r.reason}`, '', `_${d.note}_`, '');
     if (r.removedControls.length) o.push(`Removed controls (illustrative): ${r.removedControls.join(', ')}. With all controls: ${r.verdictWithAllControls}.`, '');
@@ -334,8 +453,13 @@ function exportMarkdown() {
 }
 function reportHTML(img) {
   const d = exportData(), tb = (head, rows) => `<table><tr>${head.map(x => `<th>${h(x)}</th>`).join('')}</tr>${rows.map(r => `<tr>${r.map(x => `<td>${h(x)}</td>`).join('')}</tr>`).join('')}</table>`;
-  let s = `<h1>Living Network — ${d.kind === 'topology' ? h(d.architecture) : 'scenario report'}</h1><p>Generated ${d.generated} · ${h(DATA.meta.sceneLabel)}</p>${img ? `<img src="${img}" alt="Scene">` : ''}`;
+  let s = `<h1>Living Network — ${d.kind === 'topology' ? h(d.architecture) : d.kind === 'usecase' ? h(d.industry + ': ' + d.useCase) : 'scenario report'}</h1><p>Generated ${d.generated} · ${h(DATA.meta.sceneLabel)}</p>${img ? `<img src="${img}" alt="Scene">` : ''}`;
   if (d.kind === 'topology') s += `<p>${h(d.summary)}</p>${d.source ? `<p>Source: <a href="${d.source}">${h(d.source)}</a></p>` : ''}<h2>Building blocks</h2>${tb(['Product', 'Source'], d.products.map(p => [p.name, p.source]))}<h2>How they connect</h2>${tb(['#', 'A', 'B', 'Stated relationship', 'Source'], d.relationships.map((r, i) => [i + 1, r.a, r.b, r.relationship, r.source]))}`;
+  else if (d.kind === 'usecase') s += `<p>${h(d.summary)}</p><p>Source: <a href="${d.source}">${h(d.source)}</a> (collected ${d.collected})</p><h2>Products Cisco lists for this use case</h2>${tb(['In this scene', 'Source'], d.products.map(p => [p.name, p.source]))}
+    ${d.umbrellaNote ? `<p>${h(d.umbrellaNote)}</p>` : ''}${d.alsoListed.length ? `<p><b>Also listed by Cisco, not in this scene:</b> ${h(d.alsoListed.join(' · '))}</p>` : ''}
+    <h2>Stated relationships among these products</h2>${tb(['#', 'A', 'B', 'Stated relationship', 'Source'], d.relationships.map((r, i) => [i + 1, r.a, r.b, r.relationship, r.source]))}
+    ${d.sections.map(x => `<h2>${h(x.title)}</h2><ul>${x.items.map(i => `<li>${h(i)}</li>`).join('')}</ul>`).join('')}${d.services.length ? `<h2>Cisco services</h2><p>${h(d.services.join(' · '))}</p>` : ''}
+    ${d.scenarios ? `<h2>Scenarios in this tool</h2><ul>${d.scenarios.presets.map(p => `<li>Preset ${p.number}: ${h(p.title)}</li>`).join('')}<li>Builder: ${h(d.scenarios.builder)}</li><li>Topology: ${h(d.scenarios.topology)}</li></ul>` : ''}<p><i>${h(d.note)}</i></p>`;
   else for (const r of d.runs) s += `<h2>Scenario ${r.label}</h2><p>${h(r.scenario)}</p><div class="vd"><b>${h(r.verdict)}</b><p>${h(r.reason)}</p><p><i>${h(d.note)}</i></p></div>
     ${r.removedControls.length ? `<p>Removed controls (illustrative): ${h(r.removedControls.join(', '))}. With all controls: ${h(r.verdictWithAllControls)}.</p>` : ''}
     <p>Path: ${h(r.path.join(' → '))}${r.stoppedAt ? ` (stopped at ${h(r.stoppedAt)})` : ''}</p>
@@ -345,7 +469,7 @@ function reportHTML(img) {
   return s + `<p class="fine">${h(DATA.meta.footer.replace('{date}', DATA.meta.verified))}${d.link ? ' Scenario link: index.html' + h(d.link) : ''}</p>`;
 }
 function doExport(kind) {
-  const base = 'living-network-' + (S.topo ? S.topo.a.id : 'scenario') + '-' + stamp(), snap = R.snapshot ? R.snapshot() : null;
+  const base = 'living-network-' + (S.topo ? S.topo.a.id : S.focus ? 'usecase-' + S.focus.u.code : 'scenario') + '-' + stamp(), snap = R.snapshot ? R.snapshot() : null;
   if (kind === 'json') return download(base + '.json', 'application/json', JSON.stringify(exportData(), null, 2));
   if (kind === 'md') return download(base + '.md', 'text/markdown', exportMarkdown());
   if (kind === 'png') return snap ? download(base + '.png', 'image/png', snap.toDataURL('image/png')) : toast('The scene image needs the 3D view.');
@@ -361,7 +485,7 @@ const expMenu = () => `<details class="exp"><summary class="btn" id="exportB">Ex
 function doSearch() {
   const q = $('#q').value.trim().toLowerCase(), cat = $('#qcat').value, box = $('#qres');
   const hits = Object.entries(PR).filter(([, p]) => (!cat || p.cat === cat) && (!q || (p.name + ' ' + p.s + ' ' + p.fn + ' ' + DATA.categories[p.cat]).toLowerCase().includes(q)));
-  S.filter = (q || cat) ? new Set(hits.map(([id]) => id)) : null; R && R.setFilter(S.filter);
+  S.filter = (q || cat) ? new Set(hits.map(([id]) => id)) : null; R && R.setFilter(S.filter || (S.topo ? S.topo.nodes : S.focus && S.focus.nodes));
   if (!q && !cat) { box.hidden = true; return; }
   box.innerHTML = hits.length ? hits.slice(0, 12).map(([id, p]) => `<button data-id="${id}">${h(p.name)}<small>${h(DATA.categories[p.cat])}</small></button>`).join('') : '<button disabled>No product matches</button>';
   box.hidden = false;
