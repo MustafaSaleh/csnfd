@@ -138,6 +138,39 @@ function buildSteps(r) {
   st.push({ t: 'end' });
   return st;
 }
+/* costume for the walking figure. Industry comes from the use case the scenario was opened from,
+   otherwise from a preset that belongs to exactly one use case. The Who value, and the verdict, are unchanged. */
+const ROLE_GENDERED = new Set(['employee', 'doctor', 'teacher', 'student', 'worker', 'associate', 'servant', 'advisor']);
+function roleWoman(preset, slot) {
+  let x = (((preset | 0) * 31 + (slot | 0) * 17 + 1) >>> 0);
+  x = Math.imul(x ^ (x >>> 16), 0x7feb352d);
+  x = Math.imul(x ^ (x >>> 15), 0x846ca68b);
+  return ((x ^ (x >>> 16)) >>> 0) % 2 === 1;
+}
+function roleIndustry(preset) {
+  const ctx = typeof S !== 'undefined' && S.ctx && PORTFOLIO.uc.find(u => u.code === S.ctx);
+  if (ctx) return ctx;
+  if (!preset) return null;
+  const hits = PORTFOLIO.uc.filter(u => u.presets && u.presets.includes(preset));
+  return hits.length === 1 ? hits[0] : null;
+}
+function roleOf(s, preset, slot) {
+  const who = s.who, own = { id: who, label: opt('who', who).short, woman: false, halo: false };
+  if (who === 'attacker' || who === 'insider' || who === 'contractor') return own;
+  const staff = who === 'emp' || who === 'admin' || who === 'exec', u = roleIndustry(preset | 0), ind = u && u.ind;
+  const studentNamed = ind === 'education' && /student|residential|esports/i.test(u.name || '');
+  const costume = (id, label) => ({ id, label, woman: ROLE_GENDERED.has(id) && roleWoman(preset, slot), halo: who === 'admin' });
+  if (ind === 'healthcare' && staff) return costume('doctor', 'Doctor');
+  if (ind === 'healthcare' && who === 'guest') return costume('patient', 'Patient');
+  if (ind === 'education' && (who === 'guest' || (staff && studentNamed))) return costume('student', 'Student');
+  if (ind === 'education' && staff) return costume('teacher', 'Teacher');
+  if ((s.loc === 'factory' || ind === 'manufacturing') && staff) return costume('worker', 'Plant worker');
+  if (ind === 'retail' && staff) return costume('associate', 'Store associate');
+  if (ind === 'government' && staff) return costume('servant', 'Public servant');
+  if (ind === 'financial-services' && staff) return costume('advisor', 'Advisor');
+  if (staff) return costume('employee', 'Employee');
+  return own;
+}
 function suggestions(s, run) {
   const out = [];
   for (const g of DATA.suggest) {

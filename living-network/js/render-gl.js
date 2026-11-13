@@ -158,27 +158,43 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
     emp: { body: 0x5b8def }, admin: { body: 0x8f6cf0 }, exec: { body: 0x23345e, tall: 1.12 }, contractor: { body: 0xf08a24 },
     guest: { body: 0xb9c4d8, tall: .9 }, insider: { body: 0x5b8def }, attacker: { body: 0x9c2231, legs: 0x4a1220, skin: 0x2a0d14, ring: 0xff3b30 }
   };
-  function human(who, slot) {
-    const o = HUMAN[who], g = new THREE.Group(), M = (col, basic) => basic ? new THREE.MeshBasicMaterial({ color: col }) : new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: .35, roughness: .6, flatShading: true });
-    const body = M(o.body), skin = M(o.skin || 0xf1c9a5), legs = M(o.legs || 0x2b3550);
+  /* costume colours. Body stays the Who colour unless the scenario picks a role. */
+  const COSTUME = {
+    doctor: { body: 0xf7f8fa }, patient: { body: 0xd5e6f5 }, teacher: { body: 0x2f4d6e }, student: { body: 0x6d5bd0, tall: .92 },
+    worker: { body: 0x3a4a63 }, associate: { body: 0x1f6f64 }, servant: { body: 0x1c2744 }, advisor: { body: 0x23345e }, employee: { body: 0x5b8def }
+  };
+  function human(who, slot, role) {
+    const look = role && role.id || who, C = COSTUME[look] || {}, o = HUMAN[who];
+    const g = new THREE.Group(), M = (col, basic) => basic ? new THREE.MeshBasicMaterial({ color: col }) : new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: .35, roughness: .6, flatShading: true });
+    const body = M(C.body != null ? C.body : o.body), skin = M(o.skin || 0xf1c9a5), legs = M(o.legs || 0x2b3550);
     const add = (k, m, sx, sy, sz, x, y, z, parent = g, rx = 0) => { const me = new THREE.Mesh(prim(k), m); me.scale.set(sx, sy, sz); me.position.set(x, y, z); me.rotation.x = rx; parent.add(me); return me; };
     const limb = (x, y, len, m, w) => { const pv = new THREE.Group(); pv.position.set(x, y, 0); add('b', m, w, len, w, 0, -len / 2, 0, pv); g.add(pv); return pv; };
     const legL = limb(-.22, 1.1, 1.1, legs, .3), legR = limb(.22, 1.1, 1.1, legs, .3);
     add('b', body, .9, 1.1, .5, 0, 1.65, 0);
     const armL = limb(-.6, 2.15, .95, body, .24), armR = limb(.6, 2.15, .95, body, .24);
     add('s', skin, .62, .62, .62, 0, 2.6, 0);
-    if (who === 'emp' || who === 'insider') add('b', M(0xffffff), .2, .26, .05, .24, 1.85, .27);                       /* staff badge */
-    if (who === 'admin') { add('r', M(0xf4c95d), 1.1, 1.1, 1.1, 0, 3.15, 0, g, Math.PI / 2); add('b', M(0xf4c95d), .2, .26, .05, .24, 1.85, .27); }   /* halo = privilege */
-    if (who === 'exec') { add('b', M(0xf4c95d), .14, .62, .05, 0, 1.8, .27); add('b', M(0xffffff), .5, .3, .05, 0, 2.05, .26); }      /* shirt and tie */
-    if (who === 'contractor') { add('c', M(0xffd23f), .78, .3, .78, 0, 2.95, 0); add('c', M(0xffd23f), .95, .06, .95, 0, 2.82, .1); add('b', M(0x7a4d22), .55, .38, .28, 0, -1.1, 0, armR); add('b', M(0xfff3a0), .92, .14, .52, 0, 1.6, 0); }   /* hard hat, hi-vis band, toolbox */
-    if (who === 'guest') add('r', M(0xffffff), .7, .7, .7, 0, 2.05, .2, g, 1.1);                                              /* visitor lanyard */
-    if (who === 'insider') add('k', M(0x39405a), 1.05, .75, 1.05, 0, 3.02, 0);                                                /* hood */
-    if (who === 'attacker') {                                                                                                  /* hooded figure, visor, spiked shoulders */
+    if (role && ROLE_GENDERED.has(look)) {                                                                                   /* man: short cap. woman: hair down the back. a hard hat takes the place of the cap */
+      const hair = M(0x2a211c), hat = look === 'worker';
+      if (role.woman) { if (!hat) add('b', hair, .7, .28, .7, 0, 2.84, -.04); add('b', hair, .42, hat ? .5 : .85, .36, 0, hat ? 2.2 : 2.35, -.3); }
+      else if (!hat) add('b', hair, .66, .18, .66, 0, 2.88, 0);
+    }
+    if (look === 'employee' || look === 'servant' || look === 'insider') add('b', M(0xffffff), .2, .26, .05, .24, 1.85, .27); /* staff badge */
+    if (role && role.halo) add('r', M(0xf4c95d), 1.1, 1.1, 1.1, 0, 3.15, 0, g, Math.PI / 2);                                 /* halo = privilege, on any costume */
+    if (look === 'advisor') { add('b', M(0xf4c95d), .14, .62, .05, 0, 1.8, .27); add('b', M(0xffffff), .5, .3, .05, 0, 2.05, .26); add('c', M(0xffffff), .46, .14, .46, 0, 2.18, 0); }  /* shirt, tie and a collar that shows from behind */
+    if (look === 'contractor') { add('c', M(0xffd23f), .78, .3, .78, 0, 2.95, 0); add('c', M(0xffd23f), .95, .06, .95, 0, 2.82, .1); add('b', M(0x7a4d22), .55, .38, .28, 0, -1.1, 0, armR); add('b', M(0xfff3a0), .92, .14, .52, 0, 1.6, 0); }   /* hard hat, hi-vis band, toolbox */
+    if (look === 'worker') { add('c', M(0xffd23f), .78, .3, .78, 0, 2.95, 0); add('c', M(0xffd23f), .95, .06, .95, 0, 2.82, .1); add('b', M(0xfff3a0), .98, .36, .62, 0, 1.7, 0); }  /* hard hat and a hi-vis vest that reads from behind, no toolbox */
+    if (look === 'guest') add('r', M(0xffffff), .7, .7, .7, 0, 2.05, .2, g, 1.1);                                              /* visitor lanyard */
+    if (look === 'doctor') add('b', M(0x3d8eb5), .16, .72, .06, 0, 1.62, .27);                                                 /* coat opening over scrubs */
+    if (look === 'teacher') add('b', M(0xc4a574), .5, .62, .18, -.2, -.72, 0, armL);                                            /* folder under one arm */
+    if (look === 'student') add('b', M(0x241c38), 1.02, .58, .4, 0, 1.5, -.4);                                                  /* backpack, wider than the torso so it shows from behind */
+    if (look === 'associate') { add('b', M(0xf2efe6), .72, .7, .08, 0, 1.45, .28); add('b', M(0xf2efe6), .14, .7, .14, -.28, 1.85, 0); add('b', M(0xf2efe6), .14, .7, .14, .28, 1.85, 0); }  /* apron and shoulder straps */
+    if (look === 'insider') add('k', M(0x39405a), 1.05, .75, 1.05, 0, 3.02, 0);                                                /* hood */
+    if (look === 'attacker') {                                                                                                  /* hooded figure, visor, spiked shoulders */
       add('k', legs, 1.3, 1.25, 1.3, 0, 2.98, 0); add('b', M(0xff3b30, true), .52, .13, .1, 0, 2.62, .3);
       add('t', M(0xff3b30), .5, .5, .5, -.62, 2.35, 0); add('t', M(0xff3b30), .5, .5, .5, .62, 2.35, 0); add('k', legs, 1.5, 1.5, .5, 0, 1.3, -.3, g, Math.PI);
     }
     add('r', M(slot ? 0xffd9a8 : (o.ring || 0xffffff), true), 1.9, 1.9, 1.9, 0, .04, 0, g, Math.PI / 2);                       /* ground ring so the figure is easy to find; B is tinted */
-    g.scale.set(2.8, 2.8 * (o.tall || 1), 2.8); g.userData = { legL, legR, armL, armR };
+    g.scale.set(2.8, 2.8 * (C.tall || (look === who ? o.tall : 0) || 1), 2.8); g.userData = { legL, legR, armL, armR };
     return g;
   }
   const DEVICE = {
@@ -347,8 +363,8 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
       const g = new THREE.Group(), lift = r.slot * .55 + .9, hostile = r.hostile;
       const ap = actorPos(r, r.slot), pts = [new THREE.Vector3(ap[0], lift, ap[2]), ...r.path.map(n => { const p = POS(n); return new THREE.Vector3(p[0], p[1] + lift, p[2]); })];
       const am = new THREE.MeshStandardMaterial({ color: hostile ? 0xff6a5c : (r.slot ? 0xffd9a8 : 0xe6ecfa), roughness: .5, flatShading: true });
-      const isHuman = !!HUMAN[r.s.who];
-      const actor = isHuman ? human(r.s.who, r.slot) : build(ACTOR[r.s.who], am); actor.position.set(ap[0], 0, ap[2]); g.add(actor);
+      const isHuman = !!HUMAN[r.s.who], role = roleOf(r.s, S.preset, r.slot);
+      const actor = isHuman ? human(r.s.who, r.slot, role) : build(ACTOR[r.s.who], am); actor.position.set(ap[0], 0, ap[2]); g.add(actor);
       const dev = build(DEVICE[r.s.device], new THREE.MeshStandardMaterial({ color: r.s.device === 'compromised' ? 0xff6a5c : 0x9fb3dd, roughness: .5, flatShading: true }));
       if (isHuman) { dev.scale.setScalar(.6); dev.position.set(1.0, 1.2, .35); actor.add(dev); }      /* humans carry their device as they walk */
       else { dev.position.set(ap[0] + 1.5, 0, ap[2] + .9); g.add(dev); }
@@ -374,7 +390,7 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
       const at = r.stopAt >= 0 ? pts[r.stopAt + 1] : (r.verdict === 'CONTAIN' ? pts[1] : pts[pts.length - 1]);
       mk.position.copy(at).add(new THREE.Vector3(0, r.verdict === 'CONTAIN' ? 0 : 2.6, 0)); mk.visible = false; g.add(mk);
       const chip = document.createElement('div'); chip.className = 'tchip'; labels.appendChild(chip);
-      scene.add(g); rv.push({ r, g, pts, segs, head, trail, beams, mk, chip, hostile, actor, isHuman, lift, name: opt('who', r.s.who).short });
+      scene.add(g); rv.push({ r, g, pts, segs, head, trail, beams, mk, chip, hostile, actor, isHuman, lift, name: role.label });
     }
     colorRuns(); applySplit(); dirty = true;
   }

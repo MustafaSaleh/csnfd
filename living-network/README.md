@@ -50,7 +50,9 @@ radar dish for XDR, a bar chart for Network Analytics, a cloud with a gate for S
 recognisable shapes, not Cisco hardware or artwork. The suites and the Splunk products keep their abstract shapes.
 
 Human actors (employee, admin, executive, contractor, guest, insider, external attacker) are walking 3D figures with
-their name and live trust level above them; the attacker is a red hooded figure on a dashed path. The 0–100 trust
+their name and live trust level above them; the attacker is a red hooded figure on a dashed path. The figure's clothes
+follow the scenario (a doctor, teacher, student, plant worker, or an employee drawn as a man or a woman); the identity
+used for the verdict does not. The 0–100 trust
 level is an illustrative teaching device: no product shows this number. The closest real signals are ISE posture, Duo
 risk-based authentication and Identity Intelligence.
 

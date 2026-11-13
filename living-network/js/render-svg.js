@@ -38,12 +38,12 @@ function createSVG() {
         return srcs.map(sId => { const a = M(POS(sId)); return mk('line', { x1: a[0], y1: a[1], x2: t[0], y2: t[1], stroke: LENS[e.lens].color, 'stroke-width': .1, opacity: 0 }, gR); }); });
       mk('circle', { cx: pts[0][0], cy: pts[0][1], r: .9, fill: r.hostile ? '#ff6a5c' : r.slot ? '#ffd9a8' : '#e6ecfa' }, gR);
       const head = r.hostile ? mk('polygon', { points: '0,-.9 .8,.6 -.8,.6' }, gR) : mk('circle', { r: .6 }, gR);
-      const chip = mk('text', { 'font-size': 1.1 }, gR), at = r.stopAt >= 0 ? pts[r.stopAt + 1] : r.verdict === 'CONTAIN' ? pts[1] : pts[pts.length - 1];
+      const chip = mk('text', { 'font-size': 1.1 }, gR), role = roleOf(r.s, S.preset, r.slot), at = r.stopAt >= 0 ? pts[r.stopAt + 1] : r.verdict === 'CONTAIN' ? pts[1] : pts[pts.length - 1];
       const vcol = { ALLOW: '#5be3a4', LIMIT: '#8ed0ff', STEPUP: '#f4c95d', BLOCK: '#ff7a6b', CONTAIN: '#ff5fa2' }[r.verdict];
       const mkr = mk('g', { transform: `translate(${at[0]} ${at[1]})`, visibility: 'hidden', stroke: vcol, 'stroke-width': .3, fill: 'none' }, gR);
       if (r.verdict === 'BLOCK') mk('path', { d: 'M-1.2-1.2 1.2 1.2M1.2-1.2-1.2 1.2' }, mkr); else if (r.verdict === 'CONTAIN') mk('rect', { x: -1.7, y: -1.7, width: 3.4, height: 3.4, 'stroke-dasharray': '.5 .3' }, mkr);
       else if (r.verdict === 'STEPUP') mk('path', { d: 'M0-1.6 1.5 1.1H-1.5z' }, mkr); else if (r.verdict === 'LIMIT') mk('path', { d: 'M-1.5 0A1.5 1.5 0 1 1 0 1.5' }, mkr);
-      rv.push({ r, pts, line, beams, head, chip, mkr });
+      rv.push({ r, pts, line, beams, head, chip, mkr, name: role.label });
     }
   }
   function frame() {
@@ -54,7 +54,7 @@ function createSVG() {
       const col = lens === 'trust' ? trustColor(t) : v.r.hostile ? '#ff7a6b' : v.r.slot ? '#ffd9a8' : LENS[lens].color;
       v.line.setAttribute('points', pts.map(p => p[0].toFixed(2) + ',' + p[1].toFixed(2)).join(' ')); v.line.setAttribute('stroke', col);
       v.head.setAttribute('transform', `translate(${hd[0].toFixed(2)} ${hd[1].toFixed(2)})`); v.head.setAttribute('fill', '#fff');
-      v.chip.setAttribute('x', hd[0]); v.chip.setAttribute('y', hd[1] - 1.3); v.chip.textContent = opt('who', v.r.s.who).short + ' · trust ' + t; v.chip.style.fill = trustColor(t);
+      v.chip.setAttribute('x', hd[0]); v.chip.setAttribute('y', hd[1] - 1.3); v.chip.textContent = v.name + ' · trust ' + t; v.chip.style.fill = trustColor(t);
       v.beams.forEach((bs, k) => bs.forEach(b => b.setAttribute('opacity', k === P.cur ? 1 : k <= P.k ? .3 : 0)));
       v.mkr.setAttribute('visibility', P.done ? 'visible' : 'hidden'); v.hd = hd;
     }
