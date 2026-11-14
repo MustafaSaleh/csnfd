@@ -273,22 +273,54 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
     const el = document.createElement('button'); el.className = 'lbl' + (isP ? '' : ' place'); el.dataset.id = id; el.setAttribute('aria-label', (isP ? p.name + '. ' : p.name + ', scene element. ') + p.fn);
     labels.appendChild(el); nodes[id].el = el; nodes[id].L = [{ el }, null]; nodes[id].top = top; nodes[id].anchor = new THREE.Vector3(p.p[0], p.p[1] + top, p.p[2]);
   }
-  /* relationship links: faint base set + brighter lens set */
+  /* relationship links: a faint context mesh, one quiet Splunk riser, and one bright set (the lens, or the selected product) */
   const lineSet = (pairs, mat) => { const pts = []; for (const [a, b] of pairs) { const A = POS(a), B = POS(b); pts.push(A[0], A[1] + .5, A[2], B[0], B[1] + .5, B[2]); }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); const l = new THREE.LineSegments(g, mat); if (mat.isLineDashedMaterial) l.computeLineDistances(); return l; };
-  const baseLinks = lineSet(DATA.links.filter(l => l[4] !== 'suite' && !isSp(l[0]) && !isSp(l[1])), new THREE.LineBasicMaterial({ color: 0x3a4d7a, transparent: true, opacity: .28 })); scene.add(baseLinks);
-  const spLinks = lineSet(DATA.links.filter(l => isSp(l[0]) || isSp(l[1])), new THREE.LineBasicMaterial({ color: 0xb5672f, transparent: true, opacity: .4 })); scene.add(spLinks);
+  const baseMat = new THREE.LineBasicMaterial({ color: 0x3a4d7a, transparent: true, opacity: .10 });
+  const spMat = new THREE.LineBasicMaterial({ color: 0xb5672f, transparent: true, opacity: .32 });
+  let baseLinks = lineSet([], baseMat), spLinks = lineSet([], spMat); scene.add(baseLinks); scene.add(spLinks);
+  /* the 15 "sends data to Splunk Platform" feeds, as one stub in the gap under the platform. A line from the ground would look like Secure Access's own pipe. */
+  const riserMat = new THREE.MeshBasicMaterial({ color: 0xb5672f, transparent: true, opacity: .45, depthWrite: false });
+  const riser = new THREE.Mesh(new THREE.CylinderGeometry(.16, .16, 7, 12), riserMat);
+  riser.position.set(PR.splunk.p[0], 17.9, PR.splunk.p[2]); riser.castShadow = false; scene.add(riser);
   let layer = true, diagram = false;
+  let lensLine = null, selLine = null, flow = [], topo = null, topoLine = null, topoChips = [], focusSet = null, focusLine = null;
+  let warWant = true, warOn = false;
   /* a node is shown unless a topology diagram excludes it or it belongs to the hidden Splunk layer */
   const shown = id => (!diagram || topo.nodes.has(id)) && (layer || !isSp(id) || (!!topo && topo.nodes.has(id)));
+  /* overview lines exist only while the whole scene is showing. Topology, a use case and fog of war each hide them together. */
+  function showLines() {
+    const overview = !warOn && !topo && !focusSet;
+    baseLinks.visible = overview; spLinks.visible = overview && layer; riser.visible = overview && layer;
+    if (lensLine) lensLine.visible = overview; if (selLine) selLine.visible = !warOn;
+  }
   function refreshVis() { for (const id in nodes) { const on = shown(id); nodes[id].g.visible = on; nodes[id].el.classList.toggle('gone', !on); }
-    spZone.forEach(o => o.visible = layer); zoneLbl.forEach(z => z.el.style.display = diagram || (z.sp && !layer) ? 'none' : ''); spLinks.visible = layer && !topo && !focusSet; dirty = true; }
-  function setLayer(on) { layer = on; refreshVis(); }
-  let lensLine = null, selLine = null, flow = [], topo = null, topoLine = null, topoChips = [], focusSet = null, focusLine = null;
+    spZone.forEach(o => o.visible = layer); zoneLbl.forEach(z => z.el.style.display = diagram || (z.sp && !layer) ? 'none' : ''); showLines(); dirty = true; }
+  function setLayer(on) { layer = on; refreshVis(); if (selected) select(selected); }
+  function dropLine(l) { if (!l) return; scene.remove(l); l.geometry.dispose(); if (l.material !== baseMat && l.material !== spMat) l.material.dispose(); }
   /* ambient traffic: one instanced mesh */
   const NP = 150, amb = new THREE.InstancedMesh(new THREE.SphereGeometry(.13, 6, 5), new THREE.MeshBasicMaterial({ color: 0xffffff }), NP); amb.frustumCulled = false; scene.add(amb);
   const dummy = new THREE.Object3D(), va = new THREE.Vector3(), vb = new THREE.Vector3(), tv3 = new THREE.Vector3(), tc = new THREE.Color();
   let lens = 'data', filter = null, selected = null;
+  /* one bright set. In the overview a selection replaces the lens; Topology and a use case keep their own white lines. */
+  function lineDim() {
+    const dim = !!(selected && PR[selected]) && !topo && !focusSet;
+    baseMat.opacity = dim ? .08 : .10; spMat.opacity = dim ? .08 : .32; riserMat.opacity = dim ? .12 : .45;
+    if (lensLine) lensLine.material.opacity = dim ? .10 : (lens === 'policy' || lens === 'threat' ? .75 : .5);
+  }
+  function rebuildOverview() {
+    const bright = new Set(brightLinks(lens).map(l => pairKey(l[0], l[1])));
+    const base = [], sp = [];
+    for (const l of DATA.links) {
+      if (l[4] === 'suite' || isIngest(l) || bright.has(pairKey(l[0], l[1]))) continue;
+      (isSp(l[0]) || isSp(l[1]) ? sp : base).push(l);
+    }
+    dropLine(baseLinks); dropLine(spLinks); dropLine(lensLine);
+    baseLinks = lineSet(base, baseMat); spLinks = lineSet(sp, spMat); scene.add(baseLinks); scene.add(spLinks);
+    const dashed = lens === 'policy' || lens === 'threat';
+    lensLine = lineSet(brightLinks(lens), dashed ? new THREE.LineDashedMaterial({ color: lensCol, transparent: true, opacity: .75, dashSize: .7, gapSize: .5 }) : new THREE.LineBasicMaterial({ color: lensCol, transparent: true, opacity: .5 }));
+    scene.add(lensLine); lineDim(); showLines();
+  }
 
   function setLens(l) {
     lens = l; lensCol.set(LENS[l].color);
@@ -296,27 +328,30 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
       const on = !!n.p.roles[l]; n.mat.color.copy(on ? lensCol : OFF); n.mat.emissive.copy(on ? lensCol : OFF).multiplyScalar(on ? .22 : 0);
       n.ring.visible = ringOn(n.p, l); n.ring.material.color.copy(lensCol); n.dia.visible = l === 'policy' && (n.p.pol || []).includes('author');
       n.el.classList.toggle('off', !on); n.el.innerHTML = h(n.p.s) + (on ? `<small>${h(n.p.roles[l])}</small>` : ''); }
-    if (lensLine) { scene.remove(lensLine); lensLine.geometry.dispose(); }
-    flow = lensLinks(l); const dashed = l === 'policy' || l === 'threat';
-    lensLine = lineSet(flow, dashed ? new THREE.LineDashedMaterial({ color: lensCol, transparent: true, opacity: .75, dashSize: .7, gapSize: .5 }) : new THREE.LineBasicMaterial({ color: lensCol, transparent: true, opacity: .5 }));
-    scene.add(lensLine); amb.material.color.copy(lensCol); colorRuns(); dirty = true;
+    rebuildOverview();
+    if (!topo && !focusSet) flow = brightLinks(l);
+    amb.material.color.copy(lensCol); colorRuns(); dirty = true;
     if (topo) applyTopo(); else if (focusSet) setFocus(focusSet);
   }
   function select(id) {
     selected = id; dirty = true; for (const k in nodes) nodes[k].el.classList.toggle('sel', k === id);
     const dim = id ? 1 / 3 : 1; gridMat.opacity = dim; discMat.opacity = .2 * dim;   /* the white focus ring stays the bright thing */
-    if (selLine) { scene.remove(selLine); selLine.geometry.dispose(); selLine = null; }
-    if (id && PR[id]) { selLine = lineSet(DATA.links.filter(l => l[0] === id || l[1] === id), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .85 })); scene.add(selLine); }
+    dropLine(selLine); selLine = null;
+    if (id && PR[id]) {   /* a feed to a hidden Splunk product would point at empty space */
+      const pairs = DATA.links.filter(l => (l[0] === id || l[1] === id) && (layer || (!isSp(l[0]) && !isSp(l[1]))));
+      selLine = lineSet(pairs, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .85 })); scene.add(selLine);
+    }
+    lineDim(); showLines();
   }
   /* topology mode: isolate an architecture, draw its stated relationships and number them */
   function applyTopo() {
     const only = topo || focusSet;   /* an architecture or an industry use case: everything outside it is ghosted */
-    baseLinks.visible = !only; spLinks.visible = layer && !only; if (lensLine) lensLine.visible = !only;
+    showLines();
     for (const id in nodes) { const n = nodes[id], on = !only || only.nodes.has(id); for (const mt of n.dmat ? [n.mat, n.dmat] : [n.mat]) { mt.transparent = !on; mt.opacity = on ? 1 : .1; mt.depthWrite = on; mt.needsUpdate = true; } if (n.isP) n.ring.visible = on && ringOn(n.p, lens); }
-    flow = topo ? topo.links : lensLinks(lens);
+    flow = topo ? topo.links : focusSet ? focusSet.links : brightLinks(lens); lineDim();
   }
   function setTopo(t) {
-    const was = topo; topo = t; if (topoLine) { scene.remove(topoLine); topoLine.geometry.dispose(); topoLine = null; } topoChips.forEach(c => c.el.remove()); topoChips = [];
+    const was = topo; topo = t; if (topoLine) { scene.remove(topoLine); topoLine.geometry.dispose(); topoLine.material.dispose(); topoLine = null; } topoChips.forEach(c => c.el.remove()); topoChips = [];
     /* an architecture is re-laid-out as a diagram: most-connected block in the middle, the rest on a ring; everything else is hidden */
     diagram = topoLayout(t);
     zoneG.visible = groundG.visible = !diagram;   /* a ring diagram has no floor slabs, so the grid would mean the wrong thing */
@@ -333,9 +368,9 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
   }
   /* industry use case: the scene keeps its layout, the products Cisco lists stay solid and the stated relationships among them are drawn */
   function setFocus(f) {
-    focusSet = topo ? null : f; if (focusLine) { scene.remove(focusLine); focusLine.geometry.dispose(); focusLine = null; }
+    focusSet = topo ? null : f; if (focusLine) { scene.remove(focusLine); focusLine.geometry.dispose(); focusLine.material.dispose(); focusLine = null; }
     if (topo) return;
-    applyTopo(); if (focusSet) { flow = focusSet.links; focusLine = lineSet(focusSet.links, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .9 })); scene.add(focusLine); }
+    applyTopo(); if (focusSet) { flow = focusSet.links; focusLine = lineSet(focusSet.links, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: .9 })); scene.add(focusLine); showLines(); }
     dirty = true;
   }
   function setFilter(f) { filter = f; dirty = true; for (const k in nodes) nodes[k].el.classList.toggle('filtered', !!f && !f.has(k)); }
@@ -356,16 +391,15 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
   function setView(m) { viewMode = m === 'orbit' ? 'orbit' : 'third'; rv.forEach(v => v.camInit = false); dirty = true; }
   /* fog of war (follow views): only what the actor has reached, what is close to it and the products that have already acted are visible */
   const warFog = new THREE.FogExp2(0x070b16, .018), WAR_R = 7.5;
-  let warWant = true, warOn = false;
   function setFogWar(on) { warWant = on; dirty = true; }
   function applyWar(fol) {
     const lead = rv[0], on = warWant && fol && !split && !topo && !!lead;
     if (!on) {
-      if (warOn) { warOn = false; refreshVis(); for (const id in nodes) nodes[id].fog = false, nodes[id].el.classList.remove('fog'); baseLinks.visible = !topo && !focusSet; if (lensLine) lensLine.visible = !topo && !focusSet; if (selLine) selLine.visible = true;
+      if (warOn) { warOn = false; refreshVis(); for (const id in nodes) nodes[id].fog = false, nodes[id].el.classList.remove('fog');
         rv.forEach(v => v.segs.forEach(s => s.fm.visible = true)); gfxApply(); dirty = true; }
       return;
     }
-    warOn = true; scene.fog = warFog; baseLinks.visible = false; spLinks.visible = false; if (lensLine) lensLine.visible = false; if (selLine) selLine.visible = false;
+    warOn = true; scene.fog = warFog; showLines();
     const P = prog(lead.r), seen = new Set(), hp = lead.head.position;
     lead.r.path.forEach((n, i) => { if (i < P.moves - .4) seen.add(n); });
     lead.r.tl.forEach((e, k) => { if (k <= P.cur || k <= P.k) { seen.add(e.at); (e.also || []).forEach(a => seen.add(a)); } });

@@ -70,6 +70,8 @@ present XDR and ISE already contain those cases, so switching the layer off chan
 shows when XDR or ISE are removed with "Without these controls". Two Topology views cover it: "Splunk for security
 operations" and "Splunk and Cisco Observability".
 
+In the overview, the fifteen "sends data to Splunk Platform" feeds are one orange stub in the gap under the platform, so they do not fan across the scene. The bright lines are the active lens. Select a product and that product's own relationships, including its feed up to the platform, replace them. Relationships the lens is not about stay as a faint mesh. Topology and an industry use case still draw each stated relationship on its own, and the product panel still lists every feed.
+
 **Full screen** (button at the right of the playback bar, or `F`; `Esc` exits): the scene fills the window, with the
 side panels and footer hidden, and the browser enters full screen where it is allowed. The header, lenses, playback
 bar, legend and the checkpoint and verdict captions stay. Two tabs on the scene's edges, **Scenario** (left, `[`) and

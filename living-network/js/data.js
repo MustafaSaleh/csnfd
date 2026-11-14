@@ -278,6 +278,8 @@ const DATA = {
   /* --- SPLUNK LAYER. Product facts from each product's splunk.com page (cisco.com has no Splunk product pages);
      relationships to Cisco products only where a Cisco or Splunk page states them. Toggled as one layer. --- */
   splunkFeeds: ['fw', 'sna', 'cv', 'duo', 'email', 'cii', 'mcd', 'ep', 'wl', 'aid', 'xdr', 'ise', 'te', 'sa'],   /* Cisco products with a stated Splunk data integration (own page or the Cisco Security Cloud app on Splunkbase); their checks feed the layer */
+  /* overview drawing only: these products' link to Splunk Platform is "sends data up", so the overview draws them as one riser. Not splunkFeeds — xdr, aid and nexus stay their own lines because those pages describe Splunk data flowing the other way. Checkpoints and the product panel still list every link. */
+  splunkIngest: ['ise', 'meraki', 'te', 'fw', 'hmf', 'sna', 'cv', 'itd', 'duo', 'email', 'cii', 'mcd', 'ep', 'wl', 'sa'],
   /* non-product scene nodes */
   places: {
     hq: { name: 'HQ campus', kind: 'loc', p: [-27, 0, -20], fn: 'Corporate campus with wired and Wi-Fi access.' },

@@ -7,9 +7,11 @@ function createSVG() {
   const setVB = () => svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`); setVB();
   const M = p => [p[0], p[1] > 18 ? p[2] * .9 - 62 : p[1] > 5 ? p[2] * .9 - 44 : p[2]];   /* ops plane is drawn as a band above the ground map */
   const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
-  const gZ = mk('g'), gL = mk('g'), gLL = mk('g'), gT = mk('g'), gR = mk('g'), gN = mk('g'), gF = mk('g'); let fxs = [], follow = false, diagram = false;
+  const gZ = mk('g'), gL = mk('g'), gLL = mk('g'), gFoc = mk('g'), gS = mk('g'), gT = mk('g'), gR = mk('g'), gN = mk('g'), gF = mk('g'); let fxs = [], follow = false, diagram = false, focusSet = null, selected = null;
   for (const z of DATA.zones) { const a = M([z.x[0], z.y, z.z[0]]), b = M([z.x[1], z.y, z.z[1]]); const k = z.id === 'splunk' ? ' spk' : ''; mk('rect', { class: 'zone' + k, x: a[0], y: a[1], width: b[0] - a[0], height: b[1] - a[1], rx: .8 }, gZ); mk('text', { class: 'zn' + k, x: a[0] + .5, y: a[1] - .5 }, gZ).textContent = z.label; }
-  for (const l of DATA.links) { if (l[4] === 'suite') continue; const a = M(POS(l[0])), b = M(POS(l[1])); mk('line', { class: 'lk' + (isSp(l[0]) || isSp(l[1]) ? ' spk' : ''), x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, gL); }
+  for (const l of DATA.links) { if (l[4] === 'suite' || isIngest(l)) continue; const a = M(POS(l[0])), b = M(POS(l[1])); mk('line', { class: 'lk' + (isSp(l[0]) || isSp(l[1]) ? ' spk' : ''), 'data-a': l[0], 'data-b': l[1], x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, gL); }
+  /* the same stub as the 3D view: the operations band up to the Splunk band, not a line out of one product */
+  { const A = M([PR.splunk.p[0], 14.4, PR.splunk.p[2]]), B = M([PR.splunk.p[0], 21.4, PR.splunk.p[2]]); mk('line', { class: 'lk rise spk', x1: A[0], y1: A[1], x2: B[0], y2: B[1] }, gL); }
   const SH = { net: '0,-1 .87,-.5 .87,.5 0,1 -.87,.5 -.87,-.5', id: '0,-1.1 1.1,0 0,1.1 -1.1,0', netsec: '-.9,-.9 .9,-.9 .9,.9 -.9,.9', cloud: '0,-1.1 1.05,-.35 .65,.9 -.65,.9 -1.05,-.35',
     endpoint: '-.6,-1 .6,-1 .9,0 .6,1 -.6,1 -.9,0', detect: '0,-1.1 .78,-.78 1.1,0 .78,.78 0,1.1 -.78,.78 -1.1,0 -.78,-.78', ot: '-.5,-1 .5,-1 1,1 -1,1', suite: '-1.1,-.6 1.1,-.6 1.1,.6 -1.1,.6', splunk: '0,-1.15 1.1,.85 -1.1,.85' };
   const nodes = {};
@@ -22,11 +24,24 @@ function createSVG() {
     mk('text', { class: isP ? '' : 'pl', y: 2.3 }, g).textContent = isP ? p.s : p.name;
     nodes[id] = { g, ring, dia, p, isP };
   }
+  function drawExact(pairs, parent) { pairs.forEach(l => { const A = M(POS(l[0])), B = M(POS(l[1])); mk('line', { x1: A[0], y1: A[1], x2: B[0], y2: B[1], stroke: '#fff', 'stroke-width': .12, 'stroke-opacity': .9 }, parent); }); }
+  function syncGroups() { const hide = diagram || !!focusSet; gL.style.display = gLL.style.display = hide ? 'none' : ''; }
+  function paintSelect() {
+    gS.innerHTML = ''; const overview = !diagram && !focusSet;
+    const product = !!(selected && PR[selected]);
+    gL.classList.toggle('dim', overview && product); gLL.classList.toggle('dim', overview && product);
+    if (!(overview && selected && PR[selected])) return;
+    const layerOn = !svg.classList.contains('nosp');
+    drawExact(DATA.links.filter(l => (l[0] === selected || l[1] === selected) && (layerOn || (!isSp(l[0]) && !isSp(l[1])))), gS);
+  }
   function setLens(l) {
     lens = l; gLL.innerHTML = '';
     for (const id in nodes) { const n = nodes[id]; if (!n.isP) continue; n.g.classList.toggle('on', !!n.p.roles[l]);
       n.ring.setAttribute('visibility', ringOn(n.p, l) ? 'visible' : 'hidden'); n.ring.style.stroke = LENS[l].color; n.dia.setAttribute('visibility', l === 'policy' && (n.p.pol || []).includes('author') ? 'visible' : 'hidden'); }
-    for (const [a, b] of lensLinks(l)) { const A = M(POS(a)), B = M(POS(b)); mk('line', { class: 'lk on', x1: A[0], y1: A[1], x2: B[0], y2: B[1], 'stroke-dasharray': l === 'policy' || l === 'threat' ? '.5 .4' : '' }, gLL); }
+    const bright = new Set(brightLinks(l).map(p => pairKey(p[0], p[1])));
+    gL.querySelectorAll('line[data-a]').forEach(el => el.classList.toggle('hid', bright.has(pairKey(el.dataset.a, el.dataset.b))));
+    for (const [a, b] of brightLinks(l)) { const A = M(POS(a)), B = M(POS(b)); mk('line', { class: 'lk on', x1: A[0], y1: A[1], x2: B[0], y2: B[1], 'stroke-dasharray': l === 'policy' || l === 'threat' ? '.5 .4' : '' }, gLL); }
+    paintSelect();
   }
   function setRuns(runs) {
     gR.innerHTML = ''; rv = [];
@@ -102,13 +117,18 @@ function createSVG() {
     for (const id in nodes) { const p = M(POS(id)); nodes[id].g.setAttribute('transform', `translate(${p[0]} ${p[1]})`); nodes[id].g.style.display = diagram && !t.nodes.has(id) ? 'none' : ''; }
     gZ.style.display = diagram ? 'none' : '';
     if (diagram) { const w = 50, hh = w * HOME.h / HOME.w; vb = { x: -w / 2, y: -hh / 2, w, h: hh }; setVB(); } else if (was) { vb = { ...HOME }; setVB(); }
-    gT.innerHTML = ''; gL.style.display = gLL.style.display = t ? 'none' : ''; if (!t) return;
+    gT.innerHTML = ''; syncGroups(); paintSelect(); if (!t) return;
     t.links.forEach((l, i) => { const a = M(POS(l[0])), b = M(POS(l[1])); mk('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: '#fff', 'stroke-width': .1, 'stroke-opacity': .85 }, gT);
       if (t.links.length <= 30) { const x = (a[0] + b[0]) / 2, y = (a[1] + b[1]) / 2; mk('circle', { cx: x, cy: y, r: .75, fill: '#0a1020', stroke: '#fff', 'stroke-width': .08 }, gT); mk('text', { x, y: y + .35, 'font-size': .9 }, gT).textContent = i + 1; } });
   }
-  return { kind: 'svg', fx, nudge, setLens, setRuns, setTopo, frame, setView(m) { follow = m !== 'orbit'; if (!follow) { vb = { ...HOME }; setVB(); } }, setLayer(on) { svg.classList.toggle('nosp', !on); },
+  function setFocus(f) {
+    focusSet = diagram ? null : f; gFoc.innerHTML = ''; syncGroups();
+    if (focusSet) drawExact(focusSet.links, gFoc);
+    paintSelect();
+  }
+  return { kind: 'svg', fx, nudge, setLens, setRuns, setTopo, setFocus, frame, setView(m) { follow = m !== 'orbit'; if (!follow) { vb = { ...HOME }; setVB(); } }, setLayer(on) { svg.classList.toggle('nosp', !on); paintSelect(); },
     focus(id) { const [x, y] = M(POS(id)); vb = { x: x - 18, y: y - 18 * HOME.h / HOME.w, w: 36, h: 36 * HOME.h / HOME.w }; setVB(); },
     setFilter(f) { for (const k in nodes) nodes[k].g.classList.toggle('filtered', !!f && !f.has(k)); },
-    select(id) { for (const k in nodes) nodes[k].g.classList.toggle('sel', k === id); },
+    select(id) { selected = id; for (const k in nodes) nodes[k].g.classList.toggle('sel', k === id); paintSelect(); },
     resetView() { vb = { ...HOME }; setVB(); } };
 }

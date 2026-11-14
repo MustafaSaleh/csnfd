@@ -168,7 +168,11 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr) 350px;min-height:0}
 #svg2d text.pl{font-weight:400;fill:var(--tx2);font-size:.95px}
 #svg2d text.zn{font-size:1px;letter-spacing:.12px;fill:var(--tx3);text-anchor:start;text-transform:uppercase}
 #svg2d .zone{fill:#111a31;stroke:var(--line);stroke-width:.08}
-#svg2d .lk{stroke:#2a3a60;stroke-width:.06}
+#svg2d .lk{stroke:#2a3a60;stroke-width:.06;stroke-opacity:.4}
+#svg2d .lk.spk{stroke:#b5672f;stroke-opacity:.55}
+#svg2d .lk.rise{stroke:#b5672f;stroke-width:.28;stroke-opacity:.75}
+#svg2d .lk.hid,#svg2d g.dim .lk.hid{display:none}
+#svg2d g.dim{opacity:.22}
 #svg2d .lk.on{stroke:var(--lens);stroke-opacity:.5;stroke-width:.09}
 #svg2d .n{cursor:pointer}
 #svg2d .n .sh{fill:#33405c;stroke:#0008;stroke-width:.06}

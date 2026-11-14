@@ -158,7 +158,7 @@ function renderLeft() {
     el.innerHTML = `<h2>Topology</h2><p class="small" style="margin:4px 0 8px">Pick an architecture to isolate its building blocks and see how they connect. Only relationships stated on cisco.com or splunk.com are drawn.</p>` +
       DATA.architectures.map((a, i) => `${i === 0 ? '<div class="pg">Architectures</div>' : a.id === 'ups' ? '<div class="pg">Suites</div>' : a.id === 'splsec' ? '<div class="pg">Splunk layer</div>' : a.all ? '<div class="pg">Whole scene</div>' : ''}<button class="preset" data-arch="${a.id}" aria-current="${S.arch === a.id}"><b>${i + 1}</b><span>${h(a.name)}</span></button>`).join('');
   } else {
-    el.innerHTML = `<h2>Free explore</h2><p class="small" style="margin:4px 0 10px">Orbit, zoom and pan the scene. Select any product for its function, lenses, stated relationships and cisco.com source. Lines are relationships stated on cisco.com or splunk.com.</p>` +
+    el.innerHTML = `<h2>Free explore</h2><p class="small" style="margin:4px 0 10px">Orbit, zoom and pan the scene. Select any product for its function, lenses, stated relationships and cisco.com source. Lines are relationships stated on cisco.com or splunk.com. The orange stub under Splunk Platform combines every feed that sends data there, and selecting a product draws that product's own lines.</p>` +
       Object.entries(DATA.categories).map(([c, name]) => `<div class="pg">${h(name)}</div><div class="exlist">` +
         Object.entries(PR).filter(([, p]) => p.cat === c).map(([id, p]) => `<button data-id="${id}"><span>${h(p.name)}</span><small>${h(DATA.zones.find(z => z.id === p.zone).label.slice(4))}</small></button>`).join('') + '</div>').join('');
   }
