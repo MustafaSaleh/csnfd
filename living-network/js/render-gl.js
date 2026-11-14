@@ -173,48 +173,71 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
     iot: [['b', 1.1, .8, .8, 0, .9, 0], ['c', .5, .5, .5, 0, .9, .55, Math.PI / 2], ['c', .2, .9, .2, 0, .2, 0]], ot: [['c', 1.2, .5, 1.2, 0, .25, 0], ['b', .35, 1.5, .35, 0, 1.2, 0], ['b', 1.3, .3, .3, .5, 1.95, 0]],
     aiagent: [['o', 1.6, 1.6, 1.6, 0, 1.2, 0], ['r', 2.3, 2.3, 2.3, 0, 1.2, 0, Math.PI / 2]], attacker: [['t', 1.6, 1.6, 1.6, 0, 1.1, 0], ['t', 1.3, -1.3, 1.3, 0, 1.3, 0], ['k', .5, 1, .5, 0, 2.5, 0]]
   };
-  /* walking 3D figures for human actors: original low-poly geometry, one distinct silhouette per role */
+  /* walking 3D figures for human actors: original low-poly geometry, one distinct silhouette per Who */
   const HUMAN = {
     emp: { body: 0x5b8def }, admin: { body: 0x8f6cf0 }, exec: { body: 0x23345e, tall: 1.12 }, contractor: { body: 0xf08a24 },
     guest: { body: 0xb9c4d8, tall: .9 }, insider: { body: 0x5b8def }, attacker: { body: 0x9c2231, legs: 0x4a1220, skin: 0x2a0d14, ring: 0xff3b30 }
   };
-  /* costume colours. Body stays the Who colour unless the scenario picks a role. */
-  const COSTUME = {
-    doctor: { body: 0xf7f8fa }, patient: { body: 0xd5e6f5 }, teacher: { body: 0x2f4d6e }, student: { body: 0x6d5bd0, tall: .92 },
-    worker: { body: 0x3a4a63 }, associate: { body: 0x1f6f64 }, servant: { body: 0x1c2744 }, advisor: { body: 0x23345e }, employee: { body: 0x5b8def }
-  };
-  function human(who, slot, role) {
-    const look = role && role.id || who, C = COSTUME[look] || {}, o = HUMAN[who];
-    const g = new THREE.Group(), M = (col, basic) => basic ? new THREE.MeshBasicMaterial({ color: col }) : new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: .35, roughness: .6, flatShading: true });
-    const body = M(C.body != null ? C.body : o.body), skin = M(o.skin || 0xf1c9a5), legs = M(o.legs || 0x2b3550);
-    const add = (k, m, sx, sy, sz, x, y, z, parent = g, rx = 0) => { const me = new THREE.Mesh(prim(k), m); me.scale.set(sx, sy, sz); me.position.set(x, y, z); me.rotation.x = rx; parent.add(me); return me; };
-    const limb = (x, y, len, m, w) => { const pv = new THREE.Group(); pv.position.set(x, y, 0); add('b', m, w, len, w, 0, -len / 2, 0, pv); g.add(pv); return pv; };
-    const legL = limb(-.22, 1.1, 1.1, legs, .3), legR = limb(.22, 1.1, 1.1, legs, .3);
-    add('b', body, .9, 1.1, .5, 0, 1.65, 0);
+  function human(who, slot) {
+    const o = HUMAN[who], g = new THREE.Group();
+    const M = (col, basic, smooth) => basic ? new THREE.MeshBasicMaterial({ color: col }) : new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: .25, roughness: .7, flatShading: !smooth });
+    const shade = (col, f) => new THREE.Color(col).multiplyScalar(f).getHex();           /* f < 1 = darker tone of same colour */
+    const legCol = o.legs || 0x2b3550, RED = 0xff3b30, GOLD = 0xf4c95d, atk = who === 'attacker';
+    const body = M(o.body), skin = M(o.skin || 0xf1c9a5, false, true), legs = M(legCol);
+    const dark = M(shade(legCol, .55)), trim = M(shade(o.body, .65));
+    const hand = atk ? M(0x15151c) : skin;
+    const add = (k, m, sx, sy, sz, x, y, z, parent = g, rx = 0) => { const me = new THREE.Mesh(prim(k), m); me.scale.set(sx, sy, sz); me.position.set(x, y, z); me.rotation.x = rx; me.castShadow = true; parent.add(me); return me; };
+    const limb = (x, y, len, m, w, isLeg) => {
+      const pv = new THREE.Group(); pv.position.set(x, y, 0);
+      if (isLeg) {
+        add('b', m, w, len - .14, w, 0, -(len - .14) / 2, 0, pv);                           /* trouser leg */
+        add('b', dark, w * 1.15, .16, w * 1.75, 0, -len + .08, .09, pv);                    /* shoe */
+      } else {
+        add('s', m, w * 1.3, w * 1.3, w * 1.3, 0, -.04, 0, pv);                             /* shoulder cap */
+        add('b', m, w, len - .16, w, 0, -(len - .16) / 2, 0, pv);                           /* sleeve */
+        add('s', hand, w * 1.05, w * 1.05, w * 1.05, 0, -len + .1, 0, pv);                  /* hand */
+      }
+      g.add(pv); return pv;
+    };
+    const legL = limb(-.22, 1.1, 1.1, legs, .3, true), legR = limb(.22, 1.1, 1.1, legs, .3, true);
+    add('b', body, .9, .62, .5, 0, 1.89, 0);                                                /* chest */
+    add('b', body, .78, .5, .5, 0, 1.34, 0);                                                /* waist */
+    add('b', atk ? M(RED, true) : dark, .82, .08, .53, 0, 1.13, 0);                         /* belt */
     const armL = limb(-.6, 2.15, .95, body, .24), armR = limb(.6, 2.15, .95, body, .24);
+    add('c', skin, .22, .2, .22, 0, 2.26, 0);                                               /* neck */
     add('s', skin, .62, .62, .62, 0, 2.6, 0);
-    if (role && ROLE_GENDERED.has(look)) {                                                                                   /* man: short cap. woman: hair down the back. a hard hat takes the place of the cap */
-      const hair = M(0x2a211c), hat = look === 'worker';
-      if (role.woman) { if (!hat) add('b', hair, .7, .28, .7, 0, 2.84, -.04); add('b', hair, .42, hat ? .5 : .85, .36, 0, hat ? 2.2 : 2.35, -.3); }
-      else if (!hat) add('b', hair, .66, .18, .66, 0, 2.88, 0);
+    if (!atk) { add('b', M(0x1c1c24), .06, .08, .04, -.11, 2.63, .29); add('b', M(0x1c1c24), .06, .08, .04, .11, 2.63, .29); }   /* eyes */
+    if (who !== 'contractor' && who !== 'insider' && !atk) add('s', M(o.hair || 0x3a2a1e), .66, .5, .66, 0, 2.72, -.06);         /* hair */
+    if (who === 'emp' || who === 'insider') { add('b', M(0xffffff), .2, .26, .05, .24, 1.85, .27); add('b', trim, .1, .1, .02, .24, 1.9, .3); }   /* staff badge + photo */
+    if (who === 'emp') add('b', M(0xffffff), .36, .08, .52, 0, 2.17, 0);                                                         /* collar */
+    if (who === 'admin') {                                                                                                       /* halo = privilege */
+      add('r', M(GOLD), 1.1, 1.1, 1.1, 0, 3.15, 0, g, Math.PI / 2); add('b', M(GOLD), .2, .26, .05, .24, 1.85, .27);
+      add('b', M(GOLD), .3, .06, .34, 0, .13, 0, armL); add('b', M(GOLD), .3, .06, .34, 0, .13, 0, armR);                        /* epaulettes */
     }
-    if (look === 'employee' || look === 'servant' || look === 'insider') add('b', M(0xffffff), .2, .26, .05, .24, 1.85, .27); /* staff badge */
-    if (role && role.halo) add('r', M(0xf4c95d), 1.1, 1.1, 1.1, 0, 3.15, 0, g, Math.PI / 2);                                 /* halo = privilege, on any costume */
-    if (look === 'advisor') { add('b', M(0xf4c95d), .14, .62, .05, 0, 1.8, .27); add('b', M(0xffffff), .5, .3, .05, 0, 2.05, .26); add('c', M(0xffffff), .46, .14, .46, 0, 2.18, 0); }  /* shirt, tie and a collar that shows from behind */
-    if (look === 'contractor') { add('c', M(0xffd23f), .78, .3, .78, 0, 2.95, 0); add('c', M(0xffd23f), .95, .06, .95, 0, 2.82, .1); add('b', M(0x7a4d22), .55, .38, .28, 0, -1.1, 0, armR); add('b', M(0xfff3a0), .92, .14, .52, 0, 1.6, 0); }   /* hard hat, hi-vis band, toolbox */
-    if (look === 'worker') { add('c', M(0xffd23f), .78, .3, .78, 0, 2.95, 0); add('c', M(0xffd23f), .95, .06, .95, 0, 2.82, .1); add('b', M(0xfff3a0), .98, .36, .62, 0, 1.7, 0); }  /* hard hat and a hi-vis vest that reads from behind, no toolbox */
-    if (look === 'guest') add('r', M(0xffffff), .7, .7, .7, 0, 2.05, .2, g, 1.1);                                              /* visitor lanyard */
-    if (look === 'doctor') add('b', M(0x3d8eb5), .16, .72, .06, 0, 1.62, .27);                                                 /* coat opening over scrubs */
-    if (look === 'teacher') add('b', M(0xc4a574), .5, .62, .18, -.2, -.72, 0, armL);                                            /* folder under one arm */
-    if (look === 'student') add('b', M(0x241c38), 1.02, .58, .4, 0, 1.5, -.4);                                                  /* backpack, wider than the torso so it shows from behind */
-    if (look === 'associate') { add('b', M(0xf2efe6), .72, .7, .08, 0, 1.45, .28); add('b', M(0xf2efe6), .14, .7, .14, -.28, 1.85, 0); add('b', M(0xf2efe6), .14, .7, .14, .28, 1.85, 0); }  /* apron and shoulder straps */
-    if (look === 'insider') add('k', M(0x39405a), 1.05, .75, 1.05, 0, 3.02, 0);                                                /* hood */
-    if (look === 'attacker') {                                                                                                  /* hooded figure, visor, spiked shoulders */
-      add('k', legs, 1.3, 1.25, 1.3, 0, 2.98, 0); add('b', M(0xff3b30, true), .52, .13, .1, 0, 2.62, .3);
-      add('t', M(0xff3b30), .5, .5, .5, -.62, 2.35, 0); add('t', M(0xff3b30), .5, .5, .5, .62, 2.35, 0); add('k', legs, 1.5, 1.5, .5, 0, 1.3, -.3, g, Math.PI);
+    if (who === 'exec') {                                                                                                        /* shirt and tie */
+      add('b', M(GOLD), .14, .62, .05, 0, 1.8, .27); add('b', M(0xffffff), .5, .3, .05, 0, 2.05, .26);
+      add('b', trim, .2, .56, .05, -.33, 1.9, .27); add('b', trim, .2, .56, .05, .33, 1.9, .27);                                 /* lapels */
+      add('b', M(0xffffff), .36, .08, .52, 0, 2.17, 0);                                                                          /* collar */
+      add('b', M(0x3b2a1a), .5, .36, .14, 0, -1.1, 0, armL); add('b', M(GOLD), .2, .05, .06, 0, -.9, 0, armL);                   /* briefcase + handle */
     }
-    add('r', M(slot ? 0xffd9a8 : (o.ring || 0xffffff), true), 1.9, 1.9, 1.9, 0, .04, 0, g, Math.PI / 2);                       /* ground ring so the figure is easy to find; B is tinted */
-    g.scale.set(2.8, 2.8 * (C.tall || (look === who ? o.tall : 0) || 1), 2.8); g.userData = { legL, legR, armL, armR };
+    if (who === 'contractor') {                                                                                                  /* hard hat, hi-vis band, toolbox */
+      add('c', M(0xffd23f), .78, .3, .78, 0, 2.95, 0); add('c', M(0xffd23f), .95, .06, .95, 0, 2.82, .1);
+      add('b', M(0x7a4d22), .55, .38, .28, 0, -1.1, 0, armR); add('b', M(0x2a2a2a), .26, .05, .06, 0, -.89, 0, armR);            /* toolbox + handle */
+      add('b', M(0xfff3a0), .92, .14, .52, 0, 1.6, 0);
+      add('b', M(0xfff3a0), .1, .56, .52, -.25, 1.92, 0); add('b', M(0xfff3a0), .1, .56, .52, .25, 1.92, 0);                     /* vest straps */
+    }
+    if (who === 'guest') { add('b', M(0xffffff), .22, .28, .05, 0, 1.72, .28); add('b', M(o.ring || 0x4aa3ff), .22, .07, .02, 0, 1.82, .31); }   /* visitor card */
+    if (who === 'insider') { add('k', M(0x39405a), 1.05, .75, 1.05, 0, 3.02, 0); add('b', M(0x14161f, true), .5, .12, .08, 0, 2.74, .27); }   /* hood + brow shadow */
+    if (atk) {                                                                                                                   /* hooded figure, visor, spiked shoulders */
+      add('k', legs, 1.3, 1.25, 1.3, 0, 2.98, 0); add('b', M(RED, true), .52, .13, .1, 0, 2.62, .3);
+      add('b', M(0xff8a80, true), .4, .04, .02, 0, 2.62, .36);                                                                   /* visor glow strip */
+      add('t', M(RED), .5, .5, .5, -.62, 2.35, 0); add('t', M(RED), .5, .5, .5, .62, 2.35, 0); add('k', legs, 1.5, 1.5, .5, 0, 1.3, -.3, g, Math.PI);
+    }
+    const ringCol = slot ? 0xffd9a8 : (o.ring || 0xffffff);
+    const disc = add('c', new THREE.MeshBasicMaterial({ color: ringCol, transparent: true, opacity: .16, depthWrite: false }), 1.7, .02, 1.7, 0, .02, 0);   /* soft glow under feet */
+    disc.castShadow = false;
+    add('r', M(ringCol, true), 1.9, 1.9, 1.9, 0, .04, 0, g, Math.PI / 2).castShadow = false;                                     /* ground ring so the figure is easy to find; B is tinted */
+    g.scale.set(2.8, 2.8 * (o.tall || 1), 2.8); g.userData = { legL, legR, armL, armR };
     return g;
   }
   const DEVICE = {
@@ -416,7 +439,7 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
       const ap = actorPos(r, r.slot), pts = [new THREE.Vector3(ap[0], lift, ap[2]), ...r.path.map(n => { const p = POS(n); return new THREE.Vector3(p[0], p[1] + lift, p[2]); })];
       const am = new THREE.MeshStandardMaterial({ color: hostile ? 0xff6a5c : (r.slot ? 0xffd9a8 : 0xe6ecfa), roughness: .5, flatShading: true });
       const isHuman = !!HUMAN[r.s.who], role = roleOf(r.s, S.preset, r.slot);
-      const actor = isHuman ? human(r.s.who, r.slot, role) : build(ACTOR[r.s.who], am); actor.position.set(ap[0], 0, ap[2]); g.add(actor);
+      const actor = isHuman ? human(r.s.who, r.slot) : build(ACTOR[r.s.who], am); actor.position.set(ap[0], 0, ap[2]); g.add(actor);
       const dev = build(DEVICE[r.s.device], new THREE.MeshStandardMaterial({ color: r.s.device === 'compromised' ? 0xff6a5c : 0x9fb3dd, roughness: .5, flatShading: true }));
       if (isHuman) { dev.scale.setScalar(.6); dev.position.set(1.0, 1.2, .35); actor.add(dev); }      /* humans carry their device as they walk */
       else { dev.position.set(ap[0] + 1.5, 0, ap[2] + .9); g.add(dev); }

@@ -52,9 +52,10 @@ recognisable shapes, not Cisco hardware or artwork. The suites and the Splunk pr
 Past the slabs, a faint grid marks the edge of the diagram, and a short red tint sits under Open internet.
 
 Human actors (employee, admin, executive, contractor, guest, insider, external attacker) are walking 3D figures with
-their name and live trust level above them; the attacker is a red hooded figure on a dashed path. The figure's clothes
-follow the scenario (a doctor, teacher, student, plant worker, or an employee drawn as a man or a woman); the identity
-used for the verdict does not. The 0–100 trust
+their name and live trust level above them. Each Who has its own clothes: a badge and collar, a halo, a tie and
+briefcase, a hard hat and toolbox, a visitor card, or a hood. The attacker is a red hooded figure on a dashed path.
+The name above the figure can still show the industry role, such as doctor or teacher; the identity used for the
+verdict does not change. The 0–100 trust
 level is an illustrative teaching device: no product shows this number. The closest real signals are ISE posture, Duo
 risk-based authentication and Identity Intelligence.
 
