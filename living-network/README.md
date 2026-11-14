@@ -399,8 +399,8 @@ worker), and no new verdict rule was added for them.
   detection (XP5) and an XDR incident, and the verdict stays ALLOW WITH LIMITS.
 - **Agent tool calls (A7)**: the AI Defense data sheet (`aidds`) states inspection of MCP traffic and tool allowlists
   and blocklists. The tool does not model how the poisoned tool reached the agent.
-- **Example CVEs**: rule and preset text says "a known vulnerability" and names no CVE. The examples in "Attacker
-  presets from 2026 threat reporting" are from the Talos posts and are not shown in the tool.
+- **Example CVEs**: presets 100–111 and the captions on presets 22, 34 and 35 name a CVE id and the effect recorded for it. They do not describe a procedure. Rules that still say only "a known vulnerability" are the generic exploit path. The examples in "Attacker
+  presets from 2026 threat reporting" are from the Talos posts.
 - Listed on cisco.com but out of the requested scope: Secure Web Appliance, Attack Surface Management, Secure Malware
   Analytics, Security Analytics and Logging, Telemetry Broker, Secure DDoS Protection, Vulnerability Management,
   Meraki Systems Manager, Isovalent, Catalyst Center, Splunk.
@@ -472,9 +472,7 @@ Each item names the document to check. Keys refer to the "Design reference keys"
   profile that does not belong to the edge network, ISE can automatically remove it from the network", with Cyber
   Vision feeding device properties. This supports T16 for OT; consider a Cyber Vision → ISE beam in the OT anomaly
   preset.
-- **Virtual patching** of OT assets is now rule XP2, at the IT/OT boundary firewall. Still open: inside the plant
-  (factory floor to controller, and the Secure Equipment Access path) no firewall is on the modelled path, so an
-  exploit there is detected by Cyber Vision but not dropped. The guide's firewall at the cell/area boundary would
+- **Virtual patching** of OT assets is now rule XP2, at the IT/OT boundary firewall. Preset 107 is the in-cell case: the factory path has no firewall, Cyber Vision detects the exploit, and the verdict is CONTAIN from the XDR workflow. Still open: a cell/area firewall that would drop it. The guide's firewall at the cell/area boundary would
   close that; see the IDMZ and cell/area firewall items in this list.
 - **Secure Firewall routing between OT VLANs, or transparent at the cell/area boundary**, and **SGT enforcement at the
   distribution switch** (cell/area zones classified by subnet). The industrial network node could say so.
@@ -542,7 +540,7 @@ Not opened yet, likely useful:
 - Secure Access has no XDR line: no public page naming it was found. ThousandEyes ↔ ITSI and an XDR response action
   through ISE for an IT endpoint also still need a public page.
 - No licensing view: nothing shows which suite or tier a scenario needs.
-- No "denial of service" behaviour, and no multi-stage attack that chains several steps in one run: presets 32 and 33
+- Preset 111 is the exhaustion case (a small request, or an on-site amplifier). Secure DDoS Protection stays out of scope and is not credited. There is still no multi-stage attack that chains several steps in one run: presets 32 and 33
   combine two behaviours, which the engine evaluates together, not one after the other.
 - The "exploit" behaviour is limited to systems the organisation runs (private app, cloud app, internal server,
   internal AI model, OT controller), and the remote-session behaviour to managed devices, so a contractor cannot be
@@ -1240,14 +1238,22 @@ The most specific matching rule wins (ties: the later rule). `@loc` / `@dest` ar
 | RT-ot (route) | destination ∈ {ot} | fw → industrial → otctl |
 | RT-ot-factory (route) | location ∈ {factory}; destination ∈ {ot} | otctl |
 | RT-ot-remote (route) | location ∈ {home, public, travel}; destination ∈ {ot} | sea → industrial → otctl |
+| AC-ssid (access) | location ∈ {hq}; behaviour any of {ssid} | hq → wireless |
+| RT-fwvpn (route) | destination ∈ {fwvpn} | fw |
+| RT-dns (route) | behaviour any of {dns}; location ∈ {hq, branch, factory}; destination ∈ {saas, web_safe, web_mal, web_risky} | sdwan → sa → web |
+| RT-ssid (route) | behaviour any of {ssid}; location ∈ {hq}; destination ∈ {saas, web_safe, web_mal, web_risky, cloudapp} | internet |
+| RT-edgeui (route) | destination ∈ {edgeui} | wireless |
+| RT-mgmt (route) | destination ∈ {mgmt} | scc |
+| RT-disclose (route) | behaviour any of {disclose}; location ∈ {internet}; destination ∈ {saas} | sa → saas |
+| RT-pod (route) | device ∈ {server}; behaviour any of {podnet, poddeny}; destination ∈ {cloudapp} | cloudapp |
 
 ### Checkpoint rules
 
-Every matching rule fires in path order. Verdict = highest severity among fired rules (ALLOW < ALLOW WITH LIMITS < STEP-UP < BLOCK < CONTAIN); with none, ALLOW. STEP-UP, BLOCK and CONTAIN on the path stop traffic at that hop.
+Every matching rule fires in path order. Severity is ALLOW 0, ALLOW WITH LIMITS 1, CONTROL LOST 1, STEP-UP 2, BLOCK 3, UNAVAILABLE 3, CONTAIN 4. A later checkpoint replaces the winner only when its severity is strictly greater, except that CONTROL LOST wins a tie with ALLOW WITH LIMITS. Every other tie keeps the earlier checkpoint. With none, ALLOW. STEP-UP and anything stricter on the path stop traffic at that hop. CONTROL LOST does not. UNAVAILABLE does.
 
 | Rule | When | Checked by | At hop | What is checked → result | Trust | Verdict | Design refs |
 |---|---|---|---|---|---|---|---|
-| N1 | device ∉ {headless, server}; who ∉ {guest, attacker}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Network access control → User and device authenticated to the network; segment assigned from identity | +5 (Network identity established) | — | sda, ztnc |
+| N1 | device ∉ {headless, server}; who ∉ {guest, attacker}; behaviour none of {netlogon}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Network access control → User and device authenticated to the network; segment assigned from identity | +5 (Network identity established) | — | sda, ztnc |
 | N2 | device ∈ {headless}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Endpoint profiling → Headless device profiled and placed in a least-privilege segment | +5 (Device profiled) | ALLOW WITH LIMITS | sda |
 | N3 | who ∈ {guest}; destination ∈ {saas, shadow, web_safe, web_risky, web_mal, ai, pubai, mail}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Guest access → Guest identity mapped to an internet-only segment that breaks out locally, outside the Secure Access tunnels | — | ALLOW WITH LIMITS | ubl |
 | N4 | who ∈ {guest}; destination ∈ {dcapp, cloudapp, eastwest, intai, ot}; path includes {switches, industrial, sdwan} | ISE | switches / industrial / sdwan | Guest segmentation → The guest segment has no path to internal resources | -10 (Out-of-scope request) | BLOCK | sda |
@@ -1264,14 +1270,14 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | M8 | who ∈ {emp, admin, exec, contractor, insider, attacker}; location ∈ {travel} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Sign-in context → Location is inconsistent with the account’s recent activity | -20 (Impossible travel) | STEP-UP | — |
 | M9 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {offhours} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Access pattern → Access time is outside the identity’s normal pattern | -8 (Unusual time of access) | — | — |
 | M11 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {aitm} | Identity Intelligence | sa / sea / switches / industrial / sdwan / client / @dst | Compromised session check → The same active session is in use from a second address and browser: flagged as a stolen, replayed session cookie | -25 (Compromised session) | STEP-UP | ciics, talosq2 |
-| M1 | who ∈ {emp, exec, contractor, insider}; behaviour none of {mfa_fail, fatigue, stolen, aitm} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → User verified with phishing-resistant MFA | +10 (MFA passed) | — | — |
+| M1 | who ∈ {emp, exec, contractor, insider}; behaviour none of {mfa_fail, fatigue, stolen, aitm, netlogon} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → User verified with phishing-resistant MFA | +10 (MFA passed) | — | — |
 | M1b | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour all of {stolen, mfa_ok} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → MFA challenge completed | +5 (MFA passed) | — | — |
 | M2 | who ∈ {admin}; behaviour any of {mfa_ok}; behaviour none of {stolen} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Privileged authentication → Administrator verified with fresh phishing-resistant MFA | +10 (MFA passed) | — | — |
 | M3 | who ∈ {admin}; behaviour none of {mfa_ok, mfa_fail, fatigue, aitm} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Privileged session → Privileged access requires fresh strong authentication | -5 (Fresh authentication required) | STEP-UP | — |
 | M4 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {mfa_fail} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → MFA not completed; no session issued | -30 (MFA failed) | BLOCK | — |
 | M5 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {fatigue} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Push-bombing resistance → Verified Duo Push needs a code from the sign-in screen, so repeated prompts cannot be approved blindly; sign-in refused | -25 (MFA fatigue pattern) | BLOCK | — |
 | M12 | who ∈ {emp, admin, exec, contractor, insider, attacker}; behaviour any of {aitm} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | Session theft protection → Duo Passport keeps no session cookie in the sign-in flow; proof of sign-in is bound to the user’s own device, so the replay from another device is refused | -20 (Replayed session refused) | BLOCK | duoph, talosq2 |
-| M10 | who ∈ {attacker}; behaviour none of {stolen, aitm} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → No valid identity presented | -20 (Unauthenticated request) | BLOCK | — |
+| M10 | who ∈ {attacker}; destination ∉ {mgmt, edgeui}; behaviour none of {stolen, aitm, fwvictim, flood, pushbad, disclose, edgeweb} | Duo | sa / sea / switches / industrial / sdwan / client / @dst | User authentication → No valid identity presented | -20 (Unauthenticated request) | BLOCK | — |
 | S1 | who ∈ {contractor}; destination ∈ {dcapp, cloudapp}; path includes {sa} | Secure Access | sa | Zero trust access → Access granted to the one approved application, not to the network | — | ALLOW WITH LIMITS | sasedg, ztud |
 | S1b | who ∈ {contractor}; destination ∈ {dcapp, cloudapp}; path includes {switches, industrial, sdwan}; path lacks {sa} | ISE | switches / industrial / sdwan | Contractor segmentation → Contractor segment permits only the approved application | — | ALLOW WITH LIMITS | — |
 | S2 | who ∈ {contractor}; destination ∈ {eastwest, intai}; path includes {sa} | Secure Access | sa | Zero trust access → Requested resource is not among the contractor’s granted applications | -15 (Out-of-scope request) | BLOCK | ztud |
@@ -1280,9 +1286,9 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | S4 | behaviour any of {priv}; path includes {sa} | Secure Access | sa | Least-privilege access → Requested privilege exceeds what the identity’s role allows | -15 (Excess privilege request) | BLOCK | — |
 | S5 | behaviour any of {priv}; path includes {nexus}; path lacks {sa} | Secure Workload | nexus | Microsegmentation policy → Flow is outside the workload’s allowed communication policy | -15 (Excess privilege request) | BLOCK | — |
 | S6 | behaviour any of {priv}; path lacks {sa, nexus} | Identity Intelligence | switches / industrial / sdwan / @dst | Privilege analytics → Privilege request exceeds the role and is flagged as risky | -15 (Excess privilege request) | BLOCK | — |
-| X1 | who ∈ {attacker}; behaviour none of {exploit}; path includes {fw} | Firewall (with Talos) | fw | Inbound threat prevention → Unsolicited inbound connection denied; known attack patterns blocked using Talos intelligence | -25 (Hostile inbound traffic) | BLOCK | — |
-| X2 | who ∈ {attacker}; path includes {waap} | WAAP | waap | Application and API protection → Malicious requests and automated-client patterns filtered in front of the application | -25 (Application attack pattern) | BLOCK | — |
-| X3 | who ∈ {attacker}; path includes {mcd} | Multicloud Defense | mcd | Cloud ingress protection → Inbound attack blocked at the cloud gateway | -20 (Hostile inbound traffic) | BLOCK | — |
+| X1 | who ∈ {attacker}; behaviour none of {exploit, fwvictim}; path includes {fw} | Firewall (with Talos) | fw | Inbound threat prevention → Unsolicited inbound connection denied; known attack patterns blocked using Talos intelligence | -25 (Hostile inbound traffic) | BLOCK | — |
+| X2 | who ∈ {attacker}; behaviour none of {flood}; path includes {waap} | WAAP | waap | Application and API protection → Malicious requests and automated-client patterns filtered in front of the application | -25 (Application attack pattern) | BLOCK | — |
+| X3 | who ∈ {attacker}; behaviour none of {flood}; path includes {mcd} | Multicloud Defense | mcd | Cloud ingress protection → Inbound attack blocked at the cloud gateway | -20 (Hostile inbound traffic) | BLOCK | — |
 | X4 | who ∈ {attacker}; path includes {nexus} | Hypershield | nexus | Vulnerability shielding (illustrative) → A compensating control shields the exposed workload from exploitation | -20 (Exploit attempt) | BLOCK | — |
 | XP1 | behaviour any of {exploit}; destination ∉ {ot}; path includes {fw} | Firewall (with Talos) | fw | Intrusion prevention → Exploit attempt for a known vulnerability matches a Snort rule published by Talos; the connection is dropped | -25 (Exploit attempt) | BLOCK | talosfmc, talosq3, isdg |
 | XP2 | destination ∈ {ot}; behaviour any of {exploit}; path includes {fw} | Firewall (with Cyber Vision and Talos) | fw | Virtual patching → Cyber Vision lists the controller’s known vulnerabilities; the matching intrusion prevention policy is enabled on the firewall at the IT/OT boundary and drops the exploit | -25 (Exploit attempt) | BLOCK | isdg |
@@ -1500,6 +1506,20 @@ Every matching rule fires in path order. Verdict = highest severity among fired 
 | 97 | Physical safety: campus sensor opens a safe website, unlike its profile | iot · headless · hq · web_safe · [anomaly] | CONTAIN |
 | 98 | Remote research and collaboration: mobile worker at home → private cloud app, MFA passed | emp · mobile · home · cloudapp · [mfa_ok] | ALLOW |
 | 99 | Research and academic computing: workload in the data center → the internal AI model | aiagent · server · hq · intai · [norm] | ALLOW |
+| 100 | VPN web server on the firewall reloads | attacker · byod · internet · fwvpn · [fwvictim] | UNAVAILABLE |
+| 101 | Management plane pushes a policy the admin did not author | attacker · byod · internet · mgmt · [pushbad] | BLOCK |
+| 102 | IOS XE web UI accepts an unauthenticated account | attacker · byod · internet · edgeui · [edgeweb] | CONTROL LOST |
+| 103 | Remote-access gateway discloses sensitive information | attacker · byod · internet · saas · [disclose] | CONTROL LOST |
+| 104 | A local route pulls traffic out of the tunnel | emp · mgd · public · dcapp · [leak] | CONTROL LOST |
+| 105 | DNS answer for a trusted name is wrong | emp · mgd · hq · saas · [dns] | CONTROL LOST |
+| 106 | Directory accepts a machine-authentication channel | emp · mgd · hq · dcapp · [netlogon] | STEP-UP |
+| 107 | Controller exploit starts on the factory floor | ot · headless · factory · ot · [exploit] | CONTAIN |
+| 108 | Workload reaches ingress from the pod network | aiagent · server · hq · cloudapp · [podnet] | CONTROL LOST |
+| 109 | Tunnel endpoint discloses process memory | emp · mgd · public · dcapp · [tlsleak] | CONTROL LOST |
+| 110 | Wireless association joins an unintended network | emp · mgd · hq · saas · [ssid] | CONTROL LOST |
+| 111 | A small request exhausts a service, or is amplified | attacker · byod · internet · cloudapp · [flood] | UNAVAILABLE |
+
+Preset 101’s BLOCK is the scene’s rule at Security Cloud Control. CVE-2026-20079’s authentication bypass succeeds on the on-premises Secure Firewall Management Center, which is not the product drawn. The BLOCK does not stop that bypass, and the policy still fans out. Preset 102 names the IOS XE web UI (CVE-2023-20198, CISA catalog wording). Preset 103 names Citrix, Fortinet and Check Point beside the CVE ids. Preset 106’s checkpoint result contains the sentence “ISE stands in for the directory.”
 
 ## Appendix: expert review answers (11 November 2026)
 

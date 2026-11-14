@@ -123,8 +123,9 @@ function evaluate(s, off) {
     if (s.beh.includes('leak')) { segs[atClient].ty = 'leak'; segs[atClient].label = 'Tunnel up; a more-specific local route sends some traffic in the clear.'; }
     else if (s.beh.includes('tlsleak')) { segs[atClient].ty = 'disclosed'; segs[atClient].label = 'Tunnel endpoint disclosed process memory.'; }
   }
-  if (s.beh.includes('ssid')) {
-    for (let i = 1; i < segs.length; i++) if (vpath[i + 1] === 'wireless') { segs[i].ty = 'clear'; segs[i].label = 'Unintended wireless network'; }
+  if (s.beh.includes('ssid') || s.beh.includes('edgeweb')) {
+    const label = s.beh.includes('edgeweb') ? 'IOS XE web UI' : 'Unintended wireless network';
+    for (let i = 1; i < segs.length; i++) if (vpath[i + 1] === 'wireless') { segs[i].ty = 'clear'; segs[i].label = label; }
   }
   return { s, off: [...offS], path, vpath, segs, tl, gaps, series, verdict, why, stopAt, trust, products, hostile: s.who === 'attacker',
     rules: [ac.id, rt.id], fallback: !ac.when || !rt.when };

@@ -498,7 +498,9 @@ const DATA = {
       { id: 'eastwest', label: 'Another internal device or server', short: 'Internal server', node: 'server' },
       { id: 'ot', label: 'OT controller', short: 'OT controller', node: 'otctl' },
       { id: 'mail', label: 'Email inbox', short: 'Email inbox', node: 'mail' },
-      { id: 'fwvpn', label: 'This firewall’s remote-access VPN', short: 'Firewall VPN', node: 'fw' }
+      { id: 'fwvpn', label: 'This firewall’s remote-access VPN', short: 'Firewall VPN', node: 'fw' },
+      { id: 'edgeui', label: 'IOS XE web UI on the access edge', short: 'IOS XE web UI', node: 'wireless' },
+      { id: 'mgmt', label: 'Firewall management, drawn as Security Cloud Control', short: 'Management', node: 'scc' }
     ],
     /* g = sub-group heading; x = cannot be combined with "Normal use"; mfa = mutually exclusive set */
     beh: [
@@ -525,6 +527,13 @@ const DATA = {
       { id: 'dns', label: 'DNS answer for a trusted name is wrong', g: 'Threat', x: 1 },
       { id: 'ssid', label: 'Wireless association joins an unintended network', g: 'Threat', x: 1 },
       { id: 'flood', label: 'Small request exhausts a service, or is amplified', g: 'Threat', x: 1 },
+      { id: 'pushbad', label: 'Management plane pushes a policy the admin did not author', g: 'Threat', x: 1 },
+      { id: 'edgeweb', label: 'IOS XE web UI accepts an unauthenticated account', g: 'Threat', x: 1 },
+      { id: 'disclose', label: 'Remote-access gateway discloses sensitive information', g: 'Threat', x: 1 },
+      { id: 'netlogon', label: 'Directory accepts a machine-authentication channel', g: 'Threat', x: 1 },
+      { id: 'podnet', label: 'Workload reaches ingress from the pod network', g: 'Threat', x: 1 },
+      { id: 'poddeny', label: 'Workload flow to ingress is denied', g: 'Threat', x: 1 },
+      { id: 'tlsleak', label: 'Tunnel endpoint discloses process memory', g: 'Threat', x: 1 },
       { id: 'ransom', label: 'Ransomware behaviour', g: 'Threat', x: 1 },
       { id: 'anomaly', label: 'Device behaves unlike its profile', g: 'Threat', x: 1 },
       { id: 'slow', label: 'Application is slow (experience fault)', g: 'Operations', x: 1 },
@@ -566,6 +575,17 @@ const DATA = {
     { pick: 'beh', when: { not: { loc: ['hq', 'branch', 'factory'] } }, deny: ['dns'], why: 'The wrong answer is given to a device on the organisation’s own resolver path.' },
     { pick: 'beh', when: { not: { loc: ['hq'] } }, deny: ['ssid'], why: 'The unintended network is the office wireless LAN.' },
     { pick: 'beh', when: { who: ['emp', 'admin', 'exec', 'contractor', 'guest', 'insider'] }, deny: ['flood'], why: 'This case is an attacker or an on-site device used as an amplifier, not a person browsing.' },
+    { pick: 'dest', when: { not: { who: ['attacker'] } }, deny: ['edgeui', 'mgmt'], why: 'These destinations are the IOS XE web UI and firewall management as the system under attack.' },
+    { pick: 'beh', when: { not: { who: ['attacker'] } }, deny: ['pushbad', 'edgeweb', 'disclose'], why: 'An outside attacker is the actor in these cases.' },
+    { pick: 'beh', when: { not: { dest: ['mgmt'] } }, deny: ['pushbad'], why: 'That behaviour is a policy pushed from firewall management.' },
+    { pick: 'beh', when: { not: { dest: ['edgeui'] } }, deny: ['edgeweb'], why: 'That behaviour is the IOS XE web UI accepting an account.' },
+    { pick: 'beh', when: { not: { dest: ['saas'] } }, deny: ['disclose'], why: 'That behaviour is a remote-access gateway in front of a trusted destination.' },
+    { pick: 'beh', when: { not: { loc: ['hq', 'branch', 'factory'] } }, deny: ['netlogon'], why: 'The directory case is a machine on the organisation’s own network.' },
+    { pick: 'beh', when: { who: ['attacker', 'guest', 'iot', 'ot', 'aiagent'] }, deny: ['netlogon'], why: 'The directory case is a person on a managed device.' },
+    { pick: 'beh', when: { device: ['byod', 'claptop', 'headless', 'server'] }, deny: ['netlogon', 'tlsleak'], why: 'These cases use a managed device.' },
+    { pick: 'beh', when: { not: { loc: ['home', 'public', 'travel'] } }, deny: ['tlsleak'], why: 'Process memory is disclosed at a remote tunnel endpoint.' },
+    { pick: 'beh', when: { not: { device: ['server'] } }, deny: ['podnet', 'poddeny'], why: 'The ingress case is a workload.' },
+    { pick: 'beh', when: { not: { dest: ['cloudapp'] } }, deny: ['podnet', 'poddeny'], why: 'The ingress case is a private app in public cloud.' },
     { pick: 'beh', when: { who: ['$NONHUMAN', 'guest', 'contractor'] }, deny: ['push'], why: 'Policy is authored by an administrator.' }
   ],
 
@@ -590,6 +610,10 @@ const DATA = {
       { id: 'RT-fwvpn', when: { dest: ['fwvpn'] }, nodes: ['fw'] },
       { id: 'RT-dns', when: { beh: ['dns'], loc: ['hq', 'branch', 'factory'], dest: ['saas', 'web_safe', 'web_mal', 'web_risky'] }, nodes: ['sdwan', 'sa', 'web'] },
       { id: 'RT-ssid', when: { beh: ['ssid'], loc: ['hq'], dest: ['saas', 'web_safe', 'web_mal', 'web_risky', 'cloudapp'] }, nodes: ['internet'] },
+      { id: 'RT-edgeui', when: { dest: ['edgeui'] }, nodes: ['wireless'] },
+      { id: 'RT-mgmt', when: { dest: ['mgmt'] }, nodes: ['scc'] },
+      { id: 'RT-disclose', when: { beh: ['disclose'], loc: ['internet'], dest: ['saas'] }, nodes: ['sa', 'saas'] },
+      { id: 'RT-pod', when: { beh: ['podnet', 'poddeny'], device: ['server'], dest: ['cloudapp'] }, nodes: ['cloudapp'] },
       { id: 'RT-dc', when: { dest: ['$DC'] }, nodes: ['fw', 'nexus', '@dest'] },
       { id: 'RT-dc-remote', when: { dest: ['$DC'], loc: ['$REMOTE'] }, nodes: ['sa', 'fw', 'nexus', '@dest'] },
       { id: 'RT-dc-workload', when: { dest: ['$DC'], device: ['server'] }, nodes: ['@dest'] },
@@ -618,7 +642,7 @@ const DATA = {
      tele: emits telemetry that XDR can correlate.  base: routine check, skipped once the session is stopped at that hop. */
   checks: [
     /* --- network identity and segmentation --- */
-    { id: 'N1', cvd: ['sda', 'ztnc'], when: { via: ['$ACC'], not: { device: ['headless', 'server'], who: ['guest', 'attacker'] } }, hop: ['$ACC'], at: 'ise', lens: 'identity',
+    { id: 'N1', cvd: ['sda', 'ztnc'], when: { via: ['$ACC'], nbeh: ['netlogon'], not: { device: ['headless', 'server'], who: ['guest', 'attacker'] } }, hop: ['$ACC'], at: 'ise', lens: 'identity',
       c: 'Network access control', r: 'User and device authenticated to the network; segment assigned from identity', d: 5, sig: 'Network identity established' },
     { id: 'N2', cvd: ['sda'], when: { device: ['headless'], via: ['$ACC'] }, hop: ['$ACC'], at: 'ise', lens: 'identity',
       c: 'Endpoint profiling', r: 'Headless device profiled and placed in a least-privilege segment', d: 5, sig: 'Device profiled',
@@ -669,7 +693,7 @@ const DATA = {
     { id: 'M11', cvd: ['ciics', 'talosq2'], when: { beh: ['aitm'], who: ['$AUTHN'] }, hop: ['$AUTH'], at: 'cii', lens: 'threat', tele: true,
       c: 'Compromised session check', r: 'The same active session is in use from a second address and browser: flagged as a stolen, replayed session cookie', d: -25, sig: 'Compromised session',
       v: 'STEPUP', why: 'A session in use from two places at once is treated as stolen; revoking it forces a fresh sign-in.' },
-    { id: 'M1', when: { who: ['emp', 'exec', 'contractor', 'insider'], nbeh: ['mfa_fail', 'fatigue', 'stolen', 'aitm'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+    { id: 'M1', when: { who: ['emp', 'exec', 'contractor', 'insider'], nbeh: ['mfa_fail', 'fatigue', 'stolen', 'aitm', 'netlogon'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
       c: 'User authentication', r: 'User verified with phishing-resistant MFA', d: 10, sig: 'MFA passed' },
     { id: 'M1b', when: { who: ['$AUTHN'], ball: ['stolen', 'mfa_ok'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
       c: 'User authentication', r: 'MFA challenge completed', d: 5, sig: 'MFA passed' },
@@ -687,7 +711,7 @@ const DATA = {
     { id: 'M12', cvd: ['duoph', 'talosq2'], when: { beh: ['aitm'], who: ['$AUTHN'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
       c: 'Session theft protection', r: 'Duo Passport keeps no session cookie in the sign-in flow; proof of sign-in is bound to the user’s own device, so the replay from another device is refused', d: -20, sig: 'Replayed session refused',
       v: 'BLOCK', why: 'The stolen session is refused because Duo ties the sign-in to the user’s own device, not to a cookie. A session cookie issued by the application itself is outside this control.' },
-    { id: 'M10', when: { who: ['attacker'], nbeh: ['stolen', 'aitm', 'fwvictim', 'flood'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+    { id: 'M10', when: { who: ['attacker'], nbeh: ['stolen', 'aitm', 'fwvictim', 'flood', 'pushbad', 'disclose', 'edgeweb'], not: { dest: ['mgmt', 'edgeui'] } }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
       c: 'User authentication', r: 'No valid identity presented', d: -20, sig: 'Unauthenticated request',
       v: 'BLOCK', why: 'Without a verified identity there is no session.' },
 
@@ -734,10 +758,10 @@ const DATA = {
     /* --- exploit of a known vulnerability: one rule per enforcement hop, so every path has a control. A block here is interim; the system still needs its patch.
          "(illustrative)" in `c` = no page read states this action for this case (see README, "Not verified"). --- */
     { id: 'XP1', cvd: ['talosfmc', 'talosq3', 'isdg'], when: { beh: ['exploit'], via: ['fw'], not: { dest: ['ot'] } }, hop: ['fw'], at: 'fw', lens: 'threat', tele: true, also: ['talos'],
-      c: 'Intrusion prevention', r: 'Exploit attempt for a known vulnerability matches a Snort rule published by Talos; the connection is dropped', d: -25, sig: 'Exploit attempt',
+      c: 'Intrusion prevention', r: 'Exploit attempt for a known vulnerability matches a Snort rule published by Talos; the connection is dropped. CVE-2021-44228 is Log4j2 loading code through JNDI, score 10 Critical, in the CISA catalog, and known to be used in ransomware. The firewall in this scene is healthy; the private app is the target.', d: -25, sig: 'Exploit attempt',
       v: 'BLOCK', why: 'The exploit attempt matches a published intrusion rule and is dropped at the firewall. This holds while the rule is enabled; the system still needs its patch.' },
     { id: 'XP2', cvd: ['isdg'], when: { beh: ['exploit'], dest: ['ot'], via: ['fw'] }, hop: ['fw'], at: 'fw', lens: 'threat', tele: true, also: ['cv', 'talos'],
-      c: 'Virtual patching', r: 'Cyber Vision lists the controller’s known vulnerabilities; the matching intrusion prevention policy is enabled on the firewall at the IT/OT boundary and drops the exploit', d: -25, sig: 'Exploit attempt',
+      c: 'Virtual patching', r: 'Cyber Vision lists the controller’s known vulnerabilities; the matching intrusion prevention policy is enabled on the firewall at the IT/OT boundary and drops the exploit. CVE-2023-3595 is remote code execution on Rockwell ControlLogix communication modules, reachable on the controller’s engineering protocol. CVE-2020-15782 is a Siemens controller that a network attacker can write protected memory on, or read sensitive data from (CISA-ADP 9.8; the record has no CNA score).', d: -25, sig: 'Exploit attempt',
       v: 'BLOCK', why: 'The controller cannot be patched at once, so the exploit is stopped at the IT/OT boundary firewall by an intrusion policy chosen from the vulnerabilities Cyber Vision found. It is interim protection until the patch is applied.' },
     { id: 'XP3', cvd: ['mcdug'], when: { beh: ['exploit'], via: ['mcd'] }, hop: ['mcd'], at: 'mcd', lens: 'threat', also: ['talos'],
       c: 'Cloud intrusion prevention', r: 'Exploit attempt matches a Talos rule in the gateway’s intrusion profile and is denied', d: -20, sig: 'Exploit attempt',
@@ -770,6 +794,32 @@ const DATA = {
       c: 'Amplified traffic (illustrative)', r: 'An on-site device is used to amplify traffic until a WAN hop is unavailable. CVE-2022-26143, CVE-2018-1000115 (the record states amplification on the order of 1:50,000 and has no CVSS object), and CVE-2013-5211 (no CVSS object).', d: -25, sig: 'WAN hop unavailable',
       v: 'DOWN', why: 'An on-site device amplifies traffic until a WAN hop is unavailable. CVE-2022-26143, CVE-2018-1000115, CVE-2013-5211.' },
 
+    { id: 'MG1', when: { beh: ['pushbad'], dest: ['mgmt'] }, hop: ['scc'], at: 'scc', lens: 'policy',
+      c: 'Management change (illustrative)', r: 'CVE-2026-20079 is an authentication bypass on the on-premises Secure Firewall Management Center. The bypass works: an unauthenticated attacker executes scripts as root on that management center. This scene draws Security Cloud Control in that place. Security Cloud Control is not the product in the record. The BLOCK is this scene’s rule for an unauthenticated change at Security Cloud Control. It does not stop the bypass the record describes, and the policy still fans out.', d: -25, sig: 'Unauthenticated management change',
+      v: 'BLOCK', why: 'Security Cloud Control is drawn where the on-premises Secure Firewall Management Center sits. CVE-2026-20079’s authentication bypass succeeds on that management center. The BLOCK is the scene’s rule at Security Cloud Control, and it does not stop the bypass.' },
+    { id: 'EW1', when: { beh: ['edgeweb'], dest: ['edgeui'] }, hop: ['wireless'], at: 'wireless', lens: 'threat',
+      c: 'IOS XE web UI (illustrative)', r: 'The IOS XE web UI accepts an account from someone with no account. The CISA catalog wording for CVE-2023-20198: Cisco IOS XE Web UI contains a privilege escalation vulnerability in the web user interface that could allow a remote, unauthenticated attacker to create an account with privilege level 15 access. The attacker can then use that account to gain control of the affected device. The scene draws this at the access-edge place. The product in the record is the IOS XE web UI, not a wireless controller.', d: -25, sig: 'Unauthenticated account created',
+      v: 'EXPOSED', why: 'The IOS XE web UI accepted an account from an unauthenticated attacker. CVE-2023-20198. The scene draws the access edge; the product in the record is the IOS XE web UI, not a wireless controller.' },
+    { id: 'GW0', when: { beh: ['disclose'] }, hop: ['sa'], at: 'duo', lens: 'identity',
+      c: 'Device binding', r: 'This disclosure is outside Duo device binding, so Duo does not refuse it.' },
+    { id: 'GW0b', when: { beh: ['disclose'] }, hop: ['sa'], at: 'cii', lens: 'identity',
+      c: 'Identity analytics', r: 'Identity Intelligence can see the session. It does not decide this disclosure.' },
+    { id: 'GW1', when: { beh: ['disclose'], dest: ['saas'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'data',
+      c: 'Gateway disclosure (illustrative)', r: 'A remote-access gateway discloses sensitive information before the trusted destination. CVE-2023-4966 is Citrix NetScaler ADC and Gateway, unauthenticated sensitive information disclosure, score 9.4. CVE-2018-13379 is Fortinet FortiOS and FortiProxy SSL VPN path traversal; the CNA score is 9.1 Critical and the legacy score is 8.9 High. CVE-2024-24919 is Check Point security gateways, information disclosure, score 8.6. None of these is a Cisco product.', d: -20, sig: 'Gateway disclosed information',
+      v: 'EXPOSED', why: 'The remote-access gateway disclosed sensitive information. Citrix CVE-2023-4966, Fortinet CVE-2018-13379 (CNA 9.1 and legacy 8.9), Check Point CVE-2024-24919. Duo does not refuse this case.' },
+    { id: 'NL1', when: { beh: ['netlogon'], via: ['switches'] }, hop: ['switches'], at: 'ise', lens: 'identity',
+      c: 'Directory channel (illustrative)', r: 'ISE stands in for the directory. CVE-2020-1472: the description says an unauthenticated network attacker using MS-NRPC can become domain admin. The recorded score is 5.5 Medium, AV:L/AC:L/PR:L.', d: -20, sig: 'Machine channel accepted',
+      v: 'STEPUP', why: 'ISE stands in for the directory. The machine-authentication channel was accepted. CVE-2020-1472’s description says an unauthenticated network attacker can become domain admin; the recorded score is 5.5 Medium, AV:L/AC:L/PR:L.' },
+    { id: 'PD1', when: { beh: ['podnet'], dest: ['cloudapp'] }, hop: ['cloudapp'], at: 'nexus', lens: 'threat',
+      c: 'Ingress from the pod network (illustrative)', r: 'The workload reaches the ingress admission controller from inside the cluster. CVE-2025-1974 is remote code execution from the pod network, score 9.8. CVE-2025-1097, CVE-2025-1098 and CVE-2025-24514 are injection through ingress configuration, scores 8.8. The scene has no pod network; this path stands in for it. Multicloud Defense is not on the path and is not credited.', d: -25, sig: 'Ingress reached from the pod network',
+      v: 'EXPOSED', why: 'The workload reaches the ingress from the pod network. CVE-2025-1974, CVE-2025-1097, CVE-2025-1098, CVE-2025-24514. The scene has no pod network, so this path stands in for it.' },
+    { id: 'PD2', when: { beh: ['poddeny'], dest: ['cloudapp'], via: ['workload'] }, hop: ['workload'], at: 'wl', lens: 'policy',
+      c: 'Workload policy (illustrative)', r: 'Secure Workload denies the workload’s flow, so the ingress admission controller is not reached.', d: -20, sig: 'Workload flow denied',
+      v: 'BLOCK', why: 'Secure Workload denies the workload’s flow before it reaches the ingress.' },
+    { id: 'TL1', when: { beh: ['tlsleak'], via: ['client'] }, hop: ['client'], at: 'client', lens: 'data',
+      c: 'Tunnel endpoint (illustrative)', r: 'The tunnel is up and the session stays authenticated. CVE-2014-0160 is OpenSSL Heartbleed: the tunnel endpoint discloses process memory. Score 7.5 High, and it is in the CISA catalog.', d: -20, sig: 'Process memory disclosed',
+      v: 'EXPOSED', why: 'The tunnel endpoint disclosed process memory. CVE-2014-0160. The session stays authenticated.' },
+
     /* --- threat behaviour --- */
     { id: 'T1a', cvd: ['bpsdg'], when: { device: ['compromised'], nbeh: ['scan', 'ransom', 'exfil'] }, hop: ['@src'], at: 'ep', lens: 'threat', tele: true,
       c: 'Endpoint detection', r: 'Malware detected on the device; host isolated from the network', d: -45, sig: 'Malware on device',
@@ -780,7 +830,7 @@ const DATA = {
       c: 'Endpoint detection and response', r: 'Ransomware behaviour detected; host isolated', d: -45, sig: 'Ransomware behaviour',
       v: 'CONTAIN', why: 'Ransomware behaviour triggers host isolation, confining the outbreak to one segment.' },
     { id: 'T2', cvd: ['ztnc'], when: { beh: ['scan'], via: ['switches', 'nexus'] }, hop: ['switches', 'nexus'], at: 'sna', lens: 'threat', tele: true,
-      c: 'Network behaviour analytics', r: 'Scanning and lateral-movement pattern detected from this host', d: -25, sig: 'Lateral-movement behaviour' },
+      c: 'Network behaviour analytics', r: 'Scanning and lateral-movement pattern detected from this host. CVE-2017-0144 is SMBv1 remote code execution, score 8.8, in the CISA catalog, and known to be used in ransomware. CVE-2019-0708 is unauthenticated remote code execution on Remote Desktop, score 9.8, in the CISA catalog, and known to be used in ransomware.', d: -25, sig: 'Lateral-movement behaviour' },
     { id: 'T5', when: { beh: ['scan'], via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'threat', tele: true,
       c: 'OT threat detection', r: 'Abnormal scanning traffic seen by the sensor in the industrial network', d: -20, sig: 'Lateral-movement behaviour' },
     { id: 'T3', cvd: ['ztnc', 'sda'], when: { beh: ['scan'], via: ['$ACC'], not: { who: ['attacker'], device: ['server'] } }, hop: ['$ACC'], at: 'ise', lens: 'threat',
@@ -866,7 +916,7 @@ const DATA = {
       c: 'AI runtime protection', r: 'Model interaction covered by runtime guardrails' },
 
     /* --- routine transit checks (skipped at a hop once the session is stopped there) --- */
-    { id: 'B1', when: { via: ['wireless'], nbeh: ['ssid'] }, hop: ['wireless'], at: 'wireless', lens: 'data', base: true,
+    { id: 'B1', when: { via: ['wireless'], nbeh: ['ssid', 'edgeweb'] }, hop: ['wireless'], at: 'wireless', lens: 'data', base: true,
       c: 'Air link', r: 'WPA3-protected wireless association' },
     { id: 'B2', cvd: ['sasedg'], when: { via: ['client'] }, hop: ['client'], at: 'client', lens: 'data', base: true,
       c: 'Device tunnel', r: 'Secure Client, the unified client for Secure Access, opens the VPN / zero trust access session' },
@@ -959,11 +1009,11 @@ const DATA = {
       c: 'Service health', r: 'Related alerts grouped into one episode with a service health score for the affected service' },
 
     /* --- policy authoring and distribution (operations). `fan` expands into one check per enforcement point. --- */
-    { id: 'O4', when: { beh: ['push'] }, post: true, at: 'scc', lens: 'policy',
+    { id: 'O4', when: { beh: ['push', 'pushbad'] }, post: true, at: 'scc', lens: 'policy',
       c: 'Policy authoring', r: 'Security intent authored in Security Cloud Control for the enforcement points it manages' },
-    { id: 'O5', when: { beh: ['push'] }, post: true, lens: 'policy', from: 'scc', fan: ['fw', 'mcd', 'hs', 'sa', 'wl', 'aid'],
+    { id: 'O5', when: { beh: ['push', 'pushbad'] }, post: true, lens: 'policy', from: 'scc', fan: ['fw', 'mcd', 'hs', 'sa', 'wl', 'aid'],
       c: 'Policy distribution', r: 'Enforcement point receives the policy from Security Cloud Control' },
-    { id: 'O5-sdwan', cvd: ['sdwandg', 'ub'], when: { beh: ['push'] }, post: true, at: 'sdwan', lens: 'policy', from: 'scc',
+    { id: 'O5-sdwan', cvd: ['sdwandg', 'ub'], when: { beh: ['push', 'pushbad'] }, post: true, at: 'sdwan', lens: 'policy', from: 'scc',
       c: 'Policy distribution', r: 'Router firewall policy received from Security Cloud Control; SD-WAN overlay policy stays in Catalyst SD-WAN Manager (or the Meraki dashboard for a Meraki MX)' }
   ],
 
@@ -1003,7 +1053,7 @@ const DATA = {
   /* Guided tour: sel = element to spotlight, act = named action run when the step opens (see TOUR_ACT), sheet = panel to open on phones */
   tour: [
     { sel: '#stage', act: 'start', t: 'The living network', x: 'Five zones run left to right: actors, locations, access edge, WAN and SASE edge, destinations. The operations plane and the Splunk layer float above. Every block is a product placed where it operates. Drag to orbit, scroll to zoom, or use the arrow keys.' },
-    { sel: '#left', sheet: 'left', t: 'Pick a scenario', x: 'Presets fill the five pickers for you. Ninety-nine are grouped from everyday access through the industry use cases.' },
+    { sel: '#left', sheet: 'left', t: 'Pick a scenario', x: 'Presets fill the five pickers for you. One hundred and eleven are grouped from everyday access through the industry use cases and the known-vulnerability cases.' },
     { sel: '#transport', act: 'restart', t: 'Play it', x: 'Play, pause, step one checkpoint at a time, skip to the result, or change speed. Space toggles play. The actor walks the path and pauses at each checkpoint.' },
     { sel: '#lenses', act: 'lens', t: 'Five lenses, one scene', x: 'Data, Identity, Policy, Threat and Trust recolour and relabel the same scene without reloading it. Keys 1 to 5 switch lens.' },
     { sel: '#right', sheet: 'right', act: 'finish', t: 'Read the result', x: 'The verdict with a one-sentence reason, the illustrative trust level with the signal that moved it, the decision timeline, and the products involved with their source links.' },
@@ -1154,9 +1204,15 @@ const DATA = {
     { n: 98, t: 'Remote research and collaboration: mobile worker at home → private cloud app, MFA passed', s: ['emp', 'mobile', 'home', 'cloudapp', ['mfa_ok']], lens: 'identity' },
     { n: 99, t: 'Research and academic computing: workload in the data center → the internal AI model', s: ['aiagent', 'server', 'hq', 'intai', ['norm']], lens: 'data' },
     { g: 'Known vulnerabilities', n: 100, t: 'VPN web server on the firewall reloads', s: ['attacker', 'byod', 'internet', 'fwvpn', ['fwvictim']], b: ['attacker', 'byod', 'internet', 'dcapp', ['exploit']], lens: 'threat' },
+    { n: 101, t: 'Management plane pushes a policy the admin did not author', s: ['attacker', 'byod', 'internet', 'mgmt', ['pushbad']], lens: 'policy' },
+    { n: 102, t: 'IOS XE web UI accepts an unauthenticated account', s: ['attacker', 'byod', 'internet', 'edgeui', ['edgeweb']], lens: 'threat' },
+    { n: 103, t: 'Remote-access gateway discloses sensitive information', s: ['attacker', 'byod', 'internet', 'saas', ['disclose']], lens: 'data' },
     { n: 104, t: 'A local route pulls traffic out of the tunnel', s: ['emp', 'mgd', 'public', 'dcapp', ['leak']], lens: 'data' },
     { n: 105, t: 'DNS answer for a trusted name is wrong', s: ['emp', 'mgd', 'hq', 'saas', ['dns']], lens: 'threat' },
+    { n: 106, t: 'Directory accepts a machine-authentication channel', s: ['emp', 'mgd', 'hq', 'dcapp', ['netlogon']], lens: 'identity' },
     { n: 107, t: 'Controller exploit starts on the factory floor', s: ['ot', 'headless', 'factory', 'ot', ['exploit']], b: ['contractor', 'claptop', 'hq', 'ot', ['exploit']], lens: 'threat' },
+    { n: 108, t: 'Workload reaches ingress from the pod network', s: ['aiagent', 'server', 'hq', 'cloudapp', ['podnet']], b: ['aiagent', 'server', 'hq', 'cloudapp', ['poddeny']], lens: 'threat' },
+    { n: 109, t: 'Tunnel endpoint discloses process memory', s: ['emp', 'mgd', 'public', 'dcapp', ['tlsleak']], lens: 'data' },
     { n: 110, t: 'Wireless association joins an unintended network', s: ['emp', 'mgd', 'hq', 'saas', ['ssid']], lens: 'data' },
     { n: 111, t: 'A small request exhausts a service, or is amplified', s: ['attacker', 'byod', 'internet', 'cloudapp', ['flood']], b: ['iot', 'headless', 'hq', 'web_risky', ['flood']], lens: 'threat' }
   ]

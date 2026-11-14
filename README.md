@@ -37,4 +37,4 @@ and fast-moving topics carry a `verify` note shown in the module.
 
 ## Also in this repo
 [`living-network/`](living-network/) — Living Network, a standalone interactive 3D explainer of how Cisco networking and security
-products work together (scenario builder, five lenses, 37 presets). Open `living-network/index.html`. See its README for sources and the rule table.
+products work together (scenario builder, five lenses, 111 presets). Open `living-network/index.html`. See its README for sources and the rule table.

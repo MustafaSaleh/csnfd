@@ -114,7 +114,7 @@ function setScenario(slot, s, notes) { S.slots[slot] = s; S.preset = 0; renderLe
 function renderLeft() {
   const el = $('#leftBody');
   if (S.mode === 'presets') {
-    el.innerHTML = `<h2>Preset library</h2><p class="small" style="margin:4px 0 2px">One click fills the five pickers and runs the scenario. Ninety-nine presets, from everyday access through the industry use cases.</p>` +
+    el.innerHTML = `<h2>Preset library</h2><p class="small" style="margin:4px 0 2px">One click fills the five pickers and runs the scenario. One hundred and eleven presets, from everyday access through the industry use cases and the known-vulnerability cases.</p>` +
       `<div class="chips indbar" role="radiogroup" aria-label="Show presets linked to an industry"><button class="chip" role="radio" data-pind="" aria-checked="${!S.pind}">All</button>${PORTFOLIO.industries.map(i => `<button class="chip" role="radio" data-pind="${i.id}" aria-checked="${S.pind === i.id}">${h(i.name)}</button>`).join('')}</div>` +
       (() => {
         const keep = S.pind && new Set(PORTFOLIO.uc.filter(u => u.ind === S.pind && u.presets).flatMap(u => u.presets));

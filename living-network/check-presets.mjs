@@ -94,7 +94,10 @@ if (JSON.stringify(got) !== JSON.stringify(want)) {
 } else console.log('snapshot diff empty:', got.length, 'rows');
 
 /* 104, 105 and 110: CONTROL LOST must win, and no STEP-UP or ALLOW WITH LIMITS checkpoint may outrank or tie it. */
-const expect = { 100: 'DOWN', 104: 'EXPOSED', 105: 'EXPOSED', 107: 'CONTAIN', 110: 'EXPOSED', 111: 'DOWN' };
+const expect = {
+  100: 'DOWN', 101: 'BLOCK', 102: 'EXPOSED', 103: 'EXPOSED', 104: 'EXPOSED', 105: 'EXPOSED',
+  106: 'STEPUP', 107: 'CONTAIN', 108: 'EXPOSED', 109: 'EXPOSED', 110: 'EXPOSED', 111: 'DOWN'
+};
 for (const [n, v] of Object.entries(expect)) {
   const p = DATA.presets.find(x => x.n === Number(n));
   if (!p) { fail.push(`preset ${n} is missing`); continue; }
@@ -109,9 +112,18 @@ for (const [n, v] of Object.entries(expect)) {
     if (r.verdict !== 'EXPOSED') fail.push(`preset ${n} CONTROL LOST did not win`);
   }
   if (n === '104' && !r.segs.some(s => s.ty === 'leak')) fail.push('preset 104 tunnel segment is not leak');
+  if (n === '109' && !r.segs.some(s => s.ty === 'disclosed')) fail.push('preset 109 tunnel segment is not disclosed');
+  if (n === '106' && ![r.why, ...r.tl.map(e => e.r)].some(t => t && t.includes('ISE stands in for the directory.'))) fail.push('preset 106 checkpoint does not say ISE stands in for the directory');
+  if (n === '108' && (r.path.includes('mcd') || r.path.includes('waap'))) fail.push('preset 108 path credits Multicloud Defense or WAAP');
 }
 const named = {
+  101: { keep: ['CVE-2026-20079', 'on-premises Secure Firewall Management Center', 'Security Cloud Control', 'does not stop the bypass'], drop: ['CVE-2025-20265', 'CVE-2026-20316'] },
+  102: { keep: ['IOS XE web UI', 'CVE-2023-20198', 'not a wireless controller'], drop: ['CVE-2023-20273', 'CVE-2025-20188'] },
+  103: { keep: ['Citrix', 'Fortinet', 'Check Point', 'CVE-2023-4966', 'CVE-2018-13379', '9.1', '8.9', 'CVE-2024-24919', 'outside Duo device binding'], drop: [] },
   105: { keep: ['CVE-2008-1447'], drop: ['CVE-2020-1350', 'CVE-2015-7547'] },
+  106: { keep: ['CVE-2020-1472', '5.5'], drop: [] },
+  108: { keep: ['CVE-2025-1974', 'CVE-2025-1097', 'CVE-2025-1098', 'CVE-2025-24514'], drop: ['CVE-2025-1097=', 'auth-tls-match-cn', 'auth-url'] },
+  109: { keep: ['CVE-2014-0160'], drop: ['CVE-2022-0778'] },
   110: { keep: ['CVE-2023-52424'], drop: ['CVE-2017-13077'] }
 };
 for (const [n, spec] of Object.entries(named)) {
@@ -134,7 +146,7 @@ for (const [n, spec] of Object.entries(named)) {
   }
   if (sideText.includes('CVE-2023-50387')) fail.push('preset 111 compare text still names CVE-2023-50387');
 }
-const cmp = { 100: 'BLOCK', 107: 'BLOCK', 111: 'DOWN' };
+const cmp = { 100: 'BLOCK', 107: 'BLOCK', 108: 'BLOCK', 111: 'DOWN' };
 for (const [n, v] of Object.entries(cmp)) {
   const p = DATA.presets.find(x => x.n === Number(n));
   if (!p || !p.b) { fail.push(`preset ${n} has no compare side`); continue; }
