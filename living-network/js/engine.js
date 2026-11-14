@@ -101,6 +101,7 @@ function evaluate(s, off) {
     tl.push(e);
     if (c.d) series.push({ v: trust, d: c.d, sig: c.sig || c.c, k: tl.length - 1, at: c.at });
     if (c.tele) tele.push(c.at);
+    /* Strict greater-than: equal severity keeps the earlier checkpoint (path order, then rule order). */
     if (c.v) { if (!top || SEV[c.v] > SEV[top.v]) top = c; if (!c.post && SEV[c.v] >= SEV.STEPUP && stopAt < 0) stopAt = hi; }
   }
   if (series.length === 1) series.push({ v: trust, d: 0, sig: 'No signal changed the score', k: tl.length - 1 });
@@ -110,6 +111,14 @@ function evaluate(s, off) {
   const products = [...new Set([...path.filter(n => PR[n]), ...tl.flatMap(e => [e.at, ...e.also, ...(e.beams || [])])])].filter(p => !offS.has(p));
   const vpath = ['@actor', ...path];
   const segs = vpath.slice(0, -1).map((a, i) => i === 0 ? { ty: 'clear', label: 'Local network' } : segType(a, vpath[i + 1]));
+  const atClient = vpath.indexOf('client');
+  if (atClient > 0 && atClient < segs.length) {
+    if (s.beh.includes('leak')) { segs[atClient].ty = 'leak'; segs[atClient].label = 'Tunnel up; a more-specific local route sends some traffic in the clear.'; }
+    else if (s.beh.includes('tlsleak')) { segs[atClient].ty = 'disclosed'; segs[atClient].label = 'Tunnel endpoint disclosed process memory.'; }
+  }
+  if (s.beh.includes('ssid')) {
+    for (let i = 1; i < segs.length; i++) if (vpath[i + 1] === 'wireless') { segs[i].ty = 'clear'; segs[i].label = 'Unintended wireless network'; }
+  }
   return { s, off: [...offS], path, vpath, segs, tl, gaps, series, verdict, why, stopAt, trust, products, hostile: s.who === 'attacker',
     rules: [ac.id, rt.id], fallback: !ac.when || !rt.when };
 }

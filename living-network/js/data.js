@@ -14,7 +14,7 @@ const DATA = {
 
   lenses: [
     { id: 'data', label: 'DATA', color: '#4cc9f0', blurb: 'Packet path hop by hop',
-      legend: [['line', 'Encrypted tunnel or overlay'], ['dim', 'Other transit'], ['ring', 'Inspection point']] },
+      legend: [['line', 'Encrypted tunnel or overlay'], ['dim', 'Other transit'], ['leak', 'Left the tunnel'], ['disclosed', 'Disclosed memory'], ['ring', 'Inspection point']] },
     { id: 'identity', label: 'IDENTITY', color: '#b79cff', blurb: 'Who or what is asking',
       legend: [['node', 'Verifies user, device, posture or context'], ['beam', 'Identity check in progress']] },
     { id: 'policy', label: 'POLICY', color: '#f4c95d', blurb: 'Authored, distributed, enforced',
@@ -497,7 +497,8 @@ const DATA = {
       { id: 'intai', label: 'Internal AI model or agent', short: 'Internal AI model', node: 'intai' },
       { id: 'eastwest', label: 'Another internal device or server', short: 'Internal server', node: 'server' },
       { id: 'ot', label: 'OT controller', short: 'OT controller', node: 'otctl' },
-      { id: 'mail', label: 'Email inbox', short: 'Email inbox', node: 'mail' }
+      { id: 'mail', label: 'Email inbox', short: 'Email inbox', node: 'mail' },
+      { id: 'fwvpn', label: 'This firewall’s remote-access VPN', short: 'Firewall VPN', node: 'fw' }
     ],
     /* g = sub-group heading; x = cannot be combined with "Normal use"; mfa = mutually exclusive set */
     beh: [
@@ -519,6 +520,11 @@ const DATA = {
       { id: 'rmm', label: 'Starts a remote-control session for a fake help-desk caller', g: 'Threat', x: 1 },
       { id: 'scan', label: 'Scans the network / lateral movement', g: 'Threat', x: 1 },
       { id: 'exploit', label: 'Exploits a known vulnerability (CVE)', g: 'Threat', x: 1 },
+      { id: 'fwvictim', label: 'Firewall VPN web server is the system under attack', g: 'Threat', x: 1 },
+      { id: 'leak', label: 'Local route pulls traffic out of the tunnel', g: 'Threat', x: 1 },
+      { id: 'dns', label: 'DNS answer for a trusted name is wrong', g: 'Threat', x: 1 },
+      { id: 'ssid', label: 'Wireless association joins an unintended network', g: 'Threat', x: 1 },
+      { id: 'flood', label: 'Small request exhausts a service, or is amplified', g: 'Threat', x: 1 },
       { id: 'ransom', label: 'Ransomware behaviour', g: 'Threat', x: 1 },
       { id: 'anomaly', label: 'Device behaves unlike its profile', g: 'Threat', x: 1 },
       { id: 'slow', label: 'Application is slow (experience fault)', g: 'Operations', x: 1 },
@@ -551,7 +557,15 @@ const DATA = {
     { pick: 'beh', when: { dest: ['ai', 'pubai'] }, deny: ['inject'], why: 'Prompt injection is modelled against an AI app the organisation runs; choose the internal AI model.' },
     { pick: 'beh', when: { dest: ['ai', 'pubai'] }, deny: ['agentic'], why: 'Agent tool calls are modelled against an AI agent the organisation runs; choose the internal AI model.' },
     { pick: 'beh', when: { device: ['mgd', 'stale', 'mobile', 'byod', 'claptop', 'server', 'compromised'] }, deny: ['anomaly'], why: 'Applies to headless IoT / OT devices.' },
-    { pick: 'beh', when: { who: ['attacker'] }, deny: ['norm', 'slow', 'push', 'offhours'], why: 'Does not apply to an external attacker.' },
+    { pick: 'beh', when: { who: ['attacker'] }, deny: ['norm', 'slow', 'push', 'offhours', 'leak', 'dns', 'ssid'], why: 'Does not apply to an external attacker.' },
+    { pick: 'dest', when: { not: { who: ['attacker'] } }, deny: ['fwvpn'], why: 'This case is the firewall VPN web server as the system under attack.' },
+    { pick: 'beh', when: { not: { dest: ['fwvpn'] } }, deny: ['fwvictim'], why: 'That behaviour is the firewall VPN web server being the system under attack.' },
+    { pick: 'beh', when: { not: { who: ['attacker'] } }, deny: ['fwvictim'], why: 'Only the outside attacker is the actor against the firewall VPN web server.' },
+    { pick: 'beh', when: { not: { loc: ['home', 'public', 'travel'] } }, deny: ['leak'], why: 'A local route can pull traffic out of the tunnel only when the device is off the office LAN.' },
+    { pick: 'beh', when: { device: ['byod', 'claptop', 'headless', 'server'] }, deny: ['leak'], why: 'The tunnel case is a managed device running Secure Client.' },
+    { pick: 'beh', when: { not: { loc: ['hq', 'branch', 'factory'] } }, deny: ['dns'], why: 'The wrong answer is given to a device on the organisation’s own resolver path.' },
+    { pick: 'beh', when: { not: { loc: ['hq'] } }, deny: ['ssid'], why: 'The unintended network is the office wireless LAN.' },
+    { pick: 'beh', when: { who: ['emp', 'admin', 'exec', 'contractor', 'guest', 'insider'] }, deny: ['flood'], why: 'This case is an attacker or an on-site device used as an amplifier, not a person browsing.' },
     { pick: 'beh', when: { who: ['$NONHUMAN', 'guest', 'contractor'] }, deny: ['push'], why: 'Policy is authored by an administrator.' }
   ],
 
@@ -564,6 +578,7 @@ const DATA = {
       { id: 'AC-remote', when: { loc: ['$REMOTE'] }, nodes: ['@loc'] },
       { id: 'AC-internet', when: { loc: ['internet'] }, nodes: ['internet'] },
       { id: 'AC-hq', when: { loc: ['hq'] }, nodes: ['hq', 'wireless', 'switches', 'core'] },
+      { id: 'AC-ssid', when: { loc: ['hq'], beh: ['ssid'] }, nodes: ['hq', 'wireless'] },
       { id: 'AC-hq-wired', when: { loc: ['hq'], device: ['headless'] }, nodes: ['hq', 'switches', 'core'] },
       { id: 'AC-branch', when: { loc: ['branch'] }, nodes: ['branch', 'sdwan'] },
       { id: 'AC-factory', when: { loc: ['factory'] }, nodes: ['factory', 'industrial'] },
@@ -572,6 +587,9 @@ const DATA = {
     ],
     route: [
       { id: 'RT-0', nodes: ['sa', '@dest'] },
+      { id: 'RT-fwvpn', when: { dest: ['fwvpn'] }, nodes: ['fw'] },
+      { id: 'RT-dns', when: { beh: ['dns'], loc: ['hq', 'branch', 'factory'], dest: ['saas', 'web_safe', 'web_mal', 'web_risky'] }, nodes: ['sdwan', 'sa', 'web'] },
+      { id: 'RT-ssid', when: { beh: ['ssid'], loc: ['hq'], dest: ['saas', 'web_safe', 'web_mal', 'web_risky', 'cloudapp'] }, nodes: ['internet'] },
       { id: 'RT-dc', when: { dest: ['$DC'] }, nodes: ['fw', 'nexus', '@dest'] },
       { id: 'RT-dc-remote', when: { dest: ['$DC'], loc: ['$REMOTE'] }, nodes: ['sa', 'fw', 'nexus', '@dest'] },
       { id: 'RT-dc-workload', when: { dest: ['$DC'], device: ['server'] }, nodes: ['@dest'] },
@@ -594,8 +612,9 @@ const DATA = {
      when: who/device/loc/dest (any-of), beh (any-of), ball (all-of), nbeh (none-of), not{}, via/nvia (path contains / lacks node)
      hop : path node where the check happens (first present wins). post:true = happens after the path (response / operations).
      at  : the product doing the checking.   d: trust change.   sig: the signal that moved the score.
-     v   : verdict this rule argues for. Highest severity wins: ALLOW < LIMIT < STEPUP < BLOCK < CONTAIN.
-           STEPUP, BLOCK and CONTAIN on the path stop the traffic at that hop.
+     v   : verdict this rule argues for. Severity: ALLOW 0 < LIMIT 1 = CONTROL LOST (EXPOSED) 1 < STEP-UP 2 < BLOCK 3 = UNAVAILABLE (DOWN) 3 < CONTAIN 4.
+           A later checkpoint replaces the winner only when its severity is strictly greater. Equal severity keeps the earlier checkpoint.
+           STEP-UP and anything stricter on the path stop the traffic at that hop. CONTROL LOST does not. UNAVAILABLE does.
      tele: emits telemetry that XDR can correlate.  base: routine check, skipped once the session is stopped at that hop. */
   checks: [
     /* --- network identity and segmentation --- */
@@ -668,7 +687,7 @@ const DATA = {
     { id: 'M12', cvd: ['duoph', 'talosq2'], when: { beh: ['aitm'], who: ['$AUTHN'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
       c: 'Session theft protection', r: 'Duo Passport keeps no session cookie in the sign-in flow; proof of sign-in is bound to the user’s own device, so the replay from another device is refused', d: -20, sig: 'Replayed session refused',
       v: 'BLOCK', why: 'The stolen session is refused because Duo ties the sign-in to the user’s own device, not to a cookie. A session cookie issued by the application itself is outside this control.' },
-    { id: 'M10', when: { who: ['attacker'], nbeh: ['stolen', 'aitm'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
+    { id: 'M10', when: { who: ['attacker'], nbeh: ['stolen', 'aitm', 'fwvictim', 'flood'] }, hop: ['$AUTH'], at: 'duo', lens: 'identity',
       c: 'User authentication', r: 'No valid identity presented', d: -20, sig: 'Unauthenticated request',
       v: 'BLOCK', why: 'Without a verified identity there is no session.' },
 
@@ -699,13 +718,13 @@ const DATA = {
       v: 'BLOCK', why: 'The request exceeds the role’s least-privilege entitlement.' },
 
     /* --- external attacker at the perimeter --- */
-    { id: 'X1', when: { who: ['attacker'], via: ['fw'], nbeh: ['exploit'] }, hop: ['fw'], at: 'fw', lens: 'threat', tele: true, also: ['talos'],
+    { id: 'X1', when: { who: ['attacker'], via: ['fw'], nbeh: ['exploit', 'fwvictim'] }, hop: ['fw'], at: 'fw', lens: 'threat', tele: true, also: ['talos'],
       c: 'Inbound threat prevention', r: 'Unsolicited inbound connection denied; known attack patterns blocked using Talos intelligence', d: -25, sig: 'Hostile inbound traffic',
       v: 'BLOCK', why: 'Private resources are not exposed to the internet; hostile inbound traffic is dropped at the firewall.' },
-    { id: 'X2', when: { who: ['attacker'], via: ['waap'] }, hop: ['waap'], at: 'waap', lens: 'threat',
+    { id: 'X2', when: { who: ['attacker'], via: ['waap'], nbeh: ['flood'] }, hop: ['waap'], at: 'waap', lens: 'threat',
       c: 'Application and API protection', r: 'Malicious requests and automated-client patterns filtered in front of the application', d: -25, sig: 'Application attack pattern',
       v: 'BLOCK', why: 'Application-layer attack traffic is filtered in front of the application.' },
-    { id: 'X3', when: { who: ['attacker'], via: ['mcd'] }, hop: ['mcd'], at: 'mcd', lens: 'threat',
+    { id: 'X3', when: { who: ['attacker'], via: ['mcd'], nbeh: ['flood'] }, hop: ['mcd'], at: 'mcd', lens: 'threat',
       c: 'Cloud ingress protection', r: 'Inbound attack blocked at the cloud gateway', d: -20, sig: 'Hostile inbound traffic',
       v: 'BLOCK', why: 'Inbound attack traffic is blocked at the cloud gateway.' },
     { id: 'X4', when: { who: ['attacker'], via: ['nexus'] }, hop: ['nexus'], at: 'hs', lens: 'threat',
@@ -728,6 +747,28 @@ const DATA = {
       v: 'BLOCK', why: 'An exploit attempt against an unpatched workload is stopped by a compensating control next to the workload.' },
     { id: 'XP5', cvd: ['cvds'], when: { beh: ['exploit'], via: ['industrial'] }, hop: ['industrial'], at: 'cv', lens: 'threat', tele: true, also: ['talos'],
       c: 'OT intrusion detection', r: 'Cyber Vision’s Snort intrusion detection engine matches the exploit against Talos rules and raises an alert', d: -20, sig: 'Exploit attempt' },
+    { id: 'XP5c', when: { beh: ['exploit'], dest: ['ot'], loc: ['factory'] }, hop: ['industrial'], at: 'cv', lens: 'threat',
+      c: 'In-cell controller (illustrative)', r: 'The exploit starts on the factory floor, where the path has no firewall. CVE-2023-3595 is remote code execution on Rockwell ControlLogix communication modules, reachable on the controller’s engineering protocol. CVE-2020-15782 is a Siemens controller that a network attacker can write protected memory on, or read sensitive data from (CISA-ADP 9.8; the record has no CNA score).', d: -5, sig: 'In-cell exploit' },
+
+    /* Known-vulnerability outcomes. Weakness class and CVE id only. "(illustrative)" = no Cisco page states this action for this case. */
+    { id: 'AV-fw', when: { beh: ['fwvictim'], dest: ['fwvpn'] }, hop: ['fw'], at: 'fw', lens: 'threat',
+      c: 'VPN web server unavailable (illustrative)', r: 'The firewall VPN web server reloads and stops enforcing. CVE-2024-20353 is an unauthenticated remote reload of the ASA and Firepower Threat Defense management and VPN web servers. The 5 November 2025 update on CVE-2025-20362 describes a reload of unpatched devices affected by both that issue and CVE-2025-20333. CVE-2025-20333 is authenticated remote code execution as root on the VPN web server, not a reload.', d: -30, sig: 'Firewall stopped enforcing',
+      v: 'DOWN', why: 'The firewall VPN web server reloads, so it stops enforcing. That outcome is CVE-2024-20353 and the 5 November 2025 update on CVE-2025-20362. CVE-2025-20333 is authenticated remote code execution as root, not a reload.' },
+    { id: 'TN1', when: { beh: ['leak'], via: ['client'] }, hop: ['client'], at: 'client', lens: 'data',
+      c: 'Tunnel route (illustrative)', r: 'Secure Client still shows a tunnel. CVE-2024-3661: a DHCP classless static route on the local network can send traffic the tunnel was meant to carry out the physical interface.', d: -20, sig: 'Traffic left the tunnel',
+      v: 'EXPOSED', why: 'The tunnel is up, and a more-specific route on the local network sends some of the session in the clear. CVE-2024-3661.' },
+    { id: 'DN1', when: { beh: ['dns'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'threat',
+      c: 'DNS answer (illustrative)', r: 'The name was one the organisation trusts, and the answer sent the session to the public web. CVE-2008-1447 is a recursive resolver caching the wrong address. CVE-2020-1350 is the resolver itself no longer being yours. CVE-2015-7547 is the same failure in the client stub. No CVSS object is recorded for CVE-2008-1447 or CVE-2015-7547.', d: -20, sig: 'Trusted name, wrong address',
+      v: 'EXPOSED', why: 'A trusted name resolved to the wrong address, and DNS-layer security does not treat that name as malicious. CVE-2008-1447, CVE-2020-1350, CVE-2015-7547.' },
+    { id: 'B1w', when: { beh: ['ssid'], via: ['wireless'] }, hop: ['wireless'], at: 'wireless', lens: 'data',
+      c: 'Air link (illustrative)', r: 'The station associated, and the network was not the one the user chose. CVE-2023-52424 names this under WPA3 as well as enterprise 802.1X. CVE-2017-13077 is the earlier WPA2 handshake failure; the record has no CVSS object.', d: -20, sig: 'Unintended wireless network',
+      v: 'EXPOSED', why: 'Association completed on a network the user did not choose, including under WPA3. ISE never sees the session. CVE-2023-52424. CVE-2017-13077 is the earlier WPA2 case and has no CVSS object in the record.' },
+    { id: 'AV1', when: { beh: ['flood'], who: ['attacker'], via: ['waap'] }, hop: ['waap'], at: 'waap', lens: 'threat',
+      c: 'Service exhausted (illustrative)', r: 'A small request makes the destination unavailable. CVE-2023-44487 is HTTP/2 stream cancellation against the public app. The compare side is an on-site amplifier: CVE-2022-26143, CVE-2018-1000115 (the record states amplification on the order of 1:50,000 and has no CVSS object), CVE-2013-5211 (no CVSS object), and CVE-2023-50387 for DNSSEC validation CPU. Secure DDoS Protection is not credited.', d: -25, sig: 'Service unavailable',
+      v: 'DOWN', why: 'The public application is exhausted. CVE-2023-44487. The amplifier records are CVE-2022-26143, CVE-2018-1000115, CVE-2013-5211 and CVE-2023-50387. Secure DDoS Protection is out of scope and is not credited.' },
+    { id: 'AV2', when: { beh: ['flood'], not: { who: ['attacker'] }, via: ['sdwan'] }, hop: ['sdwan'], at: 'sdwan', lens: 'threat',
+      c: 'Amplified traffic (illustrative)', r: 'An on-site device is used to amplify traffic until a WAN hop is unavailable. CVE-2022-26143, CVE-2018-1000115 (the record states amplification on the order of 1:50,000 and has no CVSS object), CVE-2013-5211 (no CVSS object), and CVE-2023-50387 for DNSSEC validation CPU.', d: -25, sig: 'WAN hop unavailable',
+      v: 'DOWN', why: 'An on-site device amplifies traffic until a WAN hop is unavailable. CVE-2022-26143, CVE-2018-1000115, CVE-2013-5211, CVE-2023-50387.' },
 
     /* --- threat behaviour --- */
     { id: 'T1a', cvd: ['bpsdg'], when: { device: ['compromised'], nbeh: ['scan', 'ransom', 'exfil'] }, hop: ['@src'], at: 'ep', lens: 'threat', tele: true,
@@ -825,7 +866,7 @@ const DATA = {
       c: 'AI runtime protection', r: 'Model interaction covered by runtime guardrails' },
 
     /* --- routine transit checks (skipped at a hop once the session is stopped there) --- */
-    { id: 'B1', when: { via: ['wireless'] }, hop: ['wireless'], at: 'wireless', lens: 'data', base: true,
+    { id: 'B1', when: { via: ['wireless'], nbeh: ['ssid'] }, hop: ['wireless'], at: 'wireless', lens: 'data', base: true,
       c: 'Air link', r: 'WPA3-protected wireless association' },
     { id: 'B2', cvd: ['sasedg'], when: { via: ['client'] }, hop: ['client'], at: 'client', lens: 'data', base: true,
       c: 'Device tunnel', r: 'Secure Client, the unified client for Secure Access, opens the VPN / zero trust access session' },
@@ -978,8 +1019,10 @@ const DATA = {
   verdicts: {
     ALLOW: { label: 'ALLOW', sev: 0, stamp: 'ACCESS GRANTED', why: 'Identity, device and context meet policy for this destination.' },
     LIMIT: { label: 'ALLOW WITH LIMITS', sev: 1, stamp: 'LIMITED ACCESS' },
+    EXPOSED: { label: 'CONTROL LOST', sev: 1, stamp: 'CONTROL LOST' },
     STEPUP: { label: 'STEP-UP', sev: 2, stamp: 'VERIFY AGAIN' },
     BLOCK: { label: 'BLOCK', sev: 3, stamp: 'BLOCKED' },
+    DOWN: { label: 'UNAVAILABLE', sev: 3, stamp: 'UNAVAILABLE' },
     CONTAIN: { label: 'CONTAIN', sev: 4, stamp: 'CONTAINED' },
     noControl: 'No remaining control in this illustrative model stopped the session.'
   },
@@ -1109,6 +1152,12 @@ const DATA = {
     { n: 96, t: 'Hybrid cloud management: worker on public Wi-Fi, a private cloud app is slow', s: ['emp', 'mgd', 'public', 'cloudapp', ['slow']], lens: 'data' },
     { n: 97, t: 'Physical safety: campus sensor opens a safe website, unlike its profile', s: ['iot', 'headless', 'hq', 'web_safe', ['anomaly']], lens: 'threat' },
     { n: 98, t: 'Remote research and collaboration: mobile worker at home → private cloud app, MFA passed', s: ['emp', 'mobile', 'home', 'cloudapp', ['mfa_ok']], lens: 'identity' },
-    { n: 99, t: 'Research and academic computing: workload in the data center → the internal AI model', s: ['aiagent', 'server', 'hq', 'intai', ['norm']], lens: 'data' }
+    { n: 99, t: 'Research and academic computing: workload in the data center → the internal AI model', s: ['aiagent', 'server', 'hq', 'intai', ['norm']], lens: 'data' },
+    { g: 'Known vulnerabilities', n: 100, t: 'VPN web server on the firewall reloads', s: ['attacker', 'byod', 'internet', 'fwvpn', ['fwvictim']], b: ['attacker', 'byod', 'internet', 'dcapp', ['exploit']], lens: 'threat' },
+    { n: 104, t: 'A local route pulls traffic out of the tunnel', s: ['emp', 'mgd', 'public', 'dcapp', ['leak']], lens: 'data' },
+    { n: 105, t: 'DNS answer for a trusted name is wrong', s: ['emp', 'mgd', 'hq', 'saas', ['dns']], lens: 'threat' },
+    { n: 107, t: 'Controller exploit starts on the factory floor', s: ['ot', 'headless', 'factory', 'ot', ['exploit']], b: ['contractor', 'claptop', 'hq', 'ot', ['exploit']], lens: 'threat' },
+    { n: 110, t: 'Wireless association joins an unintended network', s: ['emp', 'mgd', 'hq', 'saas', ['ssid']], lens: 'data' },
+    { n: 111, t: 'A small request exhausts a service, or is amplified', s: ['attacker', 'byod', 'internet', 'cloudapp', ['flood']], b: ['iot', 'headless', 'hq', 'web_risky', ['flood']], lens: 'threat' }
   ]
 };

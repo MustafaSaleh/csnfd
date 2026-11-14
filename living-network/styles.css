@@ -3,7 +3,7 @@
   --tx:#e6ecfa; --tx2:#a9b6d3; --tx3:#7385aa;
   --data:#4cc9f0; --identity:#b79cff; --policy:#f4c95d; --threat:#ff7a6b; --trust:#5be3a4;
   --lens:var(--data);
-  --ok:#5be3a4; --limit:#8ed0ff; --step:#f4c95d; --block:#ff7a6b; --contain:#ff5fa2;
+  --ok:#5be3a4; --limit:#8ed0ff; --exposed:#e8a54b; --step:#f4c95d; --block:#ff7a6b; --down:#d98a7a; --contain:#ff5fa2;
   --r:10px; --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 *{box-sizing:border-box}
@@ -200,7 +200,7 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr) 350px;min-height:0}
 .verdict .vt{font-size:17px;font-weight:750;letter-spacing:.05em;color:var(--vc);display:flex;gap:8px;align-items:center}
 .verdict p{margin-top:4px;font-size:13px}
 .verdict .note{font-size:11px;color:var(--tx2);font-style:italic}
-.v-ALLOW{--vc:var(--ok)} .v-LIMIT{--vc:var(--limit)} .v-STEPUP{--vc:var(--step)} .v-BLOCK{--vc:var(--block)} .v-CONTAIN{--vc:var(--contain)}
+.v-ALLOW{--vc:var(--ok)} .v-LIMIT{--vc:var(--limit)} .v-EXPOSED{--vc:var(--exposed)} .v-STEPUP{--vc:var(--step)} .v-BLOCK{--vc:var(--block)} .v-DOWN{--vc:var(--down)} .v-CONTAIN{--vc:var(--contain)}
 .run.pending .verdict{display:none}
 .run:not(.pending) .wait{display:none}
 .wait{border:1px dashed var(--line2);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;color:var(--tx2);font-size:13px}

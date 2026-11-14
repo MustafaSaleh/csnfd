@@ -3,7 +3,7 @@
    World effects (rings, sparks, shields, pop-ups, camera shake) are drawn by the 3D renderer; the stamp and
    screen flash are plain DOM so they also work in the 2D fallback. One switch; off by default under reduced motion.
    ===================================================================================== */
-const VCOL = { ALLOW: '#5be3a4', LIMIT: '#8ed0ff', STEPUP: '#f4c95d', BLOCK: '#ff7a6b', CONTAIN: '#ff5fa2' };
+const VCOL = { ALLOW: '#5be3a4', LIMIT: '#8ed0ff', EXPOSED: '#e8a54b', STEPUP: '#f4c95d', BLOCK: '#ff7a6b', DOWN: '#d98a7a', CONTAIN: '#ff5fa2' };
 const VFX = (() => {
   const st = { on: !RM.matches, fired: 0 };
   try { const v = localStorage.getItem('ln-fx'); if (v === '0' || v === '1') st.on = v === '1'; } catch (e) { }

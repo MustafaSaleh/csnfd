@@ -54,9 +54,10 @@ function createSVG() {
       mk('circle', { cx: pts[0][0], cy: pts[0][1], r: .9, fill: r.hostile ? '#ff6a5c' : r.slot ? '#ffd9a8' : '#e6ecfa' }, gR);
       const head = r.hostile ? mk('polygon', { points: '0,-.9 .8,.6 -.8,.6' }, gR) : mk('circle', { r: .6 }, gR);
       const chip = mk('text', { 'font-size': 1.1 }, gR), role = roleOf(r.s, S.preset, r.slot), at = r.stopAt >= 0 ? pts[r.stopAt + 1] : r.verdict === 'CONTAIN' ? pts[1] : pts[pts.length - 1];
-      const vcol = { ALLOW: '#5be3a4', LIMIT: '#8ed0ff', STEPUP: '#f4c95d', BLOCK: '#ff7a6b', CONTAIN: '#ff5fa2' }[r.verdict];
+      const vcol = { ALLOW: '#5be3a4', LIMIT: '#8ed0ff', EXPOSED: '#e8a54b', STEPUP: '#f4c95d', BLOCK: '#ff7a6b', DOWN: '#d98a7a', CONTAIN: '#ff5fa2' }[r.verdict];
       const mkr = mk('g', { transform: `translate(${at[0]} ${at[1]})`, visibility: 'hidden', stroke: vcol, 'stroke-width': .3, fill: 'none' }, gR);
-      if (r.verdict === 'BLOCK') mk('path', { d: 'M-1.2-1.2 1.2 1.2M1.2-1.2-1.2 1.2' }, mkr); else if (r.verdict === 'CONTAIN') mk('rect', { x: -1.7, y: -1.7, width: 3.4, height: 3.4, 'stroke-dasharray': '.5 .3' }, mkr);
+      if (r.verdict === 'BLOCK') mk('path', { d: 'M-1.2-1.2 1.2 1.2M1.2-1.2-1.2 1.2' }, mkr); else if (r.verdict === 'DOWN') mk('path', { d: 'M-1.4 0H1.4' }, mkr);
+      else if (r.verdict === 'EXPOSED') mk('circle', { r: 1.3 }, mkr); else if (r.verdict === 'CONTAIN') mk('rect', { x: -1.7, y: -1.7, width: 3.4, height: 3.4, 'stroke-dasharray': '.5 .3' }, mkr);
       else if (r.verdict === 'STEPUP') mk('path', { d: 'M0-1.6 1.5 1.1H-1.5z' }, mkr); else if (r.verdict === 'LIMIT') mk('path', { d: 'M-1.5 0A1.5 1.5 0 1 1 0 1.5' }, mkr);
       rv.push({ r, pts, line, beams, head, chip, mkr, name: role.label });
     }

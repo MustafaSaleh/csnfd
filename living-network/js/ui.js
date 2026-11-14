@@ -12,6 +12,7 @@ function setLens(id) {
   S.lens = id; document.body.dataset.lens = id;
   $$('#lenses button').forEach(b => b.setAttribute('aria-checked', b.dataset.lens === id));
   const L = LENS[id], sw = { line: '<path d="M1 6h16" stroke="var(--lens)" stroke-width="3"/>', dim: '<path d="M1 6h16" stroke="#8fa3c8" stroke-width="2"/>',
+    leak: '<path d="M1 6h16" stroke="#f4c95d" stroke-width="3" stroke-dasharray="2 2"/>', disclosed: '<path d="M1 6h16" stroke="#ff7a6b" stroke-width="3"/>',
     ring: '<circle cx="9" cy="6" r="4.5" fill="none" stroke="var(--lens)" stroke-width="2"/>', node: '<path d="M9 1l5 5-5 5-5-5z" fill="var(--lens)"/>',
     beam: '<path d="M1 10 17 2" stroke="var(--lens)" stroke-width="1.5"/>', diamond: '<path d="M9 0l4 6-4 6-4-6z" fill="none" stroke="var(--lens)" stroke-width="1.6"/>',
     dash: '<path d="M1 6h16" stroke="var(--lens)" stroke-width="2" stroke-dasharray="3 2.5"/>', x: '<path d="M4 1l10 10M14 1 4 11" stroke="var(--lens)" stroke-width="2.2"/>',

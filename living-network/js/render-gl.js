@@ -493,6 +493,8 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
       const mk = new THREE.Group(), mm = new THREE.MeshBasicMaterial({ color: VCOL[r.verdict] });
       const bar = (rz) => { const m = new THREE.Mesh(prim('b'), mm); m.scale.set(2.6, .28, .28); m.rotation.z = rz; mk.add(m); };
       if (r.verdict === 'BLOCK') { bar(Math.PI / 4); bar(-Math.PI / 4); }
+      else if (r.verdict === 'DOWN') { bar(0); }
+      else if (r.verdict === 'EXPOSED') { const t = new THREE.Mesh(new THREE.TorusGeometry(1.2, .13, 8, 28), mm); mk.add(t); }
       else if (r.verdict === 'CONTAIN') { const c = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(3, 3.4, 3)), new THREE.LineBasicMaterial({ color: mm.color })); c.position.y = .6; mk.add(c); }
       else if (r.verdict === 'STEPUP') { const t = new THREE.Mesh(new THREE.TorusGeometry(1.2, .13, 8, 28), mm); mk.add(t); const k = new THREE.Mesh(prim('k'), mm); k.scale.set(.8, .9, .8); k.position.y = .1; mk.add(k); }
       else if (r.verdict === 'LIMIT') { const t = new THREE.Mesh(new THREE.TorusGeometry(1.2, .13, 8, 28, Math.PI * 1.25), mm); mk.add(t); }
@@ -505,8 +507,9 @@ function buildParts(spec, mat, dmat) { const g = new THREE.Group(); for (const [
   }
   function colorRuns() {
     for (const v of rv) v.segs.forEach((s, i) => {
-      const enc = v.r.segs[i].ty === 'enc';
-      if (lens === 'data') s.mat.color.set(enc ? LENS.data.color : '#9db0d6'); else if (lens !== 'trust') s.mat.color.set(v.r.slot ? '#ffd9a8' : LENS[lens].color);
+      const ty = v.r.segs[i].ty;
+      const dataCol = ty === 'enc' ? LENS.data.color : ty === 'leak' ? '#f4c95d' : ty === 'disclosed' ? '#ff7a6b' : '#9db0d6';
+      if (lens === 'data') s.mat.color.set(dataCol); else if (lens !== 'trust') s.mat.color.set(v.r.slot ? '#ffd9a8' : LENS[lens].color);
       s.fm.color.set(v.hostile ? '#ff7a6b' : '#8fa3c8');
     });
   }

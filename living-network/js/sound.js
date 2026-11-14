@@ -51,8 +51,10 @@ const SND = (() => {
     toggle: on => seq(on ? [12, 19] : [19, 12], { d: .12, g: .06, gap: .06 }),
     ALLOW: () => seq([12, 16, 19, 24], { d: .55, g: .1, gap: .085 }),
     LIMIT: () => { seq([12, 16, 19], { d: .4, g: .09, gap: .085 }); tone(N(17), { d: .6, g: .07, t: .3, type: 'triangle' }); },
+    EXPOSED: () => { seq([10, 14, 17], { d: .4, g: .09, gap: .085 }); tone(N(12), { d: .6, g: .07, t: .3, type: 'triangle' }); },
     STEPUP: () => { seq([14, 19], { d: .22, g: .09, gap: .11 }); seq([14, 21], { d: .3, g: .09, gap: .11, t: .34 }); },
     BLOCK: () => { noise({ d: .22, g: .09, f0: 900, f1: 160, q: .7 }); tone(N(3), { d: .4, g: .13, type: 'triangle', to: N(-4) }); tone(N(-9), { d: .55, g: .12, t: .12 }); },
+    DOWN: () => { noise({ d: .28, g: .08, f0: 700, f1: 90, q: .6 }); tone(N(1), { d: .5, g: .12, type: 'triangle', to: N(-6) }); tone(N(-11), { d: .6, g: .1, t: .14 }); },
     CONTAIN: () => { [0, .16, .32].forEach(t => { tone(N(10), { d: .12, g: .09, type: 'triangle', t }); tone(N(11), { d: .12, g: .06, type: 'triangle', t }); });
       noise({ d: .5, g: .07, f0: 2400, f1: 260, t: .46 }); tone(N(-9), { d: .8, g: .13, t: .5 }); tone(N(-2), { d: .8, g: .06, t: .5 }); }
   };

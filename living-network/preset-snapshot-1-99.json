@@ -1,0 +1,6354 @@
+[
+  {
+    "n": 1,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 2,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 3,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 4,
+    "verdict": "LIMIT",
+    "why": "Unmanaged devices receive limited access.",
+    "checkpoints": [
+      {
+        "id": "P5",
+        "v": "LIMIT",
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "P5",
+      "verdict": "LIMIT",
+      "from": "home",
+      "to": "sa",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 5,
+    "verdict": "LIMIT",
+    "why": "Guests receive internet access only, isolated from internal resources.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N3",
+        "v": "LIMIT",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "B3g",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "N3",
+      "verdict": "LIMIT",
+      "from": "wireless",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 6,
+    "verdict": "LIMIT",
+    "why": "Unmanaged devices receive limited access.",
+    "checkpoints": [
+      {
+        "id": "P5",
+        "v": "LIMIT",
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "S1",
+        "v": "LIMIT",
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "P5",
+      "verdict": "LIMIT",
+      "from": "home",
+      "to": "sa",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 7,
+    "verdict": "BLOCK",
+    "why": "The resource is outside the contractor’s approved scope.",
+    "checkpoints": [
+      {
+        "id": "P5",
+        "v": "LIMIT",
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "S2",
+        "v": "BLOCK",
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "S2",
+      "verdict": "BLOCK",
+      "from": "home",
+      "to": "sa",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 8,
+    "verdict": "LIMIT",
+    "why": "Unmanaged devices receive limited access.",
+    "checkpoints": [
+      {
+        "id": "P5",
+        "v": "LIMIT",
+        "hop": "sea",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sea",
+        "at": "duo"
+      },
+      {
+        "id": "S3",
+        "v": "LIMIT",
+        "hop": "sea",
+        "at": "sea"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "B9",
+        "v": null,
+        "hop": "industrial",
+        "at": "cv"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "P5",
+      "verdict": "LIMIT",
+      "from": "home",
+      "to": "sea",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 9,
+    "verdict": "LIMIT",
+    "why": "Headless devices are profiled and confined to a least-privilege segment.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "N2",
+      "verdict": "LIMIT",
+      "from": "hq",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 10,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "W9",
+        "v": "BLOCK",
+        "hop": "switches",
+        "at": "sa"
+      },
+      {
+        "id": "T15",
+        "v": null,
+        "hop": "switches",
+        "at": "sna"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "hq",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 11,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "T14",
+        "v": null,
+        "hop": "industrial",
+        "at": "cv"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z2-ot",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "factory",
+      "to": "industrial",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 12,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": "12b",
+    "verdict": "BLOCK",
+    "why": "The destination is known to be malicious, so the request is blocked before any connection.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "W2",
+        "v": "BLOCK",
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "W2",
+      "verdict": "BLOCK",
+      "from": "sdwan",
+      "to": "sa",
+      "ty": "enc",
+      "label": "IPsec tunnel to Secure Access"
+    }
+  },
+  {
+    "n": 13,
+    "verdict": "BLOCK",
+    "why": "The phishing destination is blocked, and phishing-resistant authentication prevents credential replay.",
+    "checkpoints": [
+      {
+        "id": "E1",
+        "v": null,
+        "hop": "home",
+        "at": "email"
+      },
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "W2p",
+        "v": "BLOCK",
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "E2",
+        "v": null,
+        "hop": null,
+        "at": "duo"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP4",
+        "v": null,
+        "hop": null,
+        "at": "saa"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "W2p",
+      "verdict": "BLOCK",
+      "from": "client",
+      "to": "sa",
+      "ty": "enc",
+      "label": "Device tunnel (VPN / zero trust access)"
+    }
+  },
+  {
+    "n": 14,
+    "verdict": "BLOCK",
+    "why": "The malicious file is stopped before it can run.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "W2f",
+        "v": "BLOCK",
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "W4",
+        "v": "LIMIT",
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "F1",
+        "v": "BLOCK",
+        "hop": null,
+        "at": "ep"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP4",
+        "v": null,
+        "hop": null,
+        "at": "saa"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "W2f",
+      "verdict": "BLOCK",
+      "from": "sdwan",
+      "to": "sa",
+      "ty": "enc",
+      "label": "IPsec tunnel to Secure Access"
+    }
+  },
+  {
+    "n": 15,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "A1",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 16,
+    "verdict": "BLOCK",
+    "why": "Unapproved AI tools are blocked; the approved assistant is available instead.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "A2",
+        "v": "BLOCK",
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "A2",
+      "verdict": "BLOCK",
+      "from": "sdwan",
+      "to": "sa",
+      "ty": "enc",
+      "label": "IPsec tunnel to Secure Access"
+    }
+  },
+  {
+    "n": 17,
+    "verdict": "BLOCK",
+    "why": "Confidential data is not allowed to leave in an AI prompt.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "A1",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "A3",
+        "v": "BLOCK",
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "A3",
+      "verdict": "BLOCK",
+      "from": "sdwan",
+      "to": "sa",
+      "ty": "enc",
+      "label": "IPsec tunnel to Secure Access"
+    }
+  },
+  {
+    "n": 18,
+    "verdict": "BLOCK",
+    "why": "Runtime guardrails reject prompts that try to override the model’s instructions.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "A5",
+        "v": "BLOCK",
+        "hop": "intai",
+        "at": "aid"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "A5",
+      "verdict": "BLOCK",
+      "from": "nexus",
+      "to": "intai",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 19,
+    "verdict": "BLOCK",
+    "why": "The request exceeds the role’s least-privilege entitlement.",
+    "checkpoints": [
+      {
+        "id": "S5",
+        "v": "BLOCK",
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "S5",
+      "verdict": "BLOCK",
+      "from": "workload",
+      "to": "nexus",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 20,
+    "verdict": "BLOCK",
+    "why": "Authentication was not completed, so no session is created.",
+    "checkpoints": [
+      {
+        "id": "M7",
+        "v": "STEPUP",
+        "hop": "saas",
+        "at": "cii"
+      },
+      {
+        "id": "M4",
+        "v": "BLOCK",
+        "hop": "saas",
+        "at": "duo"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "M4",
+      "verdict": "BLOCK",
+      "from": "internet",
+      "to": "saas",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 21,
+    "verdict": "BLOCK",
+    "why": "Repeated unverified MFA prompts are treated as an attack on the identity.",
+    "checkpoints": [
+      {
+        "id": "M6",
+        "v": "STEPUP",
+        "hop": "saas",
+        "at": "cii"
+      },
+      {
+        "id": "M7",
+        "v": "STEPUP",
+        "hop": "saas",
+        "at": "cii"
+      },
+      {
+        "id": "M5",
+        "v": "BLOCK",
+        "hop": "saas",
+        "at": "duo"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "M5",
+      "verdict": "BLOCK",
+      "from": "internet",
+      "to": "saas",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 22,
+    "verdict": "CONTAIN",
+    "why": "Scanning from an internal host is treated as lateral movement, so the endpoint is quarantined.",
+    "checkpoints": [
+      {
+        "id": "T1b",
+        "v": null,
+        "hop": "hq",
+        "at": "ep"
+      },
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "T2",
+        "v": null,
+        "hop": "switches",
+        "at": "sna"
+      },
+      {
+        "id": "T3",
+        "v": "CONTAIN",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z2",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T3",
+      "verdict": "CONTAIN",
+      "from": "wireless",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 23,
+    "verdict": "CONTAIN",
+    "why": "Ransomware behaviour triggers host isolation, confining the outbreak to one segment.",
+    "checkpoints": [
+      {
+        "id": "T8",
+        "v": "CONTAIN",
+        "hop": "hq",
+        "at": "ep"
+      },
+      {
+        "id": "T9",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "ise"
+      },
+      {
+        "id": "T10",
+        "v": null,
+        "hop": null,
+        "at": "hs"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z2",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z3",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T8",
+      "verdict": "CONTAIN",
+      "from": "@actor",
+      "to": "hq",
+      "ty": "clear",
+      "label": "Local network"
+    }
+  },
+  {
+    "n": 24,
+    "verdict": "CONTAIN",
+    "why": "Correlated detections open an incident, and XDR has the affected host isolated through Secure Endpoint.",
+    "checkpoints": [
+      {
+        "id": "T11",
+        "v": null,
+        "hop": "nexus",
+        "at": "sna"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "T13",
+        "v": "BLOCK",
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z2",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": true,
+      "checkpoint": "Z2",
+      "verdict": "CONTAIN",
+      "from": "fw",
+      "to": "web",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 25,
+    "verdict": "BLOCK",
+    "why": "Application-layer attack traffic is filtered in front of the application.",
+    "checkpoints": [
+      {
+        "id": "X2",
+        "v": "BLOCK",
+        "hop": "waap",
+        "at": "waap"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "X2",
+      "verdict": "BLOCK",
+      "from": "internet",
+      "to": "waap",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 26,
+    "verdict": "BLOCK",
+    "why": "Private resources are not exposed to the internet; hostile inbound traffic is dropped at the firewall.",
+    "checkpoints": [
+      {
+        "id": "X1",
+        "v": "BLOCK",
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "X1",
+      "verdict": "BLOCK",
+      "from": "internet",
+      "to": "fw",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 27,
+    "verdict": "LIMIT",
+    "why": "Unusual bulk data movement restricts the session and raises an incident for review.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M9",
+        "v": null,
+        "hop": "switches",
+        "at": "cii"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "W8",
+        "v": "LIMIT",
+        "hop": "switches",
+        "at": "sna"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "W8",
+      "verdict": "LIMIT",
+      "from": "wireless",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 28,
+    "verdict": "STEPUP",
+    "why": "The sign-in location is inconsistent with recent activity, so re-authentication is required.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M8",
+        "v": "STEPUP",
+        "hop": "sa",
+        "at": "cii"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "M8",
+      "verdict": "STEPUP",
+      "from": "client",
+      "to": "sa",
+      "ty": "enc",
+      "label": "Device tunnel (VPN / zero trust access)"
+    }
+  },
+  {
+    "n": 29,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "te"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "O2",
+        "v": null,
+        "hop": "sa",
+        "at": "te"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 30,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M2",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "O4",
+        "v": null,
+        "hop": null,
+        "at": "scc"
+      },
+      {
+        "id": "O5-fw",
+        "v": null,
+        "hop": null,
+        "at": "fw"
+      },
+      {
+        "id": "O5-mcd",
+        "v": null,
+        "hop": null,
+        "at": "mcd"
+      },
+      {
+        "id": "O5-hs",
+        "v": null,
+        "hop": null,
+        "at": "hs"
+      },
+      {
+        "id": "O5-sa",
+        "v": null,
+        "hop": null,
+        "at": "sa"
+      },
+      {
+        "id": "O5-wl",
+        "v": null,
+        "hop": null,
+        "at": "wl"
+      },
+      {
+        "id": "O5-aid",
+        "v": null,
+        "hop": null,
+        "at": "aid"
+      },
+      {
+        "id": "O5-sdwan",
+        "v": null,
+        "hop": null,
+        "at": "sdwan"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 31,
+    "verdict": "BLOCK",
+    "why": "The stolen session is refused because Duo ties the sign-in to the user’s own device, not to a cookie. A session cookie issued by the application itself is outside this control.",
+    "checkpoints": [
+      {
+        "id": "M7",
+        "v": "STEPUP",
+        "hop": "saas",
+        "at": "cii"
+      },
+      {
+        "id": "M11",
+        "v": "STEPUP",
+        "hop": "saas",
+        "at": "cii"
+      },
+      {
+        "id": "M12",
+        "v": "BLOCK",
+        "hop": "saas",
+        "at": "duo"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "M12",
+      "verdict": "BLOCK",
+      "from": "internet",
+      "to": "saas",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 32,
+    "verdict": "CONTAIN",
+    "why": "Scanning from an internal host is treated as lateral movement, so the endpoint is quarantined.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "T2",
+        "v": null,
+        "hop": "switches",
+        "at": "sna"
+      },
+      {
+        "id": "T3",
+        "v": "CONTAIN",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "R1",
+        "v": null,
+        "hop": null,
+        "at": "ep"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z2",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T3",
+      "verdict": "CONTAIN",
+      "from": "wireless",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 33,
+    "verdict": "CONTAIN",
+    "why": "Ransomware behaviour triggers quarantine, confining the outbreak to one segment.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "T11",
+        "v": null,
+        "hop": "switches",
+        "at": "sna"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "T12",
+        "v": "BLOCK",
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "W4",
+        "v": "LIMIT",
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "T9",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "ise"
+      },
+      {
+        "id": "T10",
+        "v": null,
+        "hop": null,
+        "at": "hs"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z3",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": true,
+      "checkpoint": "T9",
+      "verdict": "CONTAIN",
+      "from": "sa",
+      "to": "web",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 34,
+    "verdict": "BLOCK",
+    "why": "The exploit attempt matches a published intrusion rule and is dropped at the firewall. This holds while the rule is enabled; the system still needs its patch.",
+    "checkpoints": [
+      {
+        "id": "XP1",
+        "v": "BLOCK",
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "XP1",
+      "verdict": "BLOCK",
+      "from": "internet",
+      "to": "fw",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 35,
+    "verdict": "BLOCK",
+    "why": "The controller cannot be patched at once, so the exploit is stopped at the IT/OT boundary firewall by an intrusion policy chosen from the vulnerabilities Cyber Vision found. It is interim protection until the patch is applied.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P5",
+        "v": "LIMIT",
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "XP2",
+        "v": "BLOCK",
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "XP2",
+      "verdict": "BLOCK",
+      "from": "core",
+      "to": "fw",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 36,
+    "verdict": "BLOCK",
+    "why": "Runtime protection inspects the agent’s tool calls and blocks the one the poisoned tool or hidden instruction tried to trigger.",
+    "checkpoints": [
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "A7",
+        "v": "BLOCK",
+        "hop": "intai",
+        "at": "aid"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "A7",
+      "verdict": "BLOCK",
+      "from": "nexus",
+      "to": "intai",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 37,
+    "verdict": "BLOCK",
+    "why": "Authentication was not completed, so no session is created.",
+    "checkpoints": [
+      {
+        "id": "M7",
+        "v": "STEPUP",
+        "hop": "sea",
+        "at": "cii"
+      },
+      {
+        "id": "M8",
+        "v": "STEPUP",
+        "hop": "sea",
+        "at": "cii"
+      },
+      {
+        "id": "M4",
+        "v": "BLOCK",
+        "hop": "sea",
+        "at": "duo"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "M4",
+      "verdict": "BLOCK",
+      "from": "public",
+      "to": "sea",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 38,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 39,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "branch",
+      "to": "sdwan",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 40,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 41,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "duo"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "te"
+      },
+      {
+        "id": "B6",
+        "v": null,
+        "hop": "mcd",
+        "at": "mcd"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP6",
+        "v": null,
+        "hop": null,
+        "at": "appd"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 42,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 43,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 44,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 45,
+    "verdict": "STEPUP",
+    "why": "Privileged access requires fresh strong authentication before the session continues.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M3",
+        "v": "STEPUP",
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "M3",
+      "verdict": "STEPUP",
+      "from": "wireless",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 46,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": "46b",
+    "verdict": "BLOCK",
+    "why": "The destination is known to be malicious, so the request is blocked before any connection.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "W2",
+        "v": "BLOCK",
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "W2",
+      "verdict": "BLOCK",
+      "from": "sdwan",
+      "to": "sa",
+      "ty": "enc",
+      "label": "IPsec tunnel to Secure Access"
+    }
+  },
+  {
+    "n": 47,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "wireless",
+        "at": "te"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "O2",
+        "v": null,
+        "hop": "sa",
+        "at": "te"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 48,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "T15",
+        "v": null,
+        "hop": "switches",
+        "at": "sna"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "hq",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 49,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "duo"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 50,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 51,
+    "verdict": "BLOCK",
+    "why": "The device’s segment only permits the destinations its profile needs.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "N5",
+        "v": "BLOCK",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "N5",
+      "verdict": "BLOCK",
+      "from": "hq",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 52,
+    "verdict": "LIMIT",
+    "why": "Sensitive data in prompts to the internal model is logged and limited by guardrail policy.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "A4",
+        "v": "LIMIT",
+        "hop": "intai",
+        "at": "aid"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "A4",
+      "verdict": "LIMIT",
+      "from": "nexus",
+      "to": "intai",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 53,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "W9",
+        "v": "BLOCK",
+        "hop": "sdwan",
+        "at": "sa"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "branch",
+      "to": "sdwan",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 54,
+    "verdict": "LIMIT",
+    "why": "Headless devices are profiled and confined to a least-privilege segment.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "N2",
+      "verdict": "LIMIT",
+      "from": "branch",
+      "to": "sdwan",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 55,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B6",
+        "v": null,
+        "hop": "mcd",
+        "at": "mcd"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 56,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "T14",
+        "v": null,
+        "hop": "industrial",
+        "at": "cv"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z2-ot",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "factory",
+      "to": "industrial",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 57,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "factory",
+        "at": "te"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "industrial",
+        "at": "duo"
+      },
+      {
+        "id": "B9",
+        "v": null,
+        "hop": "industrial",
+        "at": "cv"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 58,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "N6",
+        "v": "BLOCK",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "T14",
+        "v": null,
+        "hop": "industrial",
+        "at": "cv"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z2-ot",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "factory",
+      "to": "industrial",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 59,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "T14",
+        "v": null,
+        "hop": "industrial",
+        "at": "cv"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z2-ot",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "factory",
+      "to": "industrial",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 60,
+    "verdict": "LIMIT",
+    "why": "Headless devices are profiled and confined to a least-privilege segment.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "B9",
+        "v": null,
+        "hop": "industrial",
+        "at": "cv"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "N2",
+      "verdict": "LIMIT",
+      "from": "factory",
+      "to": "industrial",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 61,
+    "verdict": "LIMIT",
+    "why": "Headless devices are profiled and confined to a least-privilege segment.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "B9",
+        "v": null,
+        "hop": "industrial",
+        "at": "cv"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "N2",
+      "verdict": "LIMIT",
+      "from": "factory",
+      "to": "industrial",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 62,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "N5",
+        "v": "BLOCK",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "T14",
+        "v": null,
+        "hop": "industrial",
+        "at": "cv"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z2-ot",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "factory",
+      "to": "industrial",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 63,
+    "verdict": "BLOCK",
+    "why": "The device’s segment only permits the destinations its profile needs.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "N5",
+        "v": "BLOCK",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "N5",
+      "verdict": "BLOCK",
+      "from": "factory",
+      "to": "industrial",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 64,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "T14",
+        "v": null,
+        "hop": "industrial",
+        "at": "cv"
+      },
+      {
+        "id": "W9",
+        "v": "BLOCK",
+        "hop": "industrial",
+        "at": "sa"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z2-ot",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "factory",
+      "to": "industrial",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 65,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 66,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "T14",
+        "v": null,
+        "hop": "industrial",
+        "at": "cv"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "industrial",
+        "at": "ise"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "Z2-ot",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "factory",
+      "to": "industrial",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 67,
+    "verdict": "LIMIT",
+    "why": "Unusual bulk data movement restricts the session and raises an incident for review.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "M9",
+        "v": null,
+        "hop": "sdwan",
+        "at": "cii"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "duo"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "W8",
+        "v": "LIMIT",
+        "hop": "nexus",
+        "at": "sna"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "W8",
+      "verdict": "LIMIT",
+      "from": "fw",
+      "to": "nexus",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 68,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "client",
+        "at": "te"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "O2",
+        "v": null,
+        "hop": "sa",
+        "at": "te"
+      },
+      {
+        "id": "B6",
+        "v": null,
+        "hop": "mcd",
+        "at": "mcd"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP6",
+        "v": null,
+        "hop": null,
+        "at": "appd"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 69,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "duo"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "te"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 70,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 71,
+    "verdict": "LIMIT",
+    "why": "Sensitive data in prompts to the internal model is logged and limited by guardrail policy.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "A4",
+        "v": "LIMIT",
+        "hop": "intai",
+        "at": "aid"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "A4",
+      "verdict": "LIMIT",
+      "from": "nexus",
+      "to": "intai",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 72,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "A1",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 73,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "A1",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 74,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 75,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "duo"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "te"
+      },
+      {
+        "id": "B6",
+        "v": null,
+        "hop": "mcd",
+        "at": "mcd"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP6",
+        "v": null,
+        "hop": null,
+        "at": "appd"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 76,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "client",
+        "at": "te"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "O2",
+        "v": null,
+        "hop": "sa",
+        "at": "te"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 77,
+    "verdict": "STEPUP",
+    "why": "Privileged access requires fresh strong authentication before the session continues.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "M3",
+        "v": "STEPUP",
+        "hop": "sdwan",
+        "at": "duo"
+      },
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "te"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP6",
+        "v": null,
+        "hop": null,
+        "at": "appd"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "M3",
+      "verdict": "STEPUP",
+      "from": "branch",
+      "to": "sdwan",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 78,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "duo"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "te"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP6",
+        "v": null,
+        "hop": null,
+        "at": "appd"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 79,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "N5",
+        "v": "BLOCK",
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "branch",
+      "to": "sdwan",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 80,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "A1",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 81,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 82,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "client",
+        "at": "te"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "O2",
+        "v": null,
+        "hop": "sa",
+        "at": "te"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 83,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M2",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "B6",
+        "v": null,
+        "hop": "mcd",
+        "at": "mcd"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "O4",
+        "v": null,
+        "hop": null,
+        "at": "scc"
+      },
+      {
+        "id": "O5-fw",
+        "v": null,
+        "hop": null,
+        "at": "fw"
+      },
+      {
+        "id": "O5-mcd",
+        "v": null,
+        "hop": null,
+        "at": "mcd"
+      },
+      {
+        "id": "O5-hs",
+        "v": null,
+        "hop": null,
+        "at": "hs"
+      },
+      {
+        "id": "O5-sa",
+        "v": null,
+        "hop": null,
+        "at": "sa"
+      },
+      {
+        "id": "O5-wl",
+        "v": null,
+        "hop": null,
+        "at": "wl"
+      },
+      {
+        "id": "O5-aid",
+        "v": null,
+        "hop": null,
+        "at": "aid"
+      },
+      {
+        "id": "O5-sdwan",
+        "v": null,
+        "hop": null,
+        "at": "sdwan"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 84,
+    "verdict": "LIMIT",
+    "why": "Unmanaged devices receive limited access.",
+    "checkpoints": [
+      {
+        "id": "P5",
+        "v": "LIMIT",
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "P5",
+      "verdict": "LIMIT",
+      "from": "home",
+      "to": "sa",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 85,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "wireless",
+        "at": "te"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "B6",
+        "v": null,
+        "hop": "mcd",
+        "at": "mcd"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP6",
+        "v": null,
+        "hop": null,
+        "at": "appd"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 86,
+    "verdict": "LIMIT",
+    "why": "An out-of-date device is restricted until it is remediated.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P3",
+        "v": "LIMIT",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "B6",
+        "v": null,
+        "hop": "mcd",
+        "at": "mcd"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "P3",
+      "verdict": "LIMIT",
+      "from": "wireless",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 87,
+    "verdict": "LIMIT",
+    "why": "Sensitive data in prompts to the internal model is logged and limited by guardrail policy.",
+    "checkpoints": [
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sdwan",
+        "at": "duo"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "A4",
+        "v": "LIMIT",
+        "hop": "intai",
+        "at": "aid"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "A4",
+      "verdict": "LIMIT",
+      "from": "nexus",
+      "to": "intai",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 88,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B6",
+        "v": null,
+        "hop": "mcd",
+        "at": "mcd"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 89,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B1",
+        "v": null,
+        "hop": "wireless",
+        "at": "wireless"
+      },
+      {
+        "id": "N1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "P1",
+        "v": null,
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "switches",
+        "at": "duo"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "B6",
+        "v": null,
+        "hop": "mcd",
+        "at": "mcd"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 90,
+    "verdict": "LIMIT",
+    "why": "Headless devices are profiled and confined to a least-privilege segment.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "N2",
+      "verdict": "LIMIT",
+      "from": "hq",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 91,
+    "verdict": "LIMIT",
+    "why": "An out-of-date device is restricted until it is remediated.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P4",
+        "v": "LIMIT",
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "P4",
+      "verdict": "LIMIT",
+      "from": "client",
+      "to": "sa",
+      "ty": "enc",
+      "label": "Device tunnel (VPN / zero trust access)"
+    }
+  },
+  {
+    "n": 92,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 93,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B5",
+        "v": null,
+        "hop": "fw",
+        "at": "fw"
+      },
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 94,
+    "verdict": "LIMIT",
+    "why": "Headless devices are profiled and confined to a least-privilege segment.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "sdwan",
+        "at": "ise"
+      },
+      {
+        "id": "B3",
+        "v": null,
+        "hop": "sdwan",
+        "at": "sdwan"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "N2",
+      "verdict": "LIMIT",
+      "from": "branch",
+      "to": "sdwan",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 95,
+    "verdict": "BLOCK",
+    "why": "The device’s segment only permits the destinations its profile needs.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "N5",
+        "v": "BLOCK",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "N5",
+      "verdict": "BLOCK",
+      "from": "hq",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 96,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "O1",
+        "v": null,
+        "hop": "client",
+        "at": "te"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "O2",
+        "v": null,
+        "hop": "sa",
+        "at": "te"
+      },
+      {
+        "id": "B6",
+        "v": null,
+        "hop": "mcd",
+        "at": "mcd"
+      },
+      {
+        "id": "O3",
+        "v": null,
+        "hop": null,
+        "at": "te"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP5",
+        "v": null,
+        "hop": null,
+        "at": "o11y"
+      },
+      {
+        "id": "SP6",
+        "v": null,
+        "hop": null,
+        "at": "appd"
+      },
+      {
+        "id": "SP7",
+        "v": null,
+        "hop": null,
+        "at": "itsi"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 97,
+    "verdict": "CONTAIN",
+    "why": "A device behaving unlike its profile is quarantined and an alert is raised.",
+    "checkpoints": [
+      {
+        "id": "N2",
+        "v": "LIMIT",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "W9",
+        "v": "BLOCK",
+        "hop": "switches",
+        "at": "sa"
+      },
+      {
+        "id": "T15",
+        "v": null,
+        "hop": "switches",
+        "at": "sna"
+      },
+      {
+        "id": "T16",
+        "v": "CONTAIN",
+        "hop": "switches",
+        "at": "ise"
+      },
+      {
+        "id": "Z1",
+        "v": null,
+        "hop": null,
+        "at": "xdr"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      },
+      {
+        "id": "SP2",
+        "v": null,
+        "hop": null,
+        "at": "es"
+      },
+      {
+        "id": "SP3",
+        "v": null,
+        "hop": null,
+        "at": "soar"
+      },
+      {
+        "id": "SP8",
+        "v": "CONTAIN",
+        "hop": null,
+        "at": "soar"
+      }
+    ],
+    "verdictSegment": {
+      "post": false,
+      "checkpoint": "T16",
+      "verdict": "CONTAIN",
+      "from": "hq",
+      "to": "switches",
+      "ty": "clear",
+      "label": "Transit"
+    }
+  },
+  {
+    "n": 98,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B2",
+        "v": null,
+        "hop": "client",
+        "at": "client"
+      },
+      {
+        "id": "P2",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "M1",
+        "v": null,
+        "hop": "sa",
+        "at": "duo"
+      },
+      {
+        "id": "B4",
+        "v": null,
+        "hop": "sa",
+        "at": "sa"
+      },
+      {
+        "id": "B6",
+        "v": null,
+        "hop": "mcd",
+        "at": "mcd"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  },
+  {
+    "n": 99,
+    "verdict": "ALLOW",
+    "why": "Identity, device and context meet policy for this destination.",
+    "checkpoints": [
+      {
+        "id": "B7",
+        "v": null,
+        "hop": "nexus",
+        "at": "hs"
+      },
+      {
+        "id": "B8",
+        "v": null,
+        "hop": "nexus",
+        "at": "wl"
+      },
+      {
+        "id": "A6",
+        "v": null,
+        "hop": "intai",
+        "at": "aid"
+      },
+      {
+        "id": "SP1",
+        "v": null,
+        "hop": null,
+        "at": "splunk"
+      }
+    ],
+    "verdictSegment": null
+  }
+]
