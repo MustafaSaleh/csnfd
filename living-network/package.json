@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "portfolio": "node build-portfolio.mjs",
-    "build": "node build-standalone.mjs"
+    "build": "node build-standalone.mjs",
+    "check": "node check-presets.mjs"
   },
   "devDependencies": {
     "csso": "^5.0.5",

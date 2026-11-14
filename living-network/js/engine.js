@@ -63,6 +63,12 @@ const skey = s => [s.who, s.device, s.loc, s.dest, s.beh.join('+')].join('.');
 function unkey(str) { const [who, device, loc, dest, beh = ''] = String(str).split('.'); return normalize({ who, device, loc, dest, beh: beh ? beh.split('+') : [] }).s; }
 function pickRule(list, s) { let best = null, bs = -1; for (const r of list) { if (!match(r.when, s, null)) continue; const sc = r.when ? Object.keys(r.when).length : 0; if (sc >= bs) { best = r; bs = sc; } } return best; }
 function segType(a, b) { for (const [f, t, ty, label] of DATA.segments) if ((f === '*' || f === a) && (t === '*' || t === b)) return { ty, label }; return { ty: 'clear', label: 'Transit' }; }
+/* CONTROL LOST and ALLOW WITH LIMITS share severity 1. CONTROL LOST wins that tie in either order.
+   BLOCK and UNAVAILABLE share severity 3 and keep the earlier checkpoint. */
+function verdictBeats(next, prev) {
+  if (SEV[next] > SEV[prev]) return true;
+  return SEV[next] === SEV[prev] && next === 'EXPOSED' && prev === 'LIMIT';
+}
 
 /* scenario → path, checkpoints, trust series, verdict. `off` = product id disabled ("without this control"). */
 function evaluate(s, off) {
@@ -101,8 +107,9 @@ function evaluate(s, off) {
     tl.push(e);
     if (c.d) series.push({ v: trust, d: c.d, sig: c.sig || c.c, k: tl.length - 1, at: c.at });
     if (c.tele) tele.push(c.at);
-    /* Strict greater-than: equal severity keeps the earlier checkpoint (path order, then rule order). */
-    if (c.v) { if (!top || SEV[c.v] > SEV[top.v]) top = c; if (!c.post && SEV[c.v] >= SEV.STEPUP && stopAt < 0) stopAt = hi; }
+        /* Strictly greater severity replaces the winner. The one exception: CONTROL LOST wins a tie with ALLOW WITH LIMITS.
+       Every other tie keeps the earlier checkpoint (path order, then rule order). */
+    if (c.v) { if (!top || verdictBeats(c.v, top.v)) top = c; if (!c.post && SEV[c.v] >= SEV.STEPUP && stopAt < 0) stopAt = hi; }
   }
   if (series.length === 1) series.push({ v: trust, d: 0, sig: 'No signal changed the score', k: tl.length - 1 });
   const verdict = top ? top.v : 'ALLOW';

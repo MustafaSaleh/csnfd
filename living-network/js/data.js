@@ -613,8 +613,8 @@ const DATA = {
      hop : path node where the check happens (first present wins). post:true = happens after the path (response / operations).
      at  : the product doing the checking.   d: trust change.   sig: the signal that moved the score.
      v   : verdict this rule argues for. Severity: ALLOW 0 < LIMIT 1 = CONTROL LOST (EXPOSED) 1 < STEP-UP 2 < BLOCK 3 = UNAVAILABLE (DOWN) 3 < CONTAIN 4.
-           A later checkpoint replaces the winner only when its severity is strictly greater. Equal severity keeps the earlier checkpoint.
-           STEP-UP and anything stricter on the path stop the traffic at that hop. CONTROL LOST does not. UNAVAILABLE does.
+           A later checkpoint replaces the winner only when its severity is strictly greater, except that CONTROL LOST wins a tie with ALLOW WITH LIMITS.
+           Every other tie keeps the earlier checkpoint. STEP-UP and anything stricter on the path stop the traffic. CONTROL LOST does not. UNAVAILABLE does.
      tele: emits telemetry that XDR can correlate.  base: routine check, skipped once the session is stopped at that hop. */
   checks: [
     /* --- network identity and segmentation --- */
@@ -758,11 +758,11 @@ const DATA = {
       c: 'Tunnel route (illustrative)', r: 'Secure Client still shows a tunnel. CVE-2024-3661: a DHCP classless static route on the local network can send traffic the tunnel was meant to carry out the physical interface.', d: -20, sig: 'Traffic left the tunnel',
       v: 'EXPOSED', why: 'The tunnel is up, and a more-specific route on the local network sends some of the session in the clear. CVE-2024-3661.' },
     { id: 'DN1', when: { beh: ['dns'], via: ['sa'] }, hop: ['sa'], at: 'sa', lens: 'threat',
-      c: 'DNS answer (illustrative)', r: 'The name was one the organisation trusts, and the answer sent the session to the public web. CVE-2008-1447 is a recursive resolver caching the wrong address. CVE-2020-1350 is the resolver itself no longer being yours. CVE-2015-7547 is the same failure in the client stub. No CVSS object is recorded for CVE-2008-1447 or CVE-2015-7547.', d: -20, sig: 'Trusted name, wrong address',
-      v: 'EXPOSED', why: 'A trusted name resolved to the wrong address, and DNS-layer security does not treat that name as malicious. CVE-2008-1447, CVE-2020-1350, CVE-2015-7547.' },
+      c: 'DNS answer (illustrative)', r: 'The name was one the organisation trusts, and the answer sent the session to the public web. CVE-2008-1447 is a recursive resolver caching the wrong address. No CVSS object is recorded for CVE-2008-1447.', d: -20, sig: 'Trusted name, wrong address',
+      v: 'EXPOSED', why: 'A trusted name resolved to the wrong address, and DNS-layer security does not treat that name as malicious. CVE-2008-1447.' },
     { id: 'B1w', when: { beh: ['ssid'], via: ['wireless'] }, hop: ['wireless'], at: 'wireless', lens: 'data',
-      c: 'Air link (illustrative)', r: 'The station associated, and the network was not the one the user chose. CVE-2023-52424 names this under WPA3 as well as enterprise 802.1X. CVE-2017-13077 is the earlier WPA2 handshake failure; the record has no CVSS object.', d: -20, sig: 'Unintended wireless network',
-      v: 'EXPOSED', why: 'Association completed on a network the user did not choose, including under WPA3. ISE never sees the session. CVE-2023-52424. CVE-2017-13077 is the earlier WPA2 case and has no CVSS object in the record.' },
+      c: 'Air link (illustrative)', r: 'The station associated, and the network was not the one the user chose. CVE-2023-52424 names this under WPA3 as well as enterprise 802.1X.', d: -20, sig: 'Unintended wireless network',
+      v: 'EXPOSED', why: 'Association completed on a network the user did not choose, including under WPA3. ISE never sees the session. CVE-2023-52424.' },
     { id: 'AV1', when: { beh: ['flood'], who: ['attacker'], via: ['waap'] }, hop: ['waap'], at: 'waap', lens: 'threat',
       c: 'Service exhausted (illustrative)', r: 'A small request makes the destination unavailable. CVE-2023-44487 is HTTP/2 stream cancellation against the public app. The compare side is an on-site amplifier: CVE-2022-26143, CVE-2018-1000115 (the record states amplification on the order of 1:50,000 and has no CVSS object), CVE-2013-5211 (no CVSS object), and CVE-2023-50387 for DNSSEC validation CPU. Secure DDoS Protection is not credited.', d: -25, sig: 'Service unavailable',
       v: 'DOWN', why: 'The public application is exhausted. CVE-2023-44487. The amplifier records are CVE-2022-26143, CVE-2018-1000115, CVE-2013-5211 and CVE-2023-50387. Secure DDoS Protection is out of scope and is not credited.' },

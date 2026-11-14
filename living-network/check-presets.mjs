@@ -3,9 +3,9 @@
    node check-presets.mjs           diffs that file and checks the new verdicts
 
    Severity tie-break: a later checkpoint replaces the winner only when its severity is
-   strictly greater. Equal severity keeps the earlier checkpoint (path order, then rule order).
-   CONTROL LOST (EXPOSED, 1) ties with ALLOW WITH LIMITS and loses to STEP-UP (2).
-   UNAVAILABLE (DOWN, 3) ties with BLOCK. */
+   strictly greater, except that CONTROL LOST wins a tie with ALLOW WITH LIMITS.
+   Every other tie keeps the earlier checkpoint (path order, then rule order).
+   CONTROL LOST (EXPOSED, 1) ranks below STEP-UP (2). UNAVAILABLE (DOWN, 3) ties with BLOCK. */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -13,8 +13,8 @@ import { fileURLToPath } from 'url';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const snapPath = path.join(root, 'preset-snapshot-1-99.json');
 const game = new Function('S', ['data.js', 'engine.js'].map(f => fs.readFileSync(path.join(root, 'js', f), 'utf8')).join('\n;\n') +
-  '\n;return { DATA, normalize, evaluate };')({ splunk: true });
-const { DATA, normalize, evaluate } = game;
+  '\n;return { DATA, normalize, evaluate, verdictBeats };')({ splunk: true });
+const { DATA, normalize, evaluate, verdictBeats } = game;
 const SEV = Object.fromEntries(Object.entries(DATA.verdicts).filter(([, v]) => v.sev != null).map(([k, v]) => [k, v.sev]));
 
 function scenario(tuple) {
@@ -25,7 +25,7 @@ function segmentOf(r) {
   let win = null;
   for (const e of r.tl) {
     if (!e.v) continue;
-    if (!win || SEV[e.v] > SEV[win.v]) win = e;
+    if (!win || verdictBeats(e.v, win.v)) win = e;
   }
   if (!win) return null;
   const post = win.hi >= 1e6;
@@ -68,7 +68,17 @@ for (const [k, n] of Object.entries(expectSev)) {
   if (SEV[k] !== n) fail.push(`severity ${k} is ${SEV[k]}, expected ${n}`);
 }
 if (!(SEV.EXPOSED < SEV.STEPUP && SEV.EXPOSED === SEV.LIMIT && SEV.DOWN === SEV.BLOCK)) {
-  fail.push('CONTROL LOST must tie with ALLOW WITH LIMITS and rank below STEP-UP; UNAVAILABLE must tie with BLOCK');
+  fail.push('CONTROL LOST must share severity 1 with ALLOW WITH LIMITS and rank below STEP-UP; UNAVAILABLE must tie with BLOCK');
+}
+const ties = [
+  ['EXPOSED', 'LIMIT', true], ['LIMIT', 'EXPOSED', false],
+  ['EXPOSED', 'EXPOSED', false], ['LIMIT', 'LIMIT', false],
+  ['BLOCK', 'DOWN', false], ['DOWN', 'BLOCK', false],
+  ['STEPUP', 'EXPOSED', true], ['EXPOSED', 'STEPUP', false],
+  ['CONTAIN', 'DOWN', true]
+];
+for (const [next, prev, win] of ties) {
+  if (verdictBeats(next, prev) !== win) fail.push(`verdictBeats(${next}, ${prev}) should be ${win}`);
 }
 
 const got = records();
@@ -100,6 +110,17 @@ for (const [n, v] of Object.entries(expect)) {
   }
   if (n === '104' && !r.segs.some(s => s.ty === 'leak')) fail.push('preset 104 tunnel segment is not leak');
 }
+const named = {
+  105: { keep: ['CVE-2008-1447'], drop: ['CVE-2020-1350', 'CVE-2015-7547'] },
+  110: { keep: ['CVE-2023-52424'], drop: ['CVE-2017-13077'] }
+};
+for (const [n, spec] of Object.entries(named)) {
+  const p = DATA.presets.find(x => x.n === Number(n));
+  const r = evaluate(scenario(p.s), null);
+  const text = [r.why, ...r.tl.flatMap(e => [e.c, e.r])].join('\n');
+  for (const id of spec.keep) if (!text.includes(id)) fail.push(`preset ${n} text does not name ${id}`);
+  for (const id of spec.drop) if (text.includes(id)) fail.push(`preset ${n} text still names ${id}, which is a different mechanism`);
+}
 const cmp = { 100: 'BLOCK', 107: 'BLOCK', 111: 'DOWN' };
 for (const [n, v] of Object.entries(cmp)) {
   const p = DATA.presets.find(x => x.n === Number(n));
@@ -112,5 +133,5 @@ if (fail.length) {
   console.error(fail.join('\n'));
   process.exit(1);
 }
-console.log('tie-break: later checkpoint wins only when SEV is strictly greater; equal severity keeps the earlier checkpoint');
+console.log('tie-break: later checkpoint wins only when SEV is strictly greater, except CONTROL LOST wins a tie with ALLOW WITH LIMITS');
 console.log('verdicts', Object.entries(expect).map(([n, v]) => `${n}=${DATA.verdicts[v].label}`).join(', '));
