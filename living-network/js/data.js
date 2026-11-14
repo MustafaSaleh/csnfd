@@ -764,11 +764,11 @@ const DATA = {
       c: 'Air link (illustrative)', r: 'The station associated, and the network was not the one the user chose. CVE-2023-52424 names this under WPA3 as well as enterprise 802.1X.', d: -20, sig: 'Unintended wireless network',
       v: 'EXPOSED', why: 'Association completed on a network the user did not choose, including under WPA3. ISE never sees the session. CVE-2023-52424.' },
     { id: 'AV1', when: { beh: ['flood'], who: ['attacker'], via: ['waap'] }, hop: ['waap'], at: 'waap', lens: 'threat',
-      c: 'Service exhausted (illustrative)', r: 'A small request makes the destination unavailable. CVE-2023-44487 is HTTP/2 stream cancellation against the public app. The compare side is an on-site amplifier: CVE-2022-26143, CVE-2018-1000115 (the record states amplification on the order of 1:50,000 and has no CVSS object), CVE-2013-5211 (no CVSS object), and CVE-2023-50387 for DNSSEC validation CPU. Secure DDoS Protection is not credited.', d: -25, sig: 'Service unavailable',
-      v: 'DOWN', why: 'The public application is exhausted. CVE-2023-44487. The amplifier records are CVE-2022-26143, CVE-2018-1000115, CVE-2013-5211 and CVE-2023-50387. Secure DDoS Protection is out of scope and is not credited.' },
+      c: 'Service exhausted (illustrative)', r: 'A small request makes the destination unavailable. CVE-2023-44487 is HTTP/2 stream cancellation against the public app. CVE-2023-50387 is DNSSEC validation exhausting the resolver’s CPU. Secure DDoS Protection is not credited.', d: -25, sig: 'Service unavailable',
+      v: 'DOWN', why: 'A small request exhausts the service. CVE-2023-44487 is HTTP/2 stream cancellation. CVE-2023-50387 is DNSSEC validation exhausting the resolver. Secure DDoS Protection is out of scope and is not credited.' },
     { id: 'AV2', when: { beh: ['flood'], not: { who: ['attacker'] }, via: ['sdwan'] }, hop: ['sdwan'], at: 'sdwan', lens: 'threat',
-      c: 'Amplified traffic (illustrative)', r: 'An on-site device is used to amplify traffic until a WAN hop is unavailable. CVE-2022-26143, CVE-2018-1000115 (the record states amplification on the order of 1:50,000 and has no CVSS object), CVE-2013-5211 (no CVSS object), and CVE-2023-50387 for DNSSEC validation CPU.', d: -25, sig: 'WAN hop unavailable',
-      v: 'DOWN', why: 'An on-site device amplifies traffic until a WAN hop is unavailable. CVE-2022-26143, CVE-2018-1000115, CVE-2013-5211, CVE-2023-50387.' },
+      c: 'Amplified traffic (illustrative)', r: 'An on-site device is used to amplify traffic until a WAN hop is unavailable. CVE-2022-26143, CVE-2018-1000115 (the record states amplification on the order of 1:50,000 and has no CVSS object), and CVE-2013-5211 (no CVSS object).', d: -25, sig: 'WAN hop unavailable',
+      v: 'DOWN', why: 'An on-site device amplifies traffic until a WAN hop is unavailable. CVE-2022-26143, CVE-2018-1000115, CVE-2013-5211.' },
 
     /* --- threat behaviour --- */
     { id: 'T1a', cvd: ['bpsdg'], when: { device: ['compromised'], nbeh: ['scan', 'ransom', 'exfil'] }, hop: ['@src'], at: 'ep', lens: 'threat', tele: true,

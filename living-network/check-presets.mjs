@@ -121,6 +121,19 @@ for (const [n, spec] of Object.entries(named)) {
   for (const id of spec.keep) if (!text.includes(id)) fail.push(`preset ${n} text does not name ${id}`);
   for (const id of spec.drop) if (text.includes(id)) fail.push(`preset ${n} text still names ${id}, which is a different mechanism`);
 }
+{
+  const p = DATA.presets.find(x => x.n === 111);
+  const main = evaluate(scenario(p.s), null);
+  const side = evaluate(scenario(p.b), null);
+  const mainText = [main.why, ...main.tl.flatMap(e => [e.c, e.r])].join('\n');
+  const sideText = [side.why, ...side.tl.flatMap(e => [e.c, e.r])].join('\n');
+  for (const id of ['CVE-2023-44487', 'CVE-2023-50387']) if (!mainText.includes(id)) fail.push(`preset 111 main text does not name ${id}`);
+  for (const id of ['CVE-2022-26143', 'CVE-2018-1000115', 'CVE-2013-5211']) {
+    if (mainText.includes(id)) fail.push(`preset 111 main text names amplifier ${id}`);
+    if (!sideText.includes(id)) fail.push(`preset 111 compare text does not name ${id}`);
+  }
+  if (sideText.includes('CVE-2023-50387')) fail.push('preset 111 compare text still names CVE-2023-50387');
+}
 const cmp = { 100: 'BLOCK', 107: 'BLOCK', 111: 'DOWN' };
 for (const [n, v] of Object.entries(cmp)) {
   const p = DATA.presets.find(x => x.n === Number(n));
