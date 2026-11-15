@@ -149,7 +149,7 @@ invalid-combination rules, path rules, checkpoint rules, verdict text, suggestio
 edit. The tables below were generated from that object.
 
 The industry use cases are the exception. `js/portfolio.js` is generated: edit `portfolio-map.mjs` (name aliases and the
-links from use cases to scenarios) or replace `../data/cisco-industries-portfolio.json`, then run `npm run portfolio`.
+links from use cases to scenarios) or replace `data/cisco-industries-portfolio.json`, then run `npm run portfolio`.
 The generator stops if an alias names a product id that is not in `DATA.products`, a linked preset or architecture does
 not exist, a builder scenario is not valid as written, a use case has no preset, or one of presets 38 to 99 does not match
 the builder scenario linked to it. `npm run portfolio -- --report` also prints the listed names
@@ -181,7 +181,7 @@ controls". Preset 33 uses it to replay a ransomware case with Secure Endpoint di
 ## Industry use cases
 
 Source: Cisco's Industries Portfolio Explorer (https://www.cisco.com/c/m/en_us/solutions/industries/portfolio-explorer.html),
-the six data files behind it, collected 13 November 2026 and kept in `../data/cisco-industries-portfolio.json`. The use
+the six data files behind it, collected 13 November 2026 and kept in `data/cisco-industries-portfolio.json`. The use
 case text and the product and service lists are Cisco's. Everything that ties a use case to this scene is this tool's
 own work and is labelled that way on the page.
 

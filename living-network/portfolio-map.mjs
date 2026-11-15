@@ -1,5 +1,5 @@
 /* Hand-edited input for build-portfolio.mjs. Everything else in js/portfolio.js is generated.
-   Run `npm run portfolio` after changing this file or ../data/cisco-industries-portfolio.json. */
+   Run `npm run portfolio` after changing this file or data/cisco-industries-portfolio.json. */
 
 /* Names Cisco's portfolio pages still use for Umbrella. Umbrella is retiring and is not in the scene:
    Secure Access incorporates its DNS-layer security and secure web gateway, so these count as Secure Access
