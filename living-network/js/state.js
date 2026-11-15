@@ -32,7 +32,7 @@ function rerun() {
   });
   if (S.off.length && !S.runs.length) S.off = [];
   document.body.dataset.cmp = S.runs.length > 1 ? '1' : '0';
-  S.topo = S.mode === 'topo' ? topoOf(S.arch) : null; S.focus = ucFocus(); R.setLayer(S.splunk); R.setSplit && R.setSplit(S.split); R.setTopo(S.topo); R.setFocus && R.setFocus(S.focus); if (S.runs.length) SND.play("start"); R.setRuns(S.runs); R.setFilter(S.topo ? S.topo.nodes : S.filter || (S.focus && S.focus.nodes)); renderResults(); S.playing = S.autoplay && S.runs.length > 0; lastSig = ''; writeHash();
+  S.topo = S.mode === 'topo' ? topoOf(S.arch) : null; S.focus = ucFocus(); R.setLayer(S.splunk); R.setSplit && R.setSplit(S.split); R.setTopo(S.topo); R.setFocus && R.setFocus(S.focus); if (S.runs.length) SND.play("start"); R.setRuns(S.runs); R.setFilter(S.topo ? S.topo.nodes : S.filter || (S.focus && S.focus.nodes)); renderResults(); S.playing = S.autoplay && S.runs.length > 0; lastSig = ''; writeHash(); introSync();
 }
 /* playback */
 const DUR = { move: 620, check: 1250, end: 1 };

@@ -327,3 +327,32 @@ body[data-cmp="1"] main{grid-template-columns:300px minmax(0,1fr) 540px}
 }
 @media (min-width:2200px){ body{font-size:16px} main{grid-template-columns:420px minmax(0,1fr) 480px} .lbl{font-size:13px} }
 @media (prefers-reduced-motion:reduce){ .panel{transition:none} }
+
+/* scenario intro card */
+.chk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.chk input{margin:0;width:14px;height:14px;accent-color:var(--lens);cursor:pointer}
+.chk:has(input:not(:checked)){color:var(--tx3)}
+.chk:has(input:focus-visible){outline:2px solid #fff;outline-offset:2px}
+#intro{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:12;width:min(540px,calc(100% - 24px));max-height:calc(100% - 92px);overflow:auto;background:#0f172bf5;border:1px solid var(--lens);border-radius:12px;padding:14px 16px;box-shadow:0 18px 50px #000c,0 0 0 200vmax #03061080;animation:introIn .22s ease-out}
+#intro:has(.iruns.cmp){width:min(860px,calc(100% - 24px))}
+@keyframes introIn{from{opacity:0;transform:translate(-50%,8px)}}
+body.intro #transport{z-index:13} body.intro #callout,body.intro #legend{visibility:hidden} body.intro #tourHint{display:none}
+.ieye{display:flex;align-items:center;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--lens)}
+.ix{margin-left:auto;background:none;border:0;color:var(--tx2);font-size:20px;line-height:1;padding:0 4px}
+#intro h3{font-size:17px;line-height:1.25;margin:2px 0 4px}
+#intro h4{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--tx3);margin:12px 0 5px}
+#intro h4.iab{color:var(--tx);font-size:12px;margin-top:0}
+.iruns{margin-top:10px} .iruns.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px} .iruns.cmp .irun+.irun{border-left:1px solid var(--line);padding-left:16px}
+.ifacts{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:13px} .ifacts div{display:contents} .ifacts dt{color:var(--tx3)} .ifacts dd{margin:0}
+.iflow{display:flex;flex-wrap:wrap;gap:5px 0;font-size:12px}
+.iflow li{background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:2px 7px}
+.iflow li.a{border-color:var(--lens);color:var(--lens)}
+.iflow li+li{margin-left:18px;position:relative} .iflow li+li::before{content:"→";position:absolute;left:-15px;top:1px;color:var(--tx3)}
+.ichk{display:grid;gap:3px;font-size:12.5px}
+.ichk li{display:flex;gap:7px;align-items:baseline} .ichk b{font-weight:650}
+.ichk .n{flex:none;min-width:18px;height:18px;line-height:17px;text-align:center;border-radius:9px;font-size:10.5px;font-weight:700;border:1px solid var(--c);color:var(--c)}
+.ilens{display:inline-block;margin:5px 10px 0 0} .ilens::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--c);margin-right:4px}
+.ihow{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:12.5px;color:var(--tx2)} .ihow b{color:var(--tx)}
+.irow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:10px;position:sticky;bottom:-14px;background:#0f172b;padding:8px 0;margin-bottom:-8px} .irow .small{margin-left:auto}
+@media (prefers-reduced-motion:reduce){ #intro{animation:none} }
+@media (max-width:900px){ #intro{top:8px;padding:11px 12px;max-height:calc(100% - 70px)} .iruns.cmp{grid-template-columns:1fr} .iruns.cmp .irun+.irun{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:10px} .chk{padding:5px 6px;font-size:10.5px} .irow{bottom:-11px} .irow .small{display:none} }

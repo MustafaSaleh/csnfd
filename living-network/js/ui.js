@@ -106,7 +106,7 @@ function ucCard(u) {
 }
 function loadPreset(n) {
   const p = DATA.presets.find(x => x.n === n); if (!p) return;
-  S.preset = n; S.off = (p.off || []).filter(k => PR[k]); S.active = 0; S.slots[0] = fromPreset(p.s); S.compare = !!p.b; if (p.b) S.slots[1] = fromPreset(p.b);
+  INTRO.key = null; S.preset = n; S.off = (p.off || []).filter(k => PR[k]); S.active = 0; S.slots[0] = fromPreset(p.s); S.compare = !!p.b; if (p.b) S.slots[1] = fromPreset(p.b);
   if (p.lens) setLens(p.lens); renderLeft(); rerun();
 }
 function setScenario(slot, s, notes) { S.slots[slot] = s; S.preset = 0; renderLeft(); rerun(); S.notes = notes || []; if (S.notes.length) { toast(S.notes[0]); const n = $('#bnotes'); if (n) n.textContent = S.notes.join(' '); } }
@@ -378,6 +378,53 @@ function setFull(on) {
   else if (document.fullscreenElement || document.webkitFullscreenElement) { try { const p = (document.exitFullscreen || document.webkitExitFullscreen).call(document); if (p && p.catch) p.catch(() => { }); } catch (e) { } }
   if (S.view === 'orbit' && !S.topo) setTimeout(() => R.resetView(), 180);   /* re-fit the scene to the new stage size */
 }
+/* ---- scenario intro card: what is about to play and how it will flow, shown before playback ----
+   It opens when a different scenario is set up (or a preset is picked again), not on a replay of the same one.
+   It never names the verdict. The Intro checkbox in the header switches it off; the choice is remembered. */
+const INTRO = { on: (() => { try { return localStorage.getItem('ln-intro') !== '0'; } catch (e) { return true; } })(), open: false, key: null };
+const presetGroup = n => { let g = ''; for (const p of DATA.presets) { if (p.g) g = p.g; if (p.n === n) return g; } return ''; };
+function introRun(r, multi) {
+  const s = r.s, rows = [['Who', opt('who', s.who).label], ['Device', opt('device', s.device).label], ['From', opt('loc', s.loc).label], ['Going to', opt('dest', s.dest).label], ['Condition', s.beh.map(b => opt('beh', b).label).join(', ')]];
+  const lensN = {}; r.tl.forEach(e => lensN[e.lens] = (lensN[e.lens] || 0) + 1);
+  return `<section class="irun">${multi ? `<h4 class="iab">Scenario ${'AB'[r.slot]}</h4>` : ''}
+    <dl class="ifacts">${rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${h(v)}</dd></div>`).join('')}</dl>
+    ${r.off.length ? `<p class="small">Replayed without ${h(r.off.map(k => PR[k].s).join(', '))}, to show the gap.</p>` : ''}
+    <h4>The route</h4>
+    <ol class="iflow"><li class="a">${h(opt('who', s.who).short)}</li>${r.path.map(n => `<li>${h(nodeName(n))}</li>`).join('')}</ol>
+    <h4>Checkpoints on the way (${r.tl.length})</h4>
+    ${r.tl.length ? `<ol class="ichk">${r.tl.map((e, k) => `<li style="--c:${LENS[e.lens].color}"><span class="n">${k + 1}</span><span><b>${h(PR[e.at].s)}</b> · ${h(e.c)}</span></li>`).join('')}</ol>
+    <p class="small">${DATA.lenses.filter(l => lensN[l.id]).map(l => `<span class="ilens" style="--c:${l.color}">${lensN[l.id]} ${l.label.toLowerCase()}</span>`).join('')}</p>` : '<p class="small">No control inspects this scenario.</p>'}
+  </section>`;
+}
+function introHTML() {
+  const p = S.mode === 'presets' && S.preset ? presetOf(S.preset) : null, multi = S.runs.length > 1, u = UC[S.ctx], L = LENS[S.lens];
+  return `<p class="ieye">${p ? `Preset ${p.n}${presetGroup(p.n) ? ' · ' + h(presetGroup(p.n)) : ''}` : multi ? 'Your comparison' : 'Your scenario'}<button class="ix" data-intro="close" aria-label="Close intro">×</button></p>
+    <h3 id="introH">${h(p ? p.t : multi ? 'Two scenarios, side by side' : buildLine([S.runs[0].s.who, S.runs[0].s.device, S.runs[0].s.loc, S.runs[0].s.dest, S.runs[0].s.beh]))}</h3>
+    ${u ? `<p class="small">Industry context: ${h(ucLabel(u))}</p>` : ''}
+    <div class="iruns${multi ? ' cmp' : ''}">${S.runs.map(r => introRun(r, multi)).join('')}</div>
+    <p class="ihow"><b>How it plays.</b> Nothing has run yet. Press Play and the actor walks the route. Each checkpoint lights up in turn, the trust level moves, and the run ends with a verdict. The scene opens in the <b style="color:${L.color}">${L.label}</b> lens (${h(L.blurb.toLowerCase())}); keys 1 to 5 switch lens.</p>
+    <div class="irow"><button class="btn primary" data-intro="play">Play scenario</button><button class="btn" data-intro="close">Close</button><span class="small">Untick Intro in the header to skip this card.</span></div>`;
+}
+/* called at the end of every rerun */
+function introSync() {
+  const key = S.runs.map(r => skey(r.s)).join('|'), fresh = key !== INTRO.key; INTRO.key = key;
+  if (!INTRO.on || !key || TOUR.i >= 0) return introClose();
+  if (!fresh && !INTRO.open) return;
+  const el = $('#intro'); el.innerHTML = introHTML(); el.hidden = false; el.scrollTop = 0; INTRO.open = true; S.playing = false; document.body.classList.add('intro');
+}
+function introClose(play) {
+  if (!INTRO.open) return; INTRO.open = false; $('#intro').hidden = true; document.body.classList.remove('intro');
+  if ((play || S.autoplay) && S.runs.length && !S.runs.every(r => r.pb.done)) S.playing = true;
+  lastSig = '';
+}
+function setIntro(on) {
+  INTRO.on = on; $('#introT').checked = on; try { localStorage.setItem('ln-intro', on ? '1' : '0'); } catch (e) { }
+  if (!on) introClose(); else if (S.runs.length && !S.playing && S.runs.every(r => r.pb.i === 0 && !r.pb.done)) { INTRO.key = null; introSync(); }
+  toast(on ? 'Intro on: each scenario is explained before it plays' : 'Intro off: scenarios are set up without the intro card');
+}
+$('#intro').addEventListener('click', e => { const b = e.target.closest('[data-intro]'); if (b) introClose(b.dataset.intro === 'play'); });
+$('#introT').checked = INTRO.on; $('#introT').addEventListener('change', e => setIntro(e.target.checked));
+
 /* ---- guided tour ---- */
 const TOUR_ACT = {
   start() { setView('orbit', true); if (S.mode !== 'presets') setMode('presets'); loadPreset(1); },
@@ -401,6 +448,7 @@ function tourPlace() {
 }
 function tourGo(i) {
   if (document.body.classList.contains('full')) setFull(false);   /* the tour points at the side panels */
+  introClose();
   const n = DATA.tour.length; if (i < 0) i = 0; if (i >= n) return tourEnd();
   TOUR.i = i; const st = DATA.tour[i]; $('#tourHint').hidden = true; if (st.act) TOUR_ACT[st.act]();
   if (matchMedia('(max-width:900px)').matches) sheet(st.sheet || 'none');

@@ -39,6 +39,15 @@ as "Industry context" until another preset or architecture is picked. The links 
 use cases linked to its preset and the three whose product lists cover most of the run, the preset library can be
 narrowed to one industry, and each product panel says how many use cases name the product. See "Industry use cases" below.
 
+**Scenario intro**: before a scenario plays, a card over the scene says what is about to happen. It names the preset,
+who is asking, from which device and place, where they are going and under which condition. It then lists the route hop
+by hop and the checkpoints on the way, each with its product, and says which lens the scene opens in. It never names the
+verdict. **Play scenario** (or `Space`) closes the card and starts playback; **Close** or `Esc` closes it and leaves the
+scenario waiting. In a comparison the card shows scenarios A and B side by side. The card opens when a different
+scenario is set up or a preset is picked again, not when the same scenario is replayed without a control, and it stays
+closed during the guided tour. The **Intro** checkbox in the header (or `I`) switches it off; it is on by default and
+remembered between visits. With Auto on, playback starts when the card is closed.
+
 **Playback**: choosing a preset (or changing the builder) sets the scenario up and waits; press Play (`Space`), which
 pulses until then. Playback starts at 0.5×. A different speed lasts for the visit, and the next load returns to 0.5×.
 The **Auto** button in the playback bar starts each scenario as soon as it is chosen; it is off by

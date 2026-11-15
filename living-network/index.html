@@ -27,6 +27,7 @@
   <button id="musT" class="btn tg" aria-pressed="true" aria-label="Ambient music" title="Ambient music on or off (N)">Music</button>
   <button id="warT" class="btn tg" aria-pressed="true" aria-label="Fog of war" title="Fog of war in the 3rd person view: only what the actor has reached is visible (G)">Fog</button>
   <button id="tourT" class="btn" title="Guided tour of the tool (T)">Tour</button>
+  <label id="introL" class="btn chk" title="Show an intro card that explains a scenario before it plays (I)"><input type="checkbox" id="introT" checked> Intro</label>
   <div class="search" role="search">
     <input id="q" type="search" placeholder="Search products" aria-label="Search products" autocomplete="off">
     <select id="qcat" aria-label="Filter by category"></select>
@@ -51,6 +52,7 @@
     <div class="badge">Conceptual architecture — not a validated design</div>
     <div id="legend" aria-live="polite"></div>
     <div id="callout" aria-live="polite"></div>
+    <div id="intro" role="region" aria-label="Scenario intro" hidden></div>
     <div id="nogl" hidden>2D fallback view (WebGL or 3D library unavailable)</div>
     <div id="transport" class="tp" role="toolbar" aria-label="Playback">
       <button id="bRestart" aria-label="Restart" title="Restart"></button>

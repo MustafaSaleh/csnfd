@@ -32,10 +32,10 @@ async function boot() {
   $('#labels').addEventListener('pointerout', () => tip(null));
   $('#labels').addEventListener('focusin', e => { const b = e.target.closest('.lbl[data-id]'); if (b) { const r = b.getBoundingClientRect(), s = $('#stage').getBoundingClientRect(); tip(b.dataset.id, r.left - s.left, r.bottom - s.top - 8); } });
   $('#labels').addEventListener('focusout', () => tip(null));
-  $('#bPlay').onclick = () => { if (S.runs.every(r => r.pb.done)) restart(); else S.playing = !S.playing; lastSig = ''; };
-  $('#bRestart').onclick = () => { restart(); lastSig = ''; };
-  $('#bStep').onclick = () => { stepOnce(); lastSig = ''; };
-  $('#bEnd').onclick = () => { finish(); lastSig = ''; };
+  $('#bPlay').onclick = () => { if (INTRO.open) return introClose(true); if (S.runs.every(r => r.pb.done)) restart(); else S.playing = !S.playing; lastSig = ''; };
+  $('#bRestart').onclick = () => { introClose(); restart(); lastSig = ''; };
+  $('#bStep').onclick = () => { introClose(); stepOnce(); lastSig = ''; };
+  $('#bEnd').onclick = () => { introClose(); finish(); lastSig = ''; };
   const autoUI = () => $('#bAuto').setAttribute('aria-pressed', S.autoplay);
   $('#bAuto').onclick = () => { S.autoplay = !S.autoplay; try { localStorage.setItem('ln-autoplay', S.autoplay ? '1' : '0'); } catch (e) { } autoUI(); toast(S.autoplay ? 'Auto-play on: a chosen scenario starts at once' : 'Auto-play off: press Play to start a scenario'); };
   autoUI();
@@ -78,7 +78,7 @@ async function boot() {
       if (e.key === 'Escape') return tourEnd(); if (e.key === 'ArrowRight') { e.preventDefault(); return tourGo(TOUR.i + 1); } if (e.key === 'ArrowLeft') { e.preventDefault(); return tourGo(TOUR.i - 1); }
       if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Tab') return;
       return; }
-    if (e.key === 'Escape') { if (document.body.classList.contains('full')) setFull(false); else if (S.selected) select(null); else sheet('none'); return; }
+    if (e.key === 'Escape') { if (INTRO.open) introClose(); else if (document.body.classList.contains('full')) setFull(false); else if (S.selected) select(null); else sheet('none'); return; }
     if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
     if (!t.closest('.panel') && !t.closest('#top')) {   /* camera from the keyboard: arrows rotate, Shift+arrows pan, + and - zoom, 0 resets */
       const ar = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
@@ -90,6 +90,7 @@ async function boot() {
     if (e.key === 'f' || e.key === 'F') { setFull(!document.body.classList.contains('full')); return; }
     if ((e.key === '[' || e.key === ']') && document.body.classList.contains('full')) { const sd = e.key === '[' ? 'left' : 'right'; setFullPanel(sd, !fullPanel(sd)); return; }
     if (e.key === 't' || e.key === 'T') { tourGo(0); return; }
+    if (e.key === 'i' || e.key === 'I') { setIntro(!INTRO.on); return; }
     if (e.key === 'x' || e.key === 'X') { $('#fxT').click(); return; }
     if (e.key === 'm' || e.key === 'M') { $('#sndT').click(); return; }
     if (e.key === 'n' || e.key === 'N') { $('#musT').click(); return; }
@@ -107,6 +108,6 @@ async function boot() {
   document.addEventListener('visibilitychange', () => { SND.hidden(document.hidden); cancelAnimationFrame(raf); if (!document.hidden) { last = performance.now(); raf = requestAnimationFrame(loop); } });
   raf = requestAnimationFrame(loop);
   /* test / automation hook: engine only, no network */
-  window.__LN = { DATA, PORTFOLIO, UC, openUC, ucTry, S, SND, VFX, setFull, TOUR, tourGo, tourEnd, exportData, exportMarkdown, reportHTML, doExport, setSplunk, setView, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
+  window.__LN = { DATA, PORTFOLIO, UC, INTRO, setIntro, introClose, openUC, ucTry, S, SND, VFX, setFull, TOUR, tourGo, tourEnd, exportData, exportMarkdown, reportHTML, doExport, setSplunk, setView, topoOf, evaluate, normalize, blocked, suggestions, loadPreset, setLens, setMode, finish, restart, prog, renderer: () => R.kind, R };
 }
 boot();
