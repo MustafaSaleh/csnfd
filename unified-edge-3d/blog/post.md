@@ -2,7 +2,7 @@
 title: "Taking Cisco Unified Edge Apart in 3D"
 description: "An interactive 3D model that explains Cisco Unified Edge layer by layer: what is in the chassis, how the parts connect, and what you can build with it."
 image: 01-hero-overview.jpg
-tags: [cisco, unified-edge, edge-computing, ai, three.js]
+tags: Cisco, Unified Edge, Edge Computing, Edge AI, Data Center, Cisco Intersight, 3D Demo
 ---
 
 # Taking Cisco Unified Edge Apart in 3D
@@ -11,7 +11,7 @@ tags: [cisco, unified-edge, edge-computing, ai, three.js]
 
 Every time I explain Cisco Unified Edge, I end up drawing the same boxes on a whiteboard. A chassis here, some nodes there, a line up to the cloud. So I built something better: an interactive 3D model you can open in a browser, pull apart, and click through.
 
-**[Open the interactive demo →](ADD-YOUR-DEMO-LINK-HERE)**
+**[Open the interactive demo →](https://darsh.im/p/unified-edge-anatomy)**
 
 This post walks through what the demo shows and, along the way, what Unified Edge actually is.
 
