@@ -1,0 +1,1070 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Unified Edge Anatomy</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one full-viewport 3D stage; a layer rail on the left, a detail panel on the right,
+   a control dock under the stage. On phones the rail becomes a chip strip and the panel a bottom sheet. */
+:root{
+  color-scheme:dark;
+  --bg:#070b12; --bg2:#0d1522; --panel:rgba(12,19,31,.82); --panel-solid:#0e1624;
+  --line:rgba(150,180,220,.17); --fg:#e7eef8; --muted:#93a4bd; --accent:#35c8f0; --accent-ink:#04222c;
+  --warn:#ff8a7a;
+  --l-phys:#a9bcd2; --l-power:#f5b556; --l-compute:#4fd1ff; --l-fabric:#8aa2ff; --l-sec:#ff7285; --l-mgmt:#5eead4; --l-sw:#c8a6ff;
+  --f-display:"Space Grotesk","Segoe UI",system-ui,sans-serif;
+  --f-body:"Inter","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sheet:40%;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 var(--f-body);overflow:hidden;-webkit-font-smoothing:antialiased}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;background:radial-gradient(120% 90% at 50% 20%,#12203a 0%,#070b12 62%)}
+
+.top{position:fixed;inset:0 0 auto 0;z-index:5;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding-block:calc(10px + env(safe-area-inset-top,0px)) 10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:linear-gradient(#070b12f2,#070b1200)}
+.brand{display:flex;flex-direction:column;line-height:1.15;margin-right:auto;min-width:0}
+.brand b{font:700 18px var(--f-display);letter-spacing:.01em}
+.brand span{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;backdrop-filter:blur(10px)}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:999px;color:var(--muted);font-weight:500;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.tools{display:flex;gap:6px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;color:var(--muted);backdrop-filter:blur(10px);white-space:nowrap}
+.chip[aria-pressed="true"]{color:var(--fg);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.chip.go{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+
+.rail{position:fixed;z-index:4;left:max(16px,env(safe-area-inset-left,0px));top:calc(74px + env(safe-area-inset-top,0px));width:236px;max-height:calc(100% - 170px);overflow:auto;
+  display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(12px)}
+.rail h3{margin:2px 4px 4px;font:600 11px var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.rb{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid transparent;background:none;border-radius:9px;padding:8px 9px;color:var(--fg);min-width:0}
+.rb:hover{background:rgba(255,255,255,.05)}
+.rb[aria-pressed="true"]{background:rgba(255,255,255,.08);border-color:var(--line)}
+.rb i{flex:none;width:10px;height:10px;border-radius:3px;background:var(--c,var(--accent));box-shadow:0 0 10px var(--c,var(--accent))}
+.rb small{display:block;color:var(--muted);font-size:11.5px;line-height:1.3}
+.slot{display:flex;flex-direction:column;gap:3px;padding:4px}
+.slot label{font:500 11px var(--f-mono);color:var(--muted)}
+.slot select{background:var(--panel-solid);border:1px solid var(--line);border-radius:8px;padding:6px 8px;width:100%}
+
+.panel{position:fixed;z-index:4;right:max(16px,env(safe-area-inset-right,0px));top:calc(74px + env(safe-area-inset-top,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:352px;
+  overflow:auto;padding:16px 18px 18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(12px)}
+.phead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.eyebrow{font:600 11px var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--c,var(--accent))}
+.panel h2{font:600 22px/1.15 var(--f-display);margin:0 0 8px;text-wrap:balance}
+.panel p{margin:0 0 12px;color:#cfd9e8}
+.panel h4{margin:16px 0 6px;font:600 11px var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.specs{margin:0;display:grid;grid-template-columns:auto 1fr;gap:0 12px;font-size:12.5px}
+.specs dt{color:var(--muted);padding:6px 0;border-top:1px solid var(--line)}
+.specs dd{margin:0;padding:6px 0;border-top:1px solid var(--line);font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums;min-width:0;overflow-wrap:anywhere}
+.plist{display:flex;flex-wrap:wrap;gap:6px}
+.plist button{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:8px;padding:5px 9px;font-size:12.5px}
+.plist button:hover{border-color:var(--c,var(--accent))}
+.totals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
+.totals div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+.totals b{display:block;font:600 19px var(--f-display);font-variant-numeric:tabular-nums}
+.totals span{font-size:11.5px;color:var(--muted)}
+.note{font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;margin-top:16px}
+.note a,.panel a{color:var(--accent)}
+.panel ul{margin:0 0 12px;padding-left:18px;color:#cfd9e8}
+.panel li{margin-bottom:4px}
+.sheetbtn{display:none}
+
+.dock{position:fixed;z-index:4;left:284px;right:400px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;pointer-events:none}
+.dock>div{pointer-events:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(12px)}
+.dock label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+input[type=range]{accent-color:var(--accent);width:150px}
+
+.tip{position:fixed;z-index:6;pointer-events:none;padding:5px 9px;border-radius:8px;background:#04121cee;border:1px solid var(--line);font-size:12px;white-space:nowrap;transform:translate(14px,14px)}
+.toast{position:fixed;z-index:8;left:50%;top:calc(84px + env(safe-area-inset-top,0px));transform:translateX(-50%);max-width:min(92vw,440px);padding:9px 14px;border-radius:10px;background:#2a1216;border:1px solid var(--warn);color:#ffd9d3;font-size:13px}
+.tour{position:fixed;z-index:7;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));width:min(92vw,560px);padding:12px 14px 10px;border-radius:14px;background:#081320f2;border:1px solid var(--accent)}
+.tour p{margin:0 0 8px;font-size:14px}
+.tour .row{display:flex;align-items:center;gap:8px}
+.tour .bar{flex:1;height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.tour .bar i{display:block;height:100%;width:0;background:var(--accent)}
+.tour button{border:1px solid var(--line);background:none;border-radius:8px;padding:3px 10px;font-size:12px}
+
+.intro{position:fixed;z-index:9;inset:0;display:grid;place-items:center;background:radial-gradient(60% 50% at 50% 50%,#070b12cc,#070b1255);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.intro>div{width:min(100%,520px);padding:26px 26px 22px;border-radius:18px;background:#0b1422f5;border:1px solid var(--line);box-shadow:0 30px 80px #000a}
+.intro .eyebrow{color:var(--accent)}
+.intro h1{font:700 clamp(26px,5vw,36px)/1.08 var(--f-display);margin:8px 0 10px;text-wrap:balance}
+.intro p{color:#cfd9e8;margin:0 0 18px}
+.intro .btns{display:flex;gap:10px;flex-wrap:wrap}
+.intro button{border-radius:10px;padding:10px 16px;border:1px solid var(--line);background:rgba(255,255,255,.05);font-weight:600}
+.intro button.go{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.intro small{display:block;margin-top:14px;color:var(--muted);font-size:11.5px}
+
+@media (max-width:900px){
+  .top{gap:8px}
+  .brand b{font-size:16px}
+  .brand span{display:none}
+  .top .seg{order:3;width:100%;justify-content:space-between}
+  .top .seg button{flex:1;padding:6px 4px}
+  .rail{left:0;right:0;width:auto;top:calc(104px + env(safe-area-inset-top,0px));max-height:none;flex-direction:row;overflow-x:auto;overflow-y:hidden;border-radius:0;border-inline:0;background:none;border:0;backdrop-filter:none;
+    padding:4px max(16px,env(safe-area-inset-right,0px)) 4px max(16px,env(safe-area-inset-left,0px))}
+  .rail h3{display:none}
+  .rb{flex:none;background:var(--panel);border-color:var(--line);border-radius:999px;padding:6px 12px}
+  .rb small{display:none}
+  .slot{flex:none;width:170px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px}
+  .panel{left:0;right:0;width:auto;top:auto;bottom:0;height:var(--sheet);border-radius:16px 16px 0 0;border-inline:0;border-bottom:0;
+    padding:8px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:#0c1320f5}
+  .sheetbtn{display:block;width:100%;border:0;background:none;padding:2px 0 8px;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+  .sheetbtn::before{content:"";display:block;width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 4px}
+  body.collapsed{--sheet:46px}
+  body.collapsed .panel{overflow:hidden}
+  .dock{left:0;right:0;bottom:calc(var(--sheet) + 8px);padding-inline:max(16px,env(safe-area-inset-left,0px))}
+  .dock>div{padding:6px 8px;gap:6px}
+  .dock .chip{padding:4px 9px;font-size:12px}
+  input[type=range]{width:96px}
+  .tour{bottom:calc(var(--sheet) + 64px)}
+  .tools .chip{padding:5px 9px;font-size:12px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<canvas id="gl" aria-label="Interactive 3D model of a Cisco Unified Edge chassis"></canvas>
+
+<header class="top">
+  <div class="brand"><b>Unified Edge Anatomy</b><span>Cisco Unified Edge · unofficial 3D explainer</span></div>
+  <div class="seg" id="modes" role="group" aria-label="Mode">
+    <button data-mode="anatomy" aria-pressed="true">Anatomy</button>
+    <button data-mode="usecases" aria-pressed="false">Use cases</button>
+    <button data-mode="build" aria-pressed="false">Build your own</button>
+  </div>
+  <div class="tools">
+    <button class="chip go" id="bTour">▶ Tour</button>
+    <button class="chip" id="bMusic" aria-pressed="false">♪ Music</button>
+    <button class="chip" id="bSfx" aria-pressed="true">Sound FX</button>
+  </div>
+</header>
+
+<nav class="rail" id="rail" aria-label="Navigator"></nav>
+<aside class="panel" id="panel" aria-live="polite"></aside>
+
+<div class="dock"><div>
+  <label for="ex">Explode <input type="range" id="ex" min="0" max="100" value="30"></label>
+  <button class="chip" id="bBezel" aria-pressed="false">Bezel</button>
+  <button class="chip" id="bFlow" aria-pressed="true">Data flow</button>
+  <button class="chip" id="bSpin" aria-pressed="true">Auto-rotate</button>
+  <button class="chip" id="bReset">Reset view</button>
+</div></div>
+
+<div class="tip" id="tip" hidden></div>
+<div class="toast" id="toast" role="alert" hidden></div>
+<div class="tour" id="tour" hidden>
+  <p id="tourText"></p>
+  <div class="row"><div class="bar"><i id="tourBar"></i></div><span id="tourN" style="font:12px var(--f-mono);color:var(--muted)"></span>
+  <button id="tPrev">Back</button><button id="tNext">Next</button><button id="tStop">End tour</button></div>
+</div>
+
+<div class="intro" id="intro"><div>
+  <span class="eyebrow">Interactive 3D anatomy</span>
+  <h1>Take apart a Cisco Unified Edge, layer by layer</h1>
+  <p>One 3RU chassis that brings compute, storage, switching, routing and security to a store, a factory floor or a clinic. Open it up, click any part, try the use cases, or build your own configuration.</p>
+  <div class="btns">
+    <button class="go" id="iTour">▶ Guided tour with sound</button>
+    <button id="iFree">Explore on my own</button>
+  </div>
+  <small>Drag to orbit · scroll or pinch to zoom · click a part for details. Independent explainer built from public Cisco documents; the model is stylised and not to engineering scale.</small>
+</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+if(!window.THREE){$('#panel').innerHTML='<h2>3D engine did not load</h2><p>This page needs to download three.js from cdnjs. Check your connection and reload.</p>';$('#intro').hidden=true;return;}
+var T=THREE;
+var css=getComputedStyle(document.documentElement);
+function cv(n){return css.getPropertyValue(n).trim()}
+
+/* ───────────────────────── content ───────────────────────── */
+var LAYERS=[
+ {id:'phys',n:'Enclosure',s:'3RU short-depth chassis',c:cv('--l-phys'),ex:.18,cam:[.75,1.08,11.5,0,.7,.6],
+  d:'A 3RU, short-depth chassis built for places that are not data centres: back rooms, shop floors, branch closets. Five front-facing slots take sled-style nodes that swap without tools.'},
+ {id:'power',n:'Power & cooling',s:'Redundant PSUs, quiet fans',c:cv('--l-power'),ex:.72,cam:[2.5,1.0,14,0,1.2,-.6],
+  d:'Two front-serviceable power supplies in N+N redundancy and five hot-swap fan modules. Fan speed is acoustically managed, so the system can sit near people.'},
+ {id:'compute',n:'Compute & storage',s:'Xeon 6 SoC nodes, NVMe, GPU',c:cv('--l-compute'),ex:1,cam:[.6,.92,12.5,.2,1.7,3.9],
+  d:'Half-width compute nodes built on Intel Xeon 6 SoC. Each carries its own memory, NVMe storage, boot drives and an optional GPU, so a chassis can form a small cluster on its own.'},
+ {id:'fabric',n:'Fabric & networking',s:'Dual 25G switch, SD-WAN router',c:cv('--l-fabric'),ex:.62,cam:[-.7,1.0,14.5,0,1,1.2],
+  d:'Every node plugs into a cable-free midplane that reaches two management controllers, each with an embedded 25G switch. An optional secure router node adds SD-WAN and PoE.'},
+ {id:'sec',n:'Security',s:'From the bezel to the firmware',c:cv('--l-sec'),ex:0,cam:[.6,1.1,12,0,.7,1],
+  d:'Edge sites rarely have a locked cage or on-site staff, so protection is designed in: a locking bezel with intrusion detection, hardware roots of trust, signed firmware and zero-trust management.'},
+ {id:'mgmt',n:'Management & observability',s:'Cisco Intersight, SaaS',c:cv('--l-mgmt'),ex:.12,cam:[.5,1.28,18,0,3.2,0],
+  d:'The whole fleet is run from Cisco Intersight in the cloud: zero-touch onboarding, policy templates, full-stack blueprints and automated lifecycle, for ten sites or ten thousand.'},
+ {id:'sw',n:'Software & AI',s:'Hypervisors, Kubernetes, inference',c:cv('--l-sw'),ex:0,cam:[.55,1.12,15,0,2.5,0],
+  d:'The hardware is an open platform. It runs the main virtualisation and container stacks, and serves AI inference on the CPU or on NVIDIA GPUs.'}
+];
+var LBY={};LAYERS.forEach(function(l){LBY[l.id]=l});
+
+var SRC={
+ chassis:'https://www.cisco.com/site/us/en/products/collateral/computing/unified-edge/cisco-ucs-xe9305-chassis-ds.html',
+ n130:'https://www.cisco.com/site/us/en/products/collateral/computing/unified-edge/ucs-xe130c-m8-compute-node-ds.html',
+ n150:'https://www.cisco.com/site/us/en/products/collateral/computing/unified-edge/ucs-xe150c-m8-compute-node-ds.html',
+ faq:'https://www.cisco.com/c/en/us/products/collateral/servers-unified-computing/unified-edge/unified-edge-faq.html',
+ aag:'https://www.cisco.com/c/en/us/products/collateral/servers-unified-computing/unified-edge/unified-edge-at-a-glance.html',
+ home:'https://www.cisco.com/site/us/en/products/computing/unified-edge/index.html'
+};
+
+var PARTS={
+ chassis:{n:'Cisco UCS XE9305 chassis',l:['phys'],
+  pitch:'One box replaces the stack of servers, switches and routers a branch site usually needs. It is short enough for a shallow rack or a wall, and anyone on site can slide a node in.',
+  tech:'3RU modular chassis with five front-facing, hot-swappable node slots. Slots accept compute nodes and networking nodes. An NFC tag lets a phone claim the chassis into Intersight.',
+  specs:[['Height','3RU · 5.12 in (13 cm)'],['Width','17.32 in (44 cm)'],['Depth','18 in (45.7 cm) · 23 in with bezel'],['Node slots','5, front, hot-swap'],['Mounting','4-post rail · 2-post · wall · shelf, horizontal or vertical'],['Operating temp','5–45 °C'],['Acoustics','"40s dBA" under 20% load at 25 °C'],['Warranty','3-year next-business-day hardware']],src:'chassis'},
+ bezel:{n:'Locking security bezel & air filter',l:['sec','phys'],
+  pitch:'Unstaffed sites need physical protection. The bezel locks the whole front, so nobody can pull a drive or a node, and it filters dust in dirty rooms.',
+  tech:'Optional locking bezel covering the full front, with a separately replaceable air filter. Cisco describes intrusion detection on the bezel. It adds about 5 in to chassis depth.',
+  specs:[['Coverage','Entire front face'],['Lock','Keyed, with intrusion detection'],['Filter','Replaceable particulate filter'],['Depth with bezel','23 in (58.4 cm)']],src:'chassis'},
+ psu:{n:'Power supplies',l:['power'],
+  pitch:'Either supply can carry the system, and both are replaced from the front without tools. A power fault does not become a site outage.',
+  tech:'Two hot-swappable 2400 W Titanium AC supplies in N+N redundancy, front-serviceable with a latch. Output is lower on 100–127 VAC input. The FAQ lists a 3200 W option for XE150c nodes with GPUs.',
+  specs:[['Count','2, N+N redundant'],['Rating','2400 W Titanium (at 200–240 VAC)'],['Input','100–127 / 200–240 VAC, 47–63 Hz'],['Connector','IEC 320 C20'],['Service','Front, tool-less'],['Option','3200 W for GPU-heavy builds']],src:'chassis'},
+ fans:{n:'Fan modules',l:['power'],
+  pitch:'Quiet enough for a back office or a clinic corridor, and a failed fan is swapped while the system keeps running.',
+  tech:'Five 80 mm dual-rotor, hot-swappable fan modules with acoustic control. Modules release with latches from the top and rear.',
+  specs:[['Count','5 × 80 mm dual-rotor'],['Service','Hot-swap, top and rear latches'],['Acoustics','"40s dBA" under 20% load at 25 °C']],src:'chassis'},
+ midplane:{n:'Midplane fabric',l:['fabric'],
+  pitch:'No cables between servers and switch. A node clicks in and it is on the network, which removes the most common cabling mistakes at remote sites.',
+  tech:'Each node presents two 25 Gbps ports at the rear, one to each management controller, through the chassis midplane. The two controllers form one active-active fabric.',
+  specs:[['Node links','2 × 25 Gbps per node'],['Topology','Dual-homed, active-active'],['Cabling','None, blind-mate']],src:'chassis'},
+ cmc:{n:'Edge Chassis Management Controllers',l:['fabric','mgmt'],
+  pitch:'Two small modules give the chassis its own redundant switch and its connection to Intersight. There is no separate top-of-rack switch to buy, mount or manage.',
+  tech:'Two hot-swappable controllers, each with an embedded 25 Gbps switch. Each has five internal 25G ports to the node slots and front-panel uplinks. Cisco also calls them Unified Edge Management Controllers.',
+  specs:[['Count','2, hot-swap, active-active'],['Switching','25 Gbps, 145 Gbps bandwidth each'],['To nodes','5 × 25 Gbps each'],['Uplinks','2 × 10 Gbps SFP+ each'],['Management','1 × 1 Gbps RJ-45 each'],['Console','2 × USB-C each']],src:'chassis'},
+ node130:{n:'Cisco UCS XE130c M8 compute node',l:['compute'],
+  pitch:'The workhorse. Up to five fit in one chassis, enough for a resilient cluster that runs the site\'s applications and AI inference without a data-centre footprint.',
+  tech:'1RU, half-width, tool-less sled with one Intel Xeon 6 SoC. Ordered as Storage-Optimized (four E3.S bays) or IO-Optimized (three E3.S bays plus a PCIe slot).',
+  specs:[['Form factor','1RU half-width · up to 5 per chassis'],['CPU','1 × Xeon 6 SoC, 12 / 20 / 32 P-cores'],['Memory','8 DIMMs · up to 768 GB DDR5-6400'],['Data drives','4 or 3 × E3.S NVMe, up to 30 TB each'],['Boot','2 × M.2, hardware RAID 1'],['GPU','1 × 75 W HH/HL, e.g. NVIDIA L4'],['Fabric','2 × 25 Gbps to the controllers'],['Front ports','2 × 10G RJ-45, KVM, USB-C']],src:'n130'},
+ node150:{n:'Cisco UCS XE150c M8 compute node',l:['compute'],
+  pitch:'The AI node. Twice the height buys room for a full-size NVIDIA GPU, for vision models and generative AI that must run on site.',
+  tech:'2RU, half-width sled with one Xeon 6 SoC and a mezzanine tray for one full-height, full-length accelerator. Announced March 2026; up to two per chassis.',
+  specs:[['Form factor','2RU half-width · up to 2 per chassis'],['CPU','1 × Xeon 6 SoC, 20 / 32 P-cores'],['Memory','8 DIMMs · up to 1,024 GB DDR5-6400'],['Data drives','4 or 3 × E3.S NVMe, up to 30 TB each'],['GPU','1 × FHFL: RTX PRO 4500 / 6000 Blackwell SE, L40S'],['PCIe','1 × Gen5 x8 for NIC or FC (IO-Optimized)'],['Fabric','2 × 25 Gbps to the controllers']],src:'n150'},
+ cpu:{n:'Intel Xeon 6 SoC',l:['compute','sw'],
+  pitch:'Many edge AI tasks run on the processor alone, with no GPU to buy, power or cool. Cisco calls this CPU-native inferencing.',
+  tech:'Single-socket Xeon 6 SoC with P-cores at 2.0 GHz. Built-in accelerators and integrated Ethernet reduce the need for add-in cards. The 32-core part in the XE150c adds a media accelerator.',
+  specs:[['Cores','12, 20 or 32 P-cores'],['AI','Intel AMX, AVX-512, OpenVINO toolkit'],['Offload','QAT (crypto, compression), DSA'],['Confidential computing','TDX, SGX, TME-MK'],['Platform trust','Boot Guard, TXT']],src:'n130'},
+ dimm:{n:'DDR5 memory',l:['compute'],
+  pitch:'Enough memory per node to consolidate many virtual machines, or to hold AI models in RAM, on a half-width sled.',
+  tech:'Four channels, eight DIMM slots of DDR5-6400 RDIMM. The XE130c takes modules up to 96 GB; the XE150c up to 128 GB.',
+  specs:[['Slots','8 (4 channels)'],['Type','DDR5-6400 RDIMM'],['XE130c max','768 GB (8 × 96 GB)'],['XE150c max','1,024 GB (8 × 128 GB)']],src:'n130'},
+ e3s:{n:'E3.S NVMe drives',l:['compute'],
+  pitch:'Fast, dense, front-serviceable storage. A site can keep weeks of video or sensor data local, and a drive can be replaced without opening the node.',
+  tech:'Front-loading E3.S NVMe bays. Four in the Storage-Optimized build, three in the IO-Optimized build. With several nodes this is the capacity pool for hyperconverged storage.',
+  specs:[['Bays','4 (storage) or 3 (IO)'],['Per drive','Up to 30 TB'],['Per node','Up to 120 TB'],['Per chassis','Up to 600 TB with five nodes']],src:'n130'},
+ m2:{n:'M.2 boot module',l:['compute'],
+  pitch:'The operating system lives on its own mirrored pair, so every data bay stays free for workloads and a boot drive failure is not an outage.',
+  tech:'Mini storage module with two M.2 SSDs behind a hardware RAID 1 controller.',
+  specs:[['Drives','2 × M.2'],['Capacity','Up to 960 GB each'],['Protection','Hardware RAID 1']],src:'n130'},
+ gpu:{n:'GPU accelerator',l:['compute','sw'],
+  pitch:'Add a GPU only where the workload needs one. A compact card in a 1RU node handles video analytics; a full-size card in the 2RU node handles heavier models.',
+  tech:'XE130c: one PCIe Gen5 slot for a 75 W half-height, half-length GPU. XE150c: one Gen5 x16 slot on a mezzanine tray for a full-height, full-length card.',
+  specs:[['XE130c','1 × 75 W HH/HL, e.g. NVIDIA L4'],['XE150c','1 × FHFL, Gen5 x16'],['XE150c cards','RTX PRO 4500 Blackwell SE · RTX PRO 6000 Blackwell SE (capped at 450 W) · L40S']],src:'n150'},
+ pcie:{n:'PCIe Gen5 expansion slot',l:['compute','fabric'],
+  pitch:'Room to add a specialised network card or adapter when a site has a requirement the built-in fabric does not cover.',
+  tech:'Available on IO-Optimized nodes, in place of the fourth drive bay. XE130c: one HH/HL slot for a NIC, DPU or IPU. XE150c: one x8 slot for a NIC or Fibre Channel adapter.',
+  specs:[['Requires','IO-Optimized configuration'],['XE130c','Gen5 HH/HL · NIC, DPU, IPU'],['XE150c','Gen5 x8 HH/HL · NIC or FC']],src:'n130'},
+ hostports:{n:'Front host ports',l:['fabric','compute'],
+  pitch:'Local devices can plug straight into a node, and a technician can attach a console without opening anything.',
+  tech:'Each compute node has two front 10 Gbps RJ-45 host ports, a KVM connector and a USB-C port, in addition to its two midplane links.',
+  specs:[['Host ports','2 × 10 Gbps RJ-45'],['Console','KVM connector, USB-C']],src:'n130'},
+ tpm:{n:'Hardware root of trust',l:['sec'],
+  pitch:'Each node can prove it is running genuine, untampered firmware before it is trusted with workloads. That matters when the hardware sits in a public building.',
+  tech:'A TPM 2.0 is built in for the management controller (BMC); a second TPM 2.0 for the host OS is optional. Firmware is signed and anchored in a Trust Anchor module, with Intel Boot Guard and TXT on the CPU.',
+  specs:[['BMC','TPM 2.0, built in'],['Host OS','TPM 2.0, optional'],['Firmware','Signed, Trust Anchor module'],['CPU','Boot Guard, TXT, TDX, SGX']],src:'n130'},
+ router:{n:'Cisco 8255 Secure Router node',l:['fabric','sec'],
+  pitch:'The WAN router, the LAN switch and the firewall move inside the same chassis. One box, one management plane, and PoE for the site\'s cameras, phones and access points.',
+  tech:'1RU half-width networking node with SD-WAN, converged LAN, WAN and security. Up to two per chassis. Announced June 2026.',
+  specs:[['Form factor','1RU half-width · up to 2 per chassis'],['LAN','14 × 1G with PoE (30 W)'],['Multigigabit','4 × 2.5G mGig with UPoE (90 W)'],['WAN / uplink','2 × 10G SFP'],['Functions','SD-WAN, routing, switching, security']],src:'aag'},
+ poe:{n:'PoE access ports',l:['fabric'],
+  pitch:'Cameras, sensors, phones and wireless access points get data and power from the same chassis that runs the applications using them.',
+  tech:'On the 8255 Secure Router node: fourteen 1G ports with 30 W PoE and four 2.5G multigigabit ports with 90 W UPoE.',
+  specs:[['1G PoE','14 ports, 30 W'],['mGig UPoE','4 ports, 2.5G, 90 W']],src:'aag'},
+ blank:{n:'Empty slot',l:['phys'],
+  pitch:'Start with what the site needs today. A free slot is headroom: add a compute node, a GPU node or a router later without replacing anything.',
+  tech:'Unused slots are covered with a blank to keep airflow correct. Nodes are hot-swappable, so growth does not need a maintenance window on the other nodes.',
+  specs:[['Accepts','XE130c, XE150c (two slots), 8255 router']],src:'chassis'},
+ intersight:{n:'Cisco Intersight',l:['mgmt'],
+  pitch:'Ship the box to the site, have anyone plug it in, and it configures itself from the cloud. One team can run thousands of locations with the same policies.',
+  tech:'SaaS management in Intersight Managed Mode. Fleet-wide visibility across compute and networking, policy templates, and blueprints that cover hardware, OS and cluster. Appliance options are planned to follow.',
+  specs:[['Onboarding','Zero-touch; NFC claim from a phone'],['Blueprints','Hardware · OS · cluster'],['Lifecycle','Scheduled, automated updates'],['Drift control','Conformance reporting, policy templates'],['Scale','"Ten systems or ten thousand"']],src:'faq'},
+ observ:{n:'Observability: Splunk & ThousandEyes',l:['mgmt'],
+  pitch:'When something is slow at store 412, the team can tell whether it is the app, the server or the network path, without sending anyone.',
+  tech:'An Intersight plug-in sends logs, metrics and events to Splunk. ThousandEyes measures network and application performance from the edge site.',
+  specs:[['Splunk','Logs, metrics, events via Intersight plug-in'],['ThousandEyes','Network and application path visibility']],src:'faq'},
+ zerotrust:{n:'Zero-trust protection',l:['sec'],
+  pitch:'Security is not an extra project per site. Policies are set once in the cloud and enforced everywhere, which closes the gaps that appear when sites drift apart.',
+  tech:'Management access is verified and authenticated through the SaaS control plane. Central policy prevents configuration drift. Firewalling and segmentation can run as virtual network functions, including Cisco Firepower Threat Defense, with add-on protection for Kubernetes workloads and AI models.',
+  specs:[['Physical','Locking bezel, intrusion detection, anti-tamper'],['Platform','Signed firmware, Trust Anchor, TPM 2.0'],['Network','Segmentation, firewall (FTD as VNF)'],['Workload','Kubernetes workload defence, AI model protection'],['Operations','Central policy, continuous compliance checks']],src:'faq'},
+ sw_os:{n:'Infrastructure software',l:['sw'],
+  pitch:'Customers keep the platform they already know. The same chassis runs Nutanix, Red Hat, VMware, SUSE or Ubuntu, so the edge is not a new skill set.',
+  tech:'Cisco names Nutanix, Red Hat, VMware and SUSE as supported infrastructure software, and publishes validated designs for Red Hat, Nutanix and Canonical Ubuntu.',
+  specs:[['Named platforms','Nutanix · Red Hat · VMware · SUSE'],['Validated designs','Red Hat Edge · Nutanix NKP · Canonical Ubuntu']],
+  links:[['Cisco Unified Edge for Red Hat Edge, design guide','https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/UCS_CVDs/cisco_ucs_edge_red_hat_design.html'],['Unified Edge and Nutanix NKP, design guide','https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/UCS_CVDs/cisco_unified_edge_nutanix_nkp_ubuntu_design.html'],['Unified Edge and Canonical Ubuntu, design guide','https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/UCS_CVDs/Cisco_Unified_Edge_and_Canonical_Ubuntu_for_Edge_Deployments_Design.html']],src:'faq'},
+ sw_orch:{n:'Virtual machines, containers, bare metal',l:['sw'],
+  pitch:'Legacy applications in virtual machines and new cloud-native services run side by side, so a site modernises at its own pace.',
+  tech:'Supported workload types are virtualised, containerised, cloud-native, bare metal and AI inference. The Red Hat validated design covers single-node OpenShift and a three-node compact cluster; the Ubuntu design covers LXD, MicroCloud and Kubernetes.',
+  specs:[['Workloads','VMs · containers · bare metal · AI inference'],['OpenShift','Single node, or compact cluster'],['Ubuntu','LXD · MicroCloud · Kubernetes']],
+  links:[['OpenShift single-node cluster, deployment guide','https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/UCS_CVDs/edge_openshift_single.html'],['Ubuntu LXD, MicroCloud and Kubernetes, deployment guide','https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/UCS_CVDs/cisco-unified-edge-kubernetes-microcloud-ubuntu-ldx.html']],src:'faq'},
+ sw_ai:{n:'AI inference runtime',l:['sw'],
+  pitch:'Decisions happen where the data is created, in milliseconds, even if the WAN link is down. Raw video and patient data never have to leave the building.',
+  tech:'CPU-native inference uses Intel AMX with the OpenVINO toolkit. GPU inference uses NVIDIA cards in either node type. The Cisco Compatible AI Solutions designation marks third-party AI software tested on this infrastructure.',
+  specs:[['On CPU','Intel AMX + OpenVINO'],['On GPU','NVIDIA L4, L40S, RTX PRO Blackwell SE'],['Ecosystem','Cisco Compatible AI Solutions']],src:'faq'},
+ sw_apps:{n:'Edge applications',l:['sw'],
+  pitch:'The point of the platform: named partner applications that turn local data into action, such as crowd analytics, clinical monitoring and factory automation.',
+  tech:'Cisco highlights WaitTime (video analytics for venues), Sickbay (clinical insights) and Rockwell Automation (factory automation with AI modelling) as solutions on Unified Edge.',
+  specs:[['Venues','WaitTime video analytics'],['Healthcare','Sickbay clinical insights'],['Industrial','Rockwell factory automation']],src:'home'}
+};
+
+var USECASES=[
+ {id:'retail',n:'Retail store',s:'Analytics across thousands of stores',
+  d:'Each store runs its own point-of-sale back end, inventory and video analytics, and keeps trading if the WAN drops. Head office manages every store from one console.',
+  runs:['In-store analytics on camera feeds','Product placement, promotions and inventory','Personalised customer experiences','Point-of-sale and store applications'],
+  devices:['Cameras','POS tills','Shelf sensors','Digital signage','Wi-Fi access points'],
+  cfg:['c130s','c130s','c130s','r8255','empty'],
+  why:'Three compute nodes form a resilient cluster. The router node powers cameras and access points over PoE and connects the store by SD-WAN. One slot stays free for growth.'},
+ {id:'mfg',n:'Manufacturing',s:'Machine monitoring and quality',
+  d:'Models watch the line in real time and flag energy spikes, unusual vibration and temperature deviations before they stop production.',
+  runs:['Real-time machine monitoring and control','Predictive maintenance','Vision-based quality assurance','Factory automation with AI modelling (Rockwell)'],
+  devices:['PLCs','Vibration sensors','Vision cameras','Robots','Energy meters'],
+  cfg:['c150','cov','c130io','c130s','r8255'],
+  why:'A GPU node runs vision inspection models. Two 1RU nodes host control and historian workloads, one with a PCIe card for a plant network. The router node segments the OT network.'},
+ {id:'health',n:'Healthcare',s:'Real-time patient monitoring',
+  d:'Bedside data is analysed on site to detect life-threatening events early. Patient data stays local and the system keeps working through network interruptions.',
+  runs:['Real-time patient monitoring','Clinical insights (Sickbay)','Telemedicine','Real-time medical analytics'],
+  devices:['Bedside monitors','Infusion pumps','Imaging','Nurse stations','Telehealth carts'],
+  cfg:['c130s','c130s','c130s','c130s','c130io'],
+  why:'Five compute nodes give the most capacity and tolerance to a node failure for always-on clinical workloads, with up to 600 TB of local NVMe for waveform data.'},
+ {id:'fin',n:'Financial services',s:'Branch analytics and fraud detection',
+  d:'Branches run analytics and fraud checks locally with consistent security policy, and offer a better in-branch experience.',
+  runs:['Fraud detection','Bank analytics','Branch office experience','Security and compliance'],
+  devices:['ATMs','Teller stations','Security cameras','Kiosks','IP phones'],
+  cfg:['c130s','c130s','empty','r8255','r8255'],
+  why:'Two compute nodes run branch applications. Two router nodes give redundant SD-WAN paths and PoE for phones and cameras, replacing separate branch routers and switches.'},
+ {id:'venue',n:'Venues & video analytics',s:'Live video into operations',
+  d:'Many camera streams are analysed live to measure queues and crowd flow and to guide staff and visitors, with no round trip to a cloud region.',
+  runs:['Queue and crowd analytics (WaitTime)','Real-time operational insights','Safety monitoring','Digital signage updates'],
+  devices:['Concourse cameras','Entry gates','Signage','Concession POS','Staff devices'],
+  cfg:['c150','cov','c130s','c150','cov'],
+  why:'Two GPU nodes with full-size NVIDIA cards handle dense video inference. A third node runs the application tier and storage.'}
+];
+
+var TYPES={
+ empty:{n:'Empty'},
+ c130s:{n:'XE130c · Storage-Optimized',cores:32,ram:768,tb:120,gpu:1},
+ c130io:{n:'XE130c · IO-Optimized',cores:32,ram:768,tb:90,gpu:1},
+ c150:{n:'XE150c · GPU node (2 slots)',cores:32,ram:1024,tb:120,gpu:1},
+ r8255:{n:'8255 Secure Router'},
+ cov:{n:'(used by the XE150c below)'}
+};
+
+/* ───────────────────────── renderer & scene ───────────────────────── */
+var canvas=$('#gl');
+var renderer;
+try{renderer=new T.WebGLRenderer({canvas:canvas,antialias:true,alpha:true,powerPreference:'high-performance'});}
+catch(e){$('#panel').innerHTML='<h2>WebGL is not available</h2><p>This demo needs a browser with WebGL enabled.</p>';$('#intro').hidden=true;return;}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.outputEncoding=T.sRGBEncoding;
+renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+renderer.setClearColor(0x000000,0);
+
+var scene=new T.Scene();
+scene.fog=new T.Fog(0x070b12,26,60);
+var camera=new T.PerspectiveCamera(36,1,.1,200);
+
+(function env(){
+  var pm=new T.PMREMGenerator(renderer),es=new T.Scene();
+  es.background=new T.Color(0x070d18);
+  [[0,9,0,14,.2,14,0xffffff,1.5],[-10,3,4,.2,7,12,0x58c8ff,2],[10,3,-3,.2,7,12,0xffb070,1.6],[0,3,11,12,6,.2,0x8f9cff,1.4],[0,3,-11,12,6,.2,0x35c8f0,1]].forEach(function(p){
+    var m=new T.Mesh(new T.BoxGeometry(p[3],p[4],p[5]),new T.MeshBasicMaterial({color:new T.Color(p[6]).multiplyScalar(p[7])}));
+    m.position.set(p[0],p[1],p[2]);es.add(m);});
+  scene.environment=pm.fromScene(es,.03).texture;pm.dispose();
+})();
+
+scene.add(new T.HemisphereLight(0x9fc4ff,0x0a1020,.38));
+var sun=new T.DirectionalLight(0xffffff,1.25);sun.position.set(7,13,9);sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);var sc=sun.shadow.camera;sc.left=-13;sc.right=13;sc.top=13;sc.bottom=-13;sc.near=1;sc.far=40;sun.shadow.bias=-.0006;sun.shadow.radius=3;
+scene.add(sun);
+var rim=new T.PointLight(0x35c8f0,1.1,30);rim.position.set(-8,4,-7);scene.add(rim);
+
+// ground
+(function(){
+  var c=document.createElement('canvas');c.width=c.height=512;var g=c.getContext('2d');
+  var gr=g.createRadialGradient(256,256,20,256,256,256);gr.addColorStop(0,'#16263f');gr.addColorStop(.45,'#0c1626');gr.addColorStop(1,'#070b12');
+  g.fillStyle=gr;g.fillRect(0,0,512,512);
+  var m=new T.Mesh(new T.CircleGeometry(40,64),new T.MeshStandardMaterial({map:new T.CanvasTexture(c),roughness:.9,metalness:.1,envMapIntensity:.05,color:0x56688a}));
+  m.rotation.x=-Math.PI/2;m.position.y=-.02;m.receiveShadow=true;scene.add(m);
+  var grid=new T.GridHelper(60,60,0x244469,0x13233a);grid.material.transparent=true;grid.material.opacity=.45;grid.position.y=-.01;scene.add(grid);
+  var plat=new T.Mesh(new T.CylinderGeometry(5.2,5.4,.06,64),new T.MeshStandardMaterial({color:0x0d1828,metalness:.6,roughness:.5,envMapIntensity:.25}));
+  plat.position.y=-.03;plat.receiveShadow=true;scene.add(plat);
+  var ring=new T.Mesh(new T.TorusGeometry(5.3,.02,8,96),new T.MeshBasicMaterial({color:0x35c8f0}));ring.rotation.x=Math.PI/2;ring.position.y=.01;scene.add(ring);
+})();
+
+/* ───────────────────────── material registry ───────────────────────── */
+var MATS=[],MBY={};
+function layersOf(part){return (PARTS[part]&&PARTS[part].l)||['phys']}
+function reg(m,part,only){m.userData={part:part,layers:layersOf(part),base:m.opacity,only:!!only,aT:m.transparent,em:m.emissive?m.emissive.clone():null,emI:m.emissiveIntensity||0};if(only){m.opacity=0;m.visible=false}MATS.push(m);return m}
+function mat(key,part,color,o){
+  if(MBY[key])return MBY[key];o=o||{};
+  var m=new T.MeshStandardMaterial({color:color,metalness:o.m==null?.75:o.m,roughness:o.r==null?.42:o.r,emissive:o.e||0x000000,emissiveIntensity:o.ei==null?1:o.ei,envMapIntensity:o.env==null?1:o.env});
+  if(o.op!=null){m.opacity=o.op;m.transparent=true}
+  if(o.map)m.map=o.map;
+  return MBY[key]=reg(m,part,o.only);
+}
+var root=new T.Group();scene.add(root);
+function box(w,h,d,m,x,y,z,parent,part){
+  var b=new T.Mesh(new T.BoxGeometry(w,h,d),m);b.position.set(x,y,z);b.castShadow=true;b.receiveShadow=true;
+  b.userData.part=part||m.userData.part;(parent||root).add(b);return b;
+}
+function cyl(r,h,m,x,y,z,parent,part,rot){
+  var b=new T.Mesh(new T.CylinderGeometry(r,r,h,24),m);b.position.set(x,y,z);if(rot)b.rotation[rot]=Math.PI/2;b.castShadow=true;
+  b.userData.part=part||m.userData.part;(parent||root).add(b);return b;
+}
+function tex(draw,w,h){var c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);var t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;t.anisotropy=4;return t}
+function label(text,color,part,size){
+  var F='600 44px "Space Grotesk","Segoe UI",system-ui,sans-serif',mc=document.createElement('canvas').getContext('2d');mc.font=F;
+  var W2=Math.ceil(mc.measureText(text).width)+64,H2=96;
+  var t=tex(function(g,w,h){g.font=F;g.textAlign='center';g.textBaseline='middle';g.fillStyle='rgba(6,14,24,.86)';
+    var x=3,y=3,tw=w-6,hh=h-6,r=22;g.beginPath();g.moveTo(x+r,y);g.arcTo(x+tw,y,x+tw,y+hh,r);g.arcTo(x+tw,y+hh,x,y+hh,r);g.arcTo(x,y+hh,x,y,r);g.arcTo(x,y,x+tw,y,r);g.fill();
+    g.strokeStyle=color;g.lineWidth=3;g.stroke();g.fillStyle='#eef4fb';g.fillText(text,w/2,h/2+3);},W2,H2);
+  var m=new T.SpriteMaterial({map:t,transparent:true,depthWrite:false});
+  var s=new T.Sprite(m);size=size||.42;s.scale.set(size*W2/H2,size,1);if(part){reg(m,part);s.userData.part=part}return s;
+}
+
+/* explode registry: each entry moves an object from its base position through timed steps */
+var EX=[];
+function ex(o,steps,tag){EX.push({o:o,b:o.position.clone(),s:steps,tag:tag});return o}
+function sm(t,a,b){t=(t-a)/(b-a);t=t<0?0:t>1?1:t;return t*t*(3-2*t)}
+
+/* ───────────────────────── chassis ───────────────────────── */
+var W=4.4,H=1.3,D=4.6,FZ=D/2;
+var COLX=[-1.2,.77],NW=1.93,RU=.41,NH=.38,ND=2.9,NZ=FZ-ND/2;
+function rowY(i){return .03+RU/2+RU*i}
+var SLOTPOS=[[0,0],[0,1],[0,2],[1,0],[1,1]]; // [column,row] for slots 1..5
+
+var mShell=mat('shell','chassis',0x2a3442,{m:.85,r:.38});
+var mShellD=mat('shellD','chassis',0x161d28,{m:.8,r:.5});
+box(W,.03,D,mShell,0,.015,0);
+box(.03,H,D,mShell,-W/2+.015,H/2,0);box(.03,H,D,mShell,W/2-.015,H/2,0);
+box(.12,H,.05,mShell,-W/2-.06,H/2,FZ-.02);box(.12,H,.05,mShell,W/2+.06,H/2,FZ-.02); // rack ears
+var lid=box(W,.03,D,mShell,0,H-.015,0);ex(lid,[[0,2.3,0,.08,.6]]);
+// internal dividers
+box(.02,H-.06,ND,mShellD,-.215,H/2,NZ);box(.02,H-.06,2.6,mShellD,1.755,H/2,FZ-1.3);
+
+// midplane
+var mMid=mat('mid','midplane',0x0f3d33,{m:.3,r:.6,e:0x04261f});
+var mGold=mat('gold','midplane',0xd9a441,{m:1,r:.25});
+box(4.3,1.2,.04,mMid,0,.65,-.68);
+SLOTPOS.forEach(function(p){[-.5,.5].forEach(function(dx){box(.3,.12,.05,mGold,COLX[p[0]]+dx,rowY(p[1]),-.65)})});
+[-.49,.49].forEach(function(dx){box(.34,.12,.05,mGold,COLX[1]+dx,rowY(2),-.65)});
+
+// fans
+var mFan=mat('fan','fans',0x222b38,{m:.7,r:.5}),mBlade=mat('blade','fans',0x9aa9bc,{m:.9,r:.3}),mFanL=mat('fanL','fans',0xf5b556,{m:.3,r:.4,e:0xf5b556,ei:.7});
+var rotors=[];
+for(var i=0;i<5;i++){(function(i){
+  var g=new T.Group();g.position.set(-1.68+i*.84,.64,-1.85);root.add(g);
+  box(.8,1.16,.9,mFan,0,0,0,g);
+  box(.5,.04,.06,mFanL,0,.6,.3,g); // latch
+  [.2,-.2].forEach(function(dy){ // dual rotor look on rear face
+    cyl(.17,.02,mShellD,0,dy+.0,-.455,g,'fans','x');
+    var r=new T.Group();r.position.set(0,dy,-.47);g.add(r);
+    for(var k=0;k<5;k++){var b=box(.15,.045,.01,mBlade,0,0,0,r);b.castShadow=false;b.rotation.z=k*Math.PI*2/5;b.position.set(Math.cos(b.rotation.z)*.085,Math.sin(b.rotation.z)*.085,0)}
+    rotors.push(r);
+  });
+  ex(g,[[0,1.5,0,.3,.78],[0,0,-.5,.3,.78]]);
+})(i)}
+
+// power supplies
+var mPsu=mat('psu','psu',0x303a49,{m:.8,r:.4}),mPsuF=mat('psuF','psu',0x11161e,{m:.6,r:.6}),mPsuL=mat('psuL','psu',0xf5b556,{m:.3,r:.4,e:0xf5b556,ei:.9});
+[0,1].forEach(function(i){
+  var g=new T.Group();g.position.set(1.965,.03+.31+i*.62,FZ-1.3);root.add(g);
+  box(.38,.58,2.6,mPsu,0,0,0,g);box(.34,.4,.02,mPsuF,0,.05,1.305,g);
+  box(.3,.05,.08,mPsuL,0,-.22,1.33,g);cyl(.015,.03,mat('led','chassis',0x3dff9a,{m:.1,r:.3,e:0x3dff9a,ei:1.4}),.12,.24,1.31,g,'psu','x');
+  ex(g,[[0,0,3.3,0,.5],[1.1,0,0,.5,1]]);
+});
+var mLed=MBY.led;
+
+// management controllers (two, side by side in the top-right bay)
+var mCmc=mat('cmc','cmc',0x26324a,{m:.8,r:.4}),mCmcF=mat('cmcF','cmc',0x0e1420,{m:.6,r:.55}),mPort=mat('cmcPort','cmc',0x8aa2ff,{m:.4,r:.4,e:0x4a5fd0,ei:.8});
+var cmcs=[];
+[-.49,.49].forEach(function(dx){
+  var g=new T.Group();g.position.set(COLX[1]+dx,rowY(2),NZ);root.add(g);
+  box(.94,NH,ND,mCmc,0,0,0,g);box(.9,NH-.06,.02,mCmcF,0,0,ND/2+.005,g);
+  [-.3,-.14].forEach(function(x){box(.12,.12,.04,mPort,x,.02,ND/2+.02,g)});   // 2 × SFP+
+  box(.1,.1,.04,mat('cmcMgmt','cmc',0xcfd6e2,{m:.6,r:.4}),.06,.02,ND/2+.02,g); // RJ-45 mgmt
+  [.24,.34].forEach(function(x){box(.06,.03,.03,mShellD,x,.02,ND/2+.02,g,'cmc')}); // USB-C
+  cyl(.014,.03,mLed,-.4,-.12,ND/2+.01,g,'cmc','x');
+  ex(g,[[0,0,3.3,0,.5],[0,1.9,0,.5,1]]);cmcs.push(g);
+});
+
+// bezel
+var bezelT=tex(function(g,w,h){g.fillStyle='#10151d';g.fillRect(0,0,w,h);g.fillStyle='#04070b';for(var y=0;y<h;y+=16)for(var x=(y/16%2)*8;x<w;x+=16){g.beginPath();g.arc(x+4,y+8,4.4,0,7);g.fill()}},256,256);
+bezelT.wrapS=bezelT.wrapT=T.RepeatWrapping;bezelT.repeat.set(9,3);
+var mBez=mat('bezel','bezel',0xaab4c2,{m:.7,r:.5,map:bezelT});
+var bezel=new T.Group();bezel.position.set(0,H/2,FZ+.27);root.add(bezel);
+box(W+.1,H+.04,.5,mBez,0,0,0,bezel);
+box(W-.6,.03,.02,mat('bezL','bezel',0x35c8f0,{m:.2,r:.4,e:0x35c8f0,ei:1.2}),0,-.52,.26,bezel);
+cyl(.07,.06,mat('lock','bezel',0xd9a441,{m:1,r:.25}),1.9,0,.26,bezel,'bezel','x');
+box(.02,.07,.02,mShellD,1.9,0,.3,bezel,'bezel');
+ex(bezel,[[0,0,5.6,0,.5]]);
+var bezelOn=false,bezelK=0;
+
+/* ───────────────────────── nodes ───────────────────────── */
+var mNode=mat('node','node130',0x34404f,{m:.85,r:.36}),mNodeF=mat('nodeF','node130',0x0d1219,{m:.6,r:.55});
+var mNode5=mat('node5','node150',0x2c3d55,{m:.85,r:.36}),mNode5F=mat('node5F','node150',0x0d1219,{m:.6,r:.55});
+var mPcb=mat('pcb','node130',0x10382c,{m:.3,r:.65}),mPcb5=mat('pcb5','node150',0x10382c,{m:.3,r:.65});
+var mCpu=mat('cpu','cpu',0xb9c6d6,{m:.95,r:.22}),mCpuB=mat('cpuB','cpu',0x4fd1ff,{m:.5,r:.3,e:0x1c7fb0,ei:.7});
+var mDimm=mat('dimm','dimm',0x1b2a3d,{m:.5,r:.45}),mDimmT=mat('dimmT','dimm',0x4fd1ff,{m:.4,r:.4,e:0x2a8fc0,ei:.5});
+var mE3=mat('e3s','e3s',0x46566b,{m:.85,r:.3}),mE3L=mat('e3sL','e3s',0x4fd1ff,{m:.2,r:.4,e:0x4fd1ff,ei:1.3});
+var mM2=mat('m2','m2',0x1d6b52,{m:.4,r:.5}),mM2c=mat('m2c','m2',0x11151b,{m:.5,r:.4});
+var mGpu=mat('gpu','gpu',0x1a1f27,{m:.7,r:.35}),mGpuS=mat('gpuS','gpu',0x76d100,{m:.3,r:.4,e:0x4f9a00,ei:.9});
+var mPci=mat('pcie','pcie',0x8a6d2a,{m:.8,r:.35}),mPciB=mat('pcieB','pcie',0xc9d2de,{m:.9,r:.3});
+var mTpm=mat('tpm','tpm',0xff7285,{m:.6,r:.3,e:0xb02a40,ei:.9});
+var mHost=mat('host','hostports',0xc9d2de,{m:.7,r:.35}),mLatch=mat('latch','node130',0x35c8f0,{m:.4,r:.4,e:0x1a7fa0,ei:.6}),mLatch5=mat('latch5','node150',0x35c8f0,{m:.4,r:.4,e:0x1a7fa0,ei:.6});
+var mRt=mat('router','router',0x3a3350,{m:.85,r:.36}),mRtF=mat('routerF','router',0x100e18,{m:.6,r:.55}),mRtH=mat('routerH','router',0xb9c6d6,{m:.95,r:.25}),mRtP=mat('routerP','router',0x1f2b55,{m:.3,r:.6}),mLatchR=mat('latchR','router',0x8aa2ff,{m:.4,r:.4,e:0x4a5fd0,ei:.6});
+var mPoe=mat('poe','poe',0xf5d76e,{m:.5,r:.4,e:0x8a6a10,ei:.6}),mPoeU=mat('poeU','poe',0x6fe0c0,{m:.5,r:.4,e:0x1a8a70,ei:.7}),mWan=mat('wan','router',0x8aa2ff,{m:.4,r:.4,e:0x4a5fd0,ei:.9});
+var mBlank=mat('blank','blank',0x1a212c,{m:.7,r:.6});
+
+function internals(g,h,pcb,io,tag){
+  var y0=-h/2+.02;
+  box(NW-.1,.015,ND-.75,pcb,0,y0+.008,-.32,g);
+  // CPU with finned heatsink
+  box(.56,.04,.56,mCpuB,0,y0+.035,-.15,g);
+  for(var k=0;k<9;k++)box(.52,.2,.022,mCpu,0,y0+.155,-.39+k*.06,g);
+  // 8 DIMMs, 4 each side
+  for(k=0;k<4;k++){[-1,1].forEach(function(s){var x=s*(.42+k*.075);box(.02,.17,.8,mDimm,x,y0+.1,-.15,g);box(.024,.02,.8,mDimmT,x,y0+.19,-.15,g)})}
+  // M.2 boot module
+  box(.34,.02,.46,mM2,.72,y0+.03,.5,g);box(.09,.015,.36,mM2c,.66,y0+.05,.5,g);box(.09,.015,.36,mM2c,.79,y0+.05,.5,g);
+  // TPM / trust anchor
+  box(.1,.03,.1,mTpm,-.78,y0+.03,.5,g);
+  // rear midplane connectors
+  [-.5,.5].forEach(function(dx){box(.28,.1,.06,mGold,dx,0,-ND/2-.02,g)});
+  if(io)box(.5,.02,.95,mPci,.66,y0+.14,-.85,g),box(.02,.2,.12,mPciB,.66,y0+.12,-.36,g);
+}
+function face(g,h,fm,latch,io){
+  box(NW-.04,h-.04,.02,fm,0,0,ND/2+.005,g);
+  var n=io?3:4;
+  for(var k=0;k<n;k++){box(.21,.3,.55,mE3,-.8+k*.235,-h/2+.2,ND/2-.24,g);box(.03,.03,.02,mE3L,-.8+k*.235+.06,-h/2+.31,ND/2+.04,g)}
+  if(io)box(.21,.3,.03,mPciB,-.8+3*.235,-h/2+.2,ND/2+.02,g,'pcie');
+  [.3,.44].forEach(function(x){box(.1,.09,.04,mHost,x,-h/2+.16,ND/2+.02,g)});
+  box(.07,.03,.03,mHost,.3,-h/2+.3,ND/2+.02,g);box(.12,.04,.03,mHost,.44,-h/2+.3,ND/2+.02,g);
+  box(.16,h-.1,.07,latch,.83,0,ND/2+.04,g);
+  cyl(.014,.03,mLed,.62,-h/2+.3,ND/2+.01,g,fm.userData.part,'x');
+}
+function buildNode(type,tag){
+  var g=new T.Group(),h,l;
+  if(type==='c130s'||type==='c130io'){
+    h=NH;var io=type==='c130io';
+    box(NW,.02,ND,mNode,0,-h/2+.01,0,g);box(.02,h,ND,mNode,-NW/2+.01,0,0,g);box(.02,h,ND,mNode,NW/2-.01,0,0,g);
+    internals(g,h,mPcb,io,tag);face(g,h,mNodeF,mLatch,io);
+    // 75 W half-height GPU
+    box(.62,.14,1.25,mGpu,-.6,-h/2+.11,-.8,g);box(.62,.02,.1,mGpuS,-.6,-h/2+.19,-.3,g);
+    l=box(NW,.02,ND,mNode,0,h/2-.01,0,g);ex(l,[[0,.6,0,.55,1]],tag);
+  }else if(type==='c150'){
+    h=NH+RU;g.position.y=RU/2;
+    box(NW,.02,ND,mNode5,0,-h/2+.01,0,g);box(.02,h,ND,mNode5,-NW/2+.01,0,0,g);box(.02,h,ND,mNode5,NW/2-.01,0,0,g);
+    internals(g,h,mPcb5,false,tag);
+    box(NW-.04,h-.04,.02,mNode5F,0,0,ND/2+.005,g);
+    for(var k=0;k<4;k++){box(.21,.3,.55,mE3,-.8+k*.235,-h/2+.2,ND/2-.24,g);box(.03,.03,.02,mE3L,-.8+k*.235+.06,-h/2+.31,ND/2+.04,g)}
+    [.3,.44].forEach(function(x){box(.1,.09,.04,mHost,x,-h/2+.16,ND/2+.02,g)});
+    box(.16,h-.1,.07,mLatch5,.83,0,ND/2+.04,g);
+    box(1.2,.26,.02,mat('gpuVent','gpu',0x0a0d12,{m:.5,r:.7}),-.3,.2,ND/2+.02,g);
+    // mezzanine tray with full-length GPU
+    var mz=new T.Group();mz.position.set(0,.02,0);g.add(mz);
+    box(NW-.1,.015,ND-.5,mNode5,0,0,-.2,mz);
+    box(1.15,.3,2.3,mGpu,-.3,.17,-.15,mz);box(1.15,.03,.14,mGpuS,-.3,.33,.7,mz);box(.5,.02,.5,mGpuS,-.3,.325,-.4,mz);
+    ex(mz,[[0,.75,0,.55,1]],tag);
+    l=box(NW,.02,ND,mNode5,0,h/2-.01,0,g);ex(l,[[0,1.5,0,.55,1]],tag);
+  }else if(type==='r8255'){
+    h=NH;
+    box(NW,.02,ND,mRt,0,-h/2+.01,0,g);box(.02,h,ND,mRt,-NW/2+.01,0,0,g);box(.02,h,ND,mRt,NW/2-.01,0,0,g);
+    box(NW-.1,.015,ND-.4,mRtP,0,-h/2+.03,-.1,g);
+    for(k=0;k<7;k++)box(.6,.16,.022,mRtH,-.3,-h/2+.13,-.5+k*.07,g);
+    box(.7,.1,1.1,mat('poeBoard','poe',0x4a3d12,{m:.5,r:.5}),.5,-h/2+.09,-.5,g);
+    box(.1,.03,.1,mTpm,-.78,-h/2+.05,.5,g);
+    [-.5,.5].forEach(function(dx){box(.28,.1,.06,mGold,dx,0,-ND/2-.02,g)});
+    box(NW-.04,h-.04,.02,mRtF,0,0,ND/2+.005,g);
+    for(k=0;k<14;k++)box(.105,.1,.04,mPoe,-.82+(k%7)*.125,(k<7?.075:-.075),ND/2+.02,g);
+    for(k=0;k<4;k++)box(.105,.1,.04,mPoeU,.12+(k%2)*.125,(k<2?.075:-.075),ND/2+.02,g);
+    [.44,.58].forEach(function(x){box(.11,.12,.04,mWan,x,0,ND/2+.02,g)});
+    box(.16,h-.1,.07,mLatchR,.83,0,ND/2+.04,g);
+    l=box(NW,.02,ND,mRt,0,h/2-.01,0,g);ex(l,[[0,.6,0,.55,1]],tag);
+  }else{
+    box(NW-.04,NH-.04,.03,mBlank,0,0,ND/2-.01,g);
+  }
+  return g;
+}
+
+var slotG=[],slots=['c130s','c130io','r8255','c150','cov'],slotAnim=[0,0,0,0,0];
+SLOTPOS.forEach(function(p,i){
+  var g=new T.Group();g.position.set(COLX[p[0]],rowY(p[1]),NZ);root.add(g);
+  ex(g,[[0,0,3.3,0,.5],[0,p[1]*.95,0,.5,1]]);slotG.push(g);
+});
+var pickables=[];
+function refreshPick(){pickables.length=0;scene.traverse(function(o){if((o.isMesh||o.isSprite)&&o.userData.part)pickables.push(o)})}
+function setSlot(i,animate){
+  var g=slotG[i];EX=EX.filter(function(e){return e.tag!==i});
+  while(g.children.length){var c=g.children[0];g.remove(c);c.traverse(function(o){if(o.geometry)o.geometry.dispose()})}
+  if(slots[i]!=='cov'){var n=buildNode(slots[i],i);n.userData.by=n.position.y;g.add(n);if(animate&&slots[i]!=='empty'){slotAnim[i]=1;n.position.z=3.2}}
+}
+function applyConfig(cfg,animate){
+  var changed=false;
+  for(var i=0;i<5;i++)if(cfg[i]!==slots[i]||!slotG[i].children.length&&cfg[i]!=='cov'){slots[i]=cfg[i];setSlot(i,animate);changed=true}
+  refreshPick();if(changed&&animate)setTimeout(sfx.thunk,260);
+}
+
+/* ───────────────────────── holograms: cloud, shield, software stack ───────────────────────── */
+var cloud=new T.Group();cloud.position.set(0,6.3,-.6);root.add(cloud);
+var mCloud=reg(new T.MeshBasicMaterial({color:0x5eead4,transparent:true,opacity:.16,side:T.DoubleSide,depthWrite:false}),'intersight');
+var mCloudR=reg(new T.MeshBasicMaterial({color:0x5eead4,transparent:true,opacity:.95}),'intersight');
+var disc=new T.Mesh(new T.CylinderGeometry(1.7,1.7,.05,48),mCloud);disc.userData.part='intersight';cloud.add(disc);
+var cring=new T.Mesh(new T.TorusGeometry(1.75,.025,8,80),mCloudR);cring.rotation.x=Math.PI/2;cring.userData.part='intersight';cloud.add(cring);
+var cring2=new T.Mesh(new T.TorusGeometry(1.25,.012,8,64),mCloudR);cring2.rotation.x=Math.PI/2;cloud.add(cring2);
+var cl=label('Cisco Intersight · SaaS','#5eead4','intersight',.5);cl.position.set(0,.6,0);cloud.add(cl);
+var mObs=reg(new T.MeshStandardMaterial({color:0x5eead4,emissive:0x1f9a8a,metalness:.3,roughness:.3}),'observ');
+[['Splunk',-3.1],['ThousandEyes',3.1]].forEach(function(p){
+  var s=new T.Mesh(new T.IcosahedronGeometry(.28,1),mObs);s.position.set(p[1],-.2,0);s.userData.part='observ';cloud.add(s);
+  var l=label(p[0],'#5eead4','observ',.38);l.position.set(p[1],.35,0);cloud.add(l);
+  var ln=new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(p[1],-.2,0),new T.Vector3(p[1]>0?1.75:-1.75,0,0)]),reg(new T.LineBasicMaterial({color:0x5eead4,transparent:true,opacity:.5}),'observ'));cloud.add(ln);
+});
+
+var mShield=reg(new T.MeshBasicMaterial({color:0xff7285,transparent:true,opacity:.07,depthWrite:false,side:T.DoubleSide}),'zerotrust',true);
+var shield=new T.Mesh(new T.BoxGeometry(W+1.2,H+1,D+2),mShield);shield.position.set(0,H/2+.1,.3);shield.userData.part='zerotrust';root.add(shield);
+var mShieldE=reg(new T.LineBasicMaterial({color:0xff7285,transparent:true,opacity:.75}),'zerotrust',true);
+var se=new T.LineSegments(new T.EdgesGeometry(shield.geometry),mShieldE);se.position.copy(shield.position);root.add(se);
+var sl=label('Zero-trust perimeter','#ff7285','zerotrust',.45);sl.material.userData.only=true;sl.material.opacity=0;sl.position.set(0,H+1.1,.3);root.add(sl);
+
+[['sw_os','Infrastructure software · Nutanix · Red Hat · VMware · SUSE · Ubuntu'],['sw_orch','Virtual machines · containers · Kubernetes · bare metal'],['sw_ai','AI inference · Intel AMX + OpenVINO · NVIDIA GPUs'],['sw_apps','Edge applications · vision · monitoring · analytics']].forEach(function(p,i){
+  var m=reg(new T.MeshStandardMaterial({color:0xc8a6ff,transparent:true,opacity:.32,metalness:.2,roughness:.25,emissive:0x5a3aa0,emissiveIntensity:.5,depthWrite:false}),p[0],true);
+  var s=new T.Mesh(new T.BoxGeometry(4.6-i*.25,.1,3.4-i*.25),m);s.position.set(0,2.1+i*.72,0);s.userData.part=p[0];root.add(s);
+  var e=new T.LineSegments(new T.EdgesGeometry(s.geometry),reg(new T.LineBasicMaterial({color:0xc8a6ff,transparent:true,opacity:.9}),p[0],true));e.position.copy(s.position);root.add(e);
+  var l=label(p[1],'#c8a6ff',p[0],.36);l.material.userData.only=true;l.material.opacity=0;l.position.set(0,2.1+i*.72+.3,1.75-i*.12);root.add(l);
+});
+
+/* use-case device ring */
+var devG=new T.Group();root.add(devG);var devPts=[];
+function setDevices(list){
+  while(devG.children.length){var c=devG.children[0];devG.remove(c);if(c.geometry)c.geometry.dispose();if(c.material){if(c.material.map)c.material.map.dispose();c.material.dispose()}}
+  devPts=[];if(!list)return;
+  list.forEach(function(name,i){
+    var a=(-62+i*(124/(list.length-1)))*Math.PI/180,r=8.6,p=new T.Vector3(Math.sin(a)*r,.5,Math.cos(a)*r+1);
+    var o=new T.Mesh(new T.OctahedronGeometry(.26,0),new T.MeshStandardMaterial({color:0xf5b556,emissive:0xa06a10,metalness:.4,roughness:.3}));o.position.copy(p);devG.add(o);
+    var l=label(name,'#f5b556',null,.42);l.position.copy(p).add(new T.Vector3(0,.62,0));devG.add(l);
+    var ln=new T.Line(new T.BufferGeometry().setFromPoints([p,new T.Vector3(p.x*.2,.3,FZ+.2)]),new T.LineBasicMaterial({color:0xf5b556,transparent:true,opacity:.28}));devG.add(ln);
+    devPts.push(p);
+  });
+}
+
+/* data-flow particles */
+var NP=160,pPos=new Float32Array(NP*3),pCol=new Float32Array(NP*3);
+var pGeo=new T.BufferGeometry();pGeo.setAttribute('position',new T.BufferAttribute(pPos,3));pGeo.setAttribute('color',new T.BufferAttribute(pCol,3));
+var dot=tex(function(g,w){var r=g.createRadialGradient(w/2,w/2,0,w/2,w/2,w/2);r.addColorStop(0,'#fff');r.addColorStop(.3,'rgba(255,255,255,.8)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,w,w)},64,64);
+var pMat=new T.PointsMaterial({size:.2,map:dot,vertexColors:true,transparent:true,depthWrite:false,blending:T.AdditiveBlending});
+var points=new T.Points(pGeo,pMat);points.frustumCulled=false;root.add(points);
+var flowOn=true,cFab=new T.Color(cv('--l-fabric')),cMg=new T.Color(cv('--l-mgmt')),cDev=new T.Color(cv('--l-power'));
+var tmpA=new T.Vector3(),tmpB=new T.Vector3();
+function along(pts,f,out){
+  var tot=0,L=[],i;for(i=1;i<pts.length;i++){L[i]=pts[i].distanceTo(pts[i-1]);tot+=L[i]}
+  var d=f*tot;for(i=1;i<pts.length;i++){if(d<=L[i]||i===pts.length-1){return out.copy(pts[i-1]).lerp(pts[i],L[i]?Math.min(1,d/L[i]):0)}d-=L[i]}
+}
+function updateFlow(time){
+  var n=0,paths=[];
+  if(flowOn){
+    for(var s=0;s<5;s++){
+      if(slots[s]==='empty'||slots[s]==='cov')continue;
+      var sp=slotG[s].position,bx=COLX[SLOTPOS[s][0]],by=rowY(SLOTPOS[s][1]);
+      cmcs.forEach(function(c,ci){
+        var cx=COLX[1]+(ci?.49:-.49),dx=ci?.5:-.5;
+        paths.push({c:cFab,sp:.16,n:5,p:[new T.Vector3(sp.x+dx,sp.y,sp.z-ND/2),new T.Vector3(bx+dx,by,-.62),new T.Vector3(cx,rowY(2),-.62),new T.Vector3(c.position.x,c.position.y,c.position.z-ND/2),new T.Vector3(c.position.x,c.position.y,c.position.z+ND/2)]});
+      });
+    }
+    cmcs.forEach(function(c,ci){
+      paths.push({c:cMg,sp:.1,n:9,p:[new T.Vector3(c.position.x-.22,c.position.y,c.position.z+ND/2+.05),new T.Vector3(c.position.x-.22,c.position.y+.2,c.position.z+ND/2+.9),new T.Vector3(ci?1.2:-1.2,cloud.position.y-.1,cloud.position.z+.6)]});
+    });
+    devPts.forEach(function(p){paths.push({c:cDev,sp:.12,n:6,p:[p,new T.Vector3(p.x*.2,.3,FZ+.2+ (slotG[0].position.z-NZ))]})});
+  }
+  paths.forEach(function(P,k){
+    for(var j=0;j<P.n&&n<NP;j++,n++){
+      along(P.p,(time*P.sp+j/P.n+k*.137)%1,tmpA);
+      pPos[n*3]=tmpA.x;pPos[n*3+1]=tmpA.y;pPos[n*3+2]=tmpA.z;pCol[n*3]=P.c.r;pCol[n*3+1]=P.c.g;pCol[n*3+2]=P.c.b;
+    }
+  });
+  pGeo.setDrawRange(0,n);pGeo.attributes.position.needsUpdate=true;pGeo.attributes.color.needsUpdate=true;
+}
+
+/* ───────────────────────── audio ───────────────────────── */
+var AU={ctx:null,music:false,fxOn:true};
+function initAudio(){
+  if(AU.ctx){if(AU.ctx.state==='suspended')AU.ctx.resume();return}
+  var C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+  var c=AU.ctx=new C();
+  var comp=c.createDynamicsCompressor();comp.connect(c.destination);
+  AU.master=c.createGain();AU.master.gain.value=.85;AU.master.connect(comp);
+  var len=c.sampleRate*3.2,buf=c.createBuffer(2,len,c.sampleRate);
+  for(var ch=0;ch<2;ch++){var d=buf.getChannelData(ch);for(var i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.8)}
+  AU.rev=c.createConvolver();AU.rev.buffer=buf;var rg=c.createGain();rg.gain.value=.45;AU.rev.connect(rg);rg.connect(AU.master);
+  AU.mus=c.createGain();AU.mus.gain.value=0;AU.mus.connect(AU.master);AU.mus.connect(AU.rev);
+  AU.fx=c.createGain();AU.fx.gain.value=.55;AU.fx.connect(AU.master);var fs=c.createGain();fs.gain.value=.35;AU.fx.connect(fs);fs.connect(AU.rev);
+  AU.lp=c.createBiquadFilter();AU.lp.type='lowpass';AU.lp.frequency.value=900;AU.lp.Q.value=.6;AU.lp.connect(AU.mus);
+  var lfo=c.createOscillator(),lg=c.createGain();lfo.frequency.value=.05;lg.gain.value=380;lfo.connect(lg);lg.connect(AU.lp.frequency);lfo.start();
+  setInterval(schedMusic,350);
+}
+function hz(m){return 440*Math.pow(2,(m-69)/12)}
+var CHORDS=[[57,60,64,71],[53,57,60,64],[48,55,59,64],[55,59,62,69]],BAR=8,bar=0,nextBar=0;
+function schedMusic(){
+  var c=AU.ctx;if(!c||!AU.music)return;
+  if(nextBar<c.currentTime)nextBar=c.currentTime+.1;
+  while(nextBar<c.currentTime+1.2){playBar(CHORDS[bar%4],nextBar);nextBar+=BAR;bar++}
+}
+function playBar(ch,t){
+  var c=AU.ctx;
+  ch.forEach(function(n){[-7,7].forEach(function(det){
+    var o=c.createOscillator(),g=c.createGain();o.type='sawtooth';o.frequency.value=hz(n);o.detune.value=det;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.04,t+3);g.gain.setValueAtTime(.04,t+BAR-1);g.gain.linearRampToValueAtTime(0,t+BAR+3);
+    o.connect(g);g.connect(AU.lp);o.start(t);o.stop(t+BAR+3.1);
+  })});
+  var b=c.createOscillator(),bg=c.createGain();b.type='sine';b.frequency.value=hz(ch[0]-24);
+  bg.gain.setValueAtTime(0,t);bg.gain.linearRampToValueAtTime(.16,t+1.5);bg.gain.linearRampToValueAtTime(0,t+BAR+1);b.connect(bg);bg.connect(AU.mus);b.start(t);b.stop(t+BAR+1.1);
+  for(var i=0;i<16;i++){
+    if(Math.random()<.42)continue;
+    var tt=t+i*BAR/16,o=c.createOscillator(),g=c.createGain();o.type='triangle';
+    o.frequency.value=hz(ch[(i*3+bar)%4]+(Math.random()<.3?24:12));
+    g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(.05,tt+.02);g.gain.exponentialRampToValueAtTime(.0005,tt+1.3);
+    o.connect(g);g.connect(AU.mus);o.start(tt);o.stop(tt+1.4);
+  }
+}
+function setMusic(on){
+  initAudio();if(!AU.ctx)return;AU.music=on;var t=AU.ctx.currentTime;
+  AU.mus.gain.cancelScheduledValues(t);AU.mus.gain.setTargetAtTime(on?.8:0,t,on?.8:.3);
+  if(on){nextBar=0;schedMusic()}
+  $('#bMusic').setAttribute('aria-pressed',on);
+}
+function tone(f,d,type,vol,f2,delay){
+  var c=AU.ctx;if(!c||!AU.fxOn)return;var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol||.2,t+.008);g.gain.exponentialRampToValueAtTime(.0004,t+d);
+  o.connect(g);g.connect(AU.fx);o.start(t);o.stop(t+d+.05);
+}
+function noise(d,f1,f2,vol){
+  var c=AU.ctx;if(!c||!AU.fxOn)return;var t=c.currentTime,n=c.sampleRate*d,b=c.createBuffer(1,n,c.sampleRate),a=b.getChannelData(0);
+  for(var i=0;i<n;i++)a[i]=Math.random()*2-1;
+  var s=c.createBufferSource();s.buffer=b;var f=c.createBiquadFilter();f.type='bandpass';f.Q.value=1.2;f.frequency.setValueAtTime(f1,t);f.frequency.exponentialRampToValueAtTime(f2,t+d);
+  var g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+d*.35);g.gain.linearRampToValueAtTime(0,t+d);
+  s.connect(f);f.connect(g);g.connect(AU.fx);s.start(t);
+}
+var sfx={
+  hover:function(){tone(1900,.05,'sine',.05)},
+  click:function(){tone(660,.09,'triangle',.16);tone(990,.14,'sine',.12,null,.06)},
+  layer:function(){[523,659,784,1047].forEach(function(f,i){tone(f,.35,'sine',.1,null,i*.07)})},
+  whoosh:function(){noise(.7,300,2600,.14)},
+  thunk:function(){tone(150,.22,'sine',.4,48);noise(.08,2500,900,.12)},
+  err:function(){tone(220,.18,'square',.08,150)},
+  tick:function(){tone(1200,.03,'square',.03)}
+};
+
+/* ───────────────────────── camera ───────────────────────── */
+var cam={th:.75,ph:1.08,r:26,t:new T.Vector3(0,.8,.8)},goal={th:.75,ph:1.08,r:13,t:new T.Vector3(0,.8,.8)};
+var HOME=[.75,1.08,13,0,.8,.8];
+function fly(a){goal.th=a[0];goal.ph=a[1];goal.r=a[2]*(mobile()?2.1:1.3);goal.t.set(a[3],a[4],a[5]);
+  while(goal.th-cam.th>Math.PI)cam.th+=Math.PI*2;while(goal.th-cam.th<-Math.PI)cam.th-=Math.PI*2}
+function mobile(){return innerWidth<=900}
+var spin=!matchMedia('(prefers-reduced-motion:reduce)').matches,lastTouch=0;
+$('#bSpin').setAttribute('aria-pressed',spin);
+
+var ptrs={},dragged=false,pinch=0;
+canvas.addEventListener('pointerdown',function(e){canvas.setPointerCapture(e.pointerId);ptrs[e.pointerId]={x:e.clientX,y:e.clientY};dragged=false;lastTouch=performance.now();pinch=0});
+canvas.addEventListener('pointermove',function(e){
+  var p=ptrs[e.pointerId],ids=Object.keys(ptrs);
+  if(p){
+    var dx=e.clientX-p.x,dy=e.clientY-p.y;
+    if(ids.length===2){
+      p.x=e.clientX;p.y=e.clientY;var a=ptrs[ids[0]],b=ptrs[ids[1]],d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(pinch)goal.r=Math.max(5,Math.min(42,goal.r*pinch/d));pinch=d;dragged=true;
+    }else{
+      if(Math.abs(dx)+Math.abs(dy)>3)dragged=true;
+      if(dragged){goal.th-=dx*.006;goal.ph=Math.max(.25,Math.min(1.5,goal.ph-dy*.005));p.x=e.clientX;p.y=e.clientY}
+    }
+    lastTouch=performance.now();tip.hidden=true;
+  }else if(e.pointerType==='mouse')hoverAt(e.clientX,e.clientY);
+});
+function up(e){var had=ptrs[e.pointerId];delete ptrs[e.pointerId];pinch=0;if(had&&!dragged&&e.type==='pointerup')clickAt(e.clientX,e.clientY)}
+canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+canvas.addEventListener('pointerleave',function(){setHover(null)});
+canvas.addEventListener('wheel',function(e){e.preventDefault();goal.r=Math.max(5,Math.min(42,goal.r*(1+Math.sign(e.deltaY)*.09)));lastTouch=performance.now()},{passive:false});
+
+var ray=new T.Raycaster(),ndc=new T.Vector2(),tip=$('#tip');
+function pick(x,y){
+  var r=canvas.getBoundingClientRect();ndc.set((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
+  var hits=ray.intersectObjects(pickables,false);
+  for(var i=0;i<hits.length;i++){var o=hits[i].object,m=o.material;if(m.opacity>.28&&m.visible!==false&&o.visible){var p=o;var vis=true;while(p){if(!p.visible)vis=false;p=p.parent}if(vis)return hits[i]}}
+  return null;
+}
+var hovered=null,selected=null,hovT=0;
+function setHover(k){if(k===hovered)return;hovered=k;canvas.style.cursor=k?'pointer':'grab';if(k)sfx.hover();else tip.hidden=true}
+function hoverAt(x,y){
+  var now=performance.now();if(now-hovT<40)return;hovT=now;
+  var h=pick(x,y),k=h?h.object.userData.part:null;setHover(k);
+  if(k){tip.textContent=PARTS[k].n;tip.style.left=x+'px';tip.style.top=y+'px';tip.hidden=false}
+}
+function clickAt(x,y){
+  initAudio();var h=pick(x,y);
+  if(h){stopTour();selectPart(h.object.userData.part,h.point)}
+}
+
+/* ───────────────────────── state & UI ───────────────────────── */
+var mode='anatomy',focus=null,exGoal=.3,exCur=0,audience='sales',curUse=null;
+var rail=$('#rail'),panel=$('#panel'),exIn=$('#ex');
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function setExplode(v,quiet){if(Math.abs(v-exGoal)>.15&&!quiet)sfx.whoosh();exGoal=v;exIn.value=Math.round(v*100)}
+function setBezel(on){bezelOn=on;$('#bBezel').setAttribute('aria-pressed',on)}
+
+function head(eyebrow,color){
+  return '<button class="sheetbtn" id="sheetBtn">Details</button><div class="phead"><span class="eyebrow" style="--c:'+color+'">'+esc(eyebrow)+'</span>'+
+   '<div class="seg" role="group" aria-label="Audience"><button data-aud="sales" aria-pressed="'+(audience==='sales')+'">Sales</button><button data-aud="tech" aria-pressed="'+(audience==='tech')+'">Technical</button></div></div>';
+}
+function foot(src){
+  return '<p class="note">Figures from Cisco public documents'+(src?' (<a href="'+SRC[src]+'" target="_blank" rel="noopener">source</a>)':'')+'. The 3D model is stylised: part counts are accurate, exact placement is illustrative. Independent explainer, not a Cisco publication.</p>';
+}
+function specsHTML(sp,n){return '<dl class="specs">'+sp.slice(0,n||99).map(function(r){return '<dt>'+esc(r[0])+'</dt><dd>'+esc(r[1])+'</dd>'}).join('')+'</dl>'}
+var lastRender=null;
+function render(fn){lastRender=fn;fn();panel.scrollTop=0}
+
+function showPart(k){
+  var p=PARTS[k],L=LBY[p.l[0]];
+  render(function(){
+    var h=head(L.n,L.c)+'<h2>'+esc(p.n)+'</h2>';
+    if(audience==='sales')h+='<p>'+esc(p.pitch)+'</p><h4>Key facts</h4>'+specsHTML(p.specs,4)+'<h4>How it works</h4><p>'+esc(p.tech)+'</p>';
+    else h+='<p>'+esc(p.tech)+'</p><h4>Specifications</h4>'+specsHTML(p.specs)+'<h4>Why it matters</h4><p>'+esc(p.pitch)+'</p>';
+    if(p.links)h+='<h4>Cisco validated designs</h4><ul>'+p.links.map(function(l){return '<li><a href="'+l[1]+'" target="_blank" rel="noopener">'+esc(l[0])+'</a></li>'}).join('')+'</ul>';
+    if(p.l.length>1)h+='<h4>Also part of</h4><div class="plist">'+p.l.slice(1).map(function(id){return '<button data-layer="'+id+'" style="--c:'+LBY[id].c+'">'+esc(LBY[id].n)+'</button>'}).join('')+'</div>';
+    panel.innerHTML=h+foot(p.src);
+  });
+}
+function showLayer(id){
+  var L=LBY[id];
+  render(function(){
+    var parts=Object.keys(PARTS).filter(function(k){return PARTS[k].l.indexOf(id)>=0});
+    panel.innerHTML=head('Layer',L.c)+'<h2>'+esc(L.n)+'</h2><p>'+esc(L.d)+'</p><h4>Parts in this layer</h4><div class="plist" style="--c:'+L.c+'">'+
+      parts.map(function(k){return '<button data-part="'+k+'">'+esc(PARTS[k].n)+'</button>'}).join('')+'</div>'+foot('home');
+  });
+}
+function showOverview(){
+  render(function(){
+    panel.innerHTML=head('Overview',cv('--accent'))+'<h2>Cisco Unified Edge</h2>'+
+    (audience==='sales'
+     ?'<p>A full-stack platform for the places where data is created. One chassis combines compute, storage, switching, routing and security, sized for a store, plant or clinic and managed from the cloud.</p><ul><li><b>AI-ready edge.</b> Inference on the CPU, or add NVIDIA GPUs where needed.</li><li><b>Unified operations.</b> Zero-touch deployment and one console for every site.</li><li><b>Designed-in security.</b> Protection from the locking bezel down to the firmware.</li></ul>'
+     :'<p>Cisco UCS XE9305: a 3RU, short-depth, five-slot modular chassis. Nodes are dual-homed at 25 Gbps through a midplane to two controllers with embedded switches. Managed in Intersight Managed Mode.</p>')+
+    '<h4>At a glance</h4>'+specsHTML([['Chassis','UCS XE9305 · 3RU · 5 slots'],['Compute','XE130c (1RU) · XE150c (2RU, GPU)'],['CPU','Intel Xeon 6 SoC, up to 32 P-cores'],['Networking','2 × embedded 25G switch · 8255 router node'],['Management','Cisco Intersight (SaaS)'],['Software','Nutanix · Red Hat · VMware · SUSE · Ubuntu']])+
+    '<h4>Explore the layers</h4><div class="plist">'+LAYERS.map(function(l){return '<button data-layer="'+l.id+'" style="--c:'+l.c+'">'+esc(l.n)+'</button>'}).join('')+'</div>'+foot('home');
+  });
+}
+function showUse(u){
+  render(function(){
+    panel.innerHTML=head('Use case',cv('--l-power'))+'<h2>'+esc(u.n)+'</h2><p>'+esc(u.d)+'</p><h4>What runs at the site</h4><ul>'+u.runs.map(function(r){return '<li>'+esc(r)+'</li>'}).join('')+'</ul>'+
+    '<h4>Example build</h4>'+specsHTML(buildRows(u.cfg))+'<p style="margin-top:10px">'+esc(u.why)+'</p>'+
+    '<div class="plist"><button data-open-build="1">Adjust this build</button></div>'+
+    '<p class="note">Use cases are taken from Cisco material. The example build is an illustration made for this demo, not Cisco sizing guidance. <a href="'+SRC.home+'" target="_blank" rel="noopener">Product page</a></p>';
+  });
+}
+function buildRows(cfg){
+  var r=[];cfg.forEach(function(t,i){if(t==='cov')return;r.push(['Slot '+(i+1)+(t==='c150'?'–'+(i+2):''),TYPES[t].n.replace(' (2 slots)','')])});
+  r.push(['Fixed','2 × controller · 2 × PSU · 5 × fan']);return r;
+}
+function totals(cfg){
+  var t={nodes:0,cores:0,ram:0,tb:0,gpu:0,poe:0,rt:0};
+  cfg.forEach(function(k){var y=TYPES[k];if(y.cores){t.nodes++;t.cores+=y.cores;t.ram+=y.ram;t.tb+=y.tb;t.gpu+=y.gpu}if(k==='r8255'){t.rt++;t.poe+=18}});return t;
+}
+function showBuild(){
+  render(function(){
+    var t=totals(slots);
+    panel.innerHTML=head('Build your own',cv('--accent'))+'<h2>Your chassis</h2><p>Choose what goes in each of the five slots. The model updates as you change it. Totals show the data-sheet maximum for this mix.</p>'+
+    '<div class="totals"><div><b>'+t.nodes+'</b><span>compute nodes</span></div><div><b>'+t.cores+'</b><span>P-cores, max</span></div><div><b>'+t.ram.toLocaleString('en-US')+' GB</b><span>memory, max</span></div><div><b>'+t.tb+' TB</b><span>NVMe, max</span></div><div><b>'+t.gpu+'</b><span>GPU slots</span></div><div><b>'+t.poe+'</b><span>PoE / UPoE ports</span></div></div>'+
+    '<h4>Always included</h4>'+specsHTML([['Fabric','2 × controller, 25G switch each'],['Uplinks','4 × 10G SFP+ · 2 × 1G mgmt'],['Power','2 × 2400 W, N+N'],['Cooling','5 × hot-swap fan']])+
+    '<h4>Rules</h4><ul><li>Up to five XE130c nodes.</li><li>Up to two XE150c nodes; each takes two stacked slots.</li><li>Up to two 8255 Secure Router nodes.</li></ul>'+
+    '<h4>Start from a use case</h4><div class="plist">'+USECASES.map(function(u){return '<button data-preset="'+u.id+'">'+esc(u.n)+'</button>'}).join('')+'</div>'+foot('aag');
+  });
+}
+
+function buildRail(){
+  var h='';
+  if(mode==='anatomy'){
+    h='<h3>Layers</h3><button class="rb" data-layer="" aria-pressed="'+(!focus)+'"><i style="--c:#e7eef8"></i><span>All layers<small>Whole system</small></span></button>'+
+     LAYERS.map(function(l){return '<button class="rb" data-layer="'+l.id+'" aria-pressed="'+(focus===l.id)+'"><i style="--c:'+l.c+'"></i><span>'+esc(l.n)+'<small>'+esc(l.s)+'</small></span></button>'}).join('');
+  }else if(mode==='usecases'){
+    h='<h3>Use cases</h3>'+USECASES.map(function(u){return '<button class="rb" data-use="'+u.id+'" aria-pressed="'+(curUse===u.id)+'"><i style="--c:'+cv('--l-power')+'"></i><span>'+esc(u.n)+'<small>'+esc(u.s)+'</small></span></button>'}).join('');
+  }else{
+    h='<h3>Slots</h3>';
+    for(var i=4;i>=0;i--){
+      var opts=['empty','c130s','c130io'];if(i===0||i===1||i===3)opts.push('c150');opts.push('r8255');
+      var cov=slots[i]==='cov';
+      h+='<div class="slot"><label for="slot'+i+'">SLOT '+(i+1)+' · '+(SLOTPOS[i][0]?'right':'left')+' column, row '+(SLOTPOS[i][1]+1)+'</label><select id="slot'+i+'" data-slot="'+i+'"'+(cov?' disabled':'')+'>'+
+        (cov?'<option>'+TYPES.cov.n+'</option>':opts.map(function(o){return '<option value="'+o+'"'+(slots[i]===o?' selected':'')+'>'+TYPES[o].n+'</option>'}).join(''))+'</select></div>';
+    }
+  }
+  rail.innerHTML=h;
+}
+
+function setFocus(id,quiet){
+  focus=id||null;
+  if(focus){var L=LBY[focus];setExplode(L.ex,quiet);fly(L.cam);setBezel(focus==='sec');if(!quiet)sfx.layer();showLayer(focus)}
+  else{setExplode(.3,quiet);fly(HOME);setBezel(false);showOverview()}
+  selected=null;buildRail();
+}
+function selectPart(k,pt){
+  var p=PARTS[k];if(!p)return;selected=k;sfx.click();
+  if(mode==='anatomy'&&focus&&p.l.indexOf(focus)<0){focus=p.l[0];buildRail()}
+  if(k==='bezel')setBezel(true);
+  if(pt){goal.t.copy(pt);goal.r=Math.min(goal.r,mobile()?17:12.5)}
+  else{ // fly to the first visible mesh of that part
+    var o=null;for(var i=0;i<pickables.length;i++)if(pickables[i].userData.part===k){o=pickables[i];break}
+    if(o){o.getWorldPosition(tmpB);goal.t.copy(tmpB);goal.r=Math.min(goal.r,mobile()?18:13)}
+  }
+  document.body.classList.remove('collapsed');
+  showPart(k);lastTouch=performance.now();
+}
+function setMode(m,quiet){
+  mode=m;[].forEach.call(document.querySelectorAll('#modes button'),function(b){b.setAttribute('aria-pressed',b.dataset.mode===m)});
+  selected=null;
+  if(m==='anatomy'){setDevices(null);curUse=null;setFocus(null,quiet)}
+  else if(m==='usecases'){focus=null;setBezel(false);setUse(curUse||'retail',quiet)}
+  else{focus=null;setDevices(null);setBezel(false);setExplode(.12,quiet);fly([.45,1.02,12.5,0,.8,1.6]);buildRail();showBuild()}
+}
+function setUse(id,quiet){
+  var u=USECASES.filter(function(x){return x.id===id})[0];curUse=id;
+  applyConfig(u.cfg,!quiet);setDevices(u.devices);setExplode(.1,true);fly([.35,1.0,19,0,1.6,2.4]);if(!quiet)sfx.layer();
+  buildRail();showUse(u);
+}
+function toast(msg){var t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(function(){t.hidden=true},3600)}
+function changeSlot(i,v){
+  var cfg=slots.slice();
+  if(cfg[i]==='c150')cfg[i+1]='empty';
+  if(v==='c150'){if(cfg[i+1]==='c150')cfg[i+2]='empty';cfg[i+1]='cov'}
+  cfg[i]=v;
+  var n150=cfg.filter(function(x){return x==='c150'}).length,nr=cfg.filter(function(x){return x==='r8255'}).length;
+  if(n150>2||nr>2){sfx.err();toast(n150>2?'A chassis takes up to two XE150c nodes.':'A chassis takes up to two 8255 Secure Router nodes.');buildRail();return}
+  applyConfig(cfg,true);buildRail();showBuild();
+}
+
+rail.addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;initAudio();stopTour();
+  if(b.dataset.layer!=null)setFocus(b.dataset.layer);else if(b.dataset.use)setUse(b.dataset.use);
+});
+rail.addEventListener('change',function(e){var s=e.target.closest('select');if(s){initAudio();changeSlot(+s.dataset.slot,s.value)}});
+panel.addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;initAudio();
+  if(b.id==='sheetBtn'){document.body.classList.toggle('collapsed');resize();return}
+  stopTour();
+  if(b.dataset.aud){audience=b.dataset.aud;sfx.tick();if(lastRender)lastRender()}
+  else if(b.dataset.part){if(mode!=='anatomy'){setMode('anatomy',true)}selectPart(b.dataset.part)}
+  else if(b.dataset.layer){if(mode!=='anatomy')setMode('anatomy',true);setFocus(b.dataset.layer)}
+  else if(b.dataset.openBuild){setMode('build')}
+  else if(b.dataset.preset){var u=USECASES.filter(function(x){return x.id===b.dataset.preset})[0];applyConfig(u.cfg,true);buildRail();showBuild()}
+});
+$('#modes').addEventListener('click',function(e){var b=e.target.closest('button');if(b){initAudio();stopTour();sfx.click();setMode(b.dataset.mode)}});
+exIn.addEventListener('input',function(){initAudio();var v=exIn.value/100;if(Math.abs(v-exGoal)>.04)sfx.tick();exGoal=v;lastTouch=performance.now()});
+$('#bBezel').onclick=function(){initAudio();setBezel(!bezelOn);sfx.thunk()};
+$('#bFlow').onclick=function(){initAudio();flowOn=!flowOn;this.setAttribute('aria-pressed',flowOn);sfx.click()};
+$('#bSpin').onclick=function(){initAudio();spin=!spin;this.setAttribute('aria-pressed',spin);sfx.click()};
+$('#bReset').onclick=function(){initAudio();stopTour();sfx.whoosh();if(mode==='anatomy')setFocus(focus,true);else setMode(mode,true)};
+$('#bMusic').onclick=function(){setMusic(!AU.music)};
+$('#bSfx').onclick=function(){initAudio();AU.fxOn=!AU.fxOn;this.setAttribute('aria-pressed',AU.fxOn);sfx.click()};
+$('#bTour').onclick=function(){initAudio();if(tourI>=0)stopTour();else startTour()};
+$('#iTour').onclick=function(){$('#intro').hidden=true;setMusic(true);startTour()};
+$('#iFree').onclick=function(){$('#intro').hidden=true;initAudio();sfx.layer()};
+addEventListener('keydown',function(e){if(e.key==='Escape'){if(!$('#intro').hidden)$('#iFree').click();else stopTour()}});
+
+/* ───────────────────────── guided tour ───────────────────────── */
+var TOUR=[
+ {t:'This is Cisco Unified Edge: one 3RU chassis that combines compute, storage, networking and security for sites outside the data centre.',a:function(){setMode('anatomy',true)}},
+ {t:'The enclosure is short-depth and mounts in a rack, on a wall or on a shelf. Five front slots take nodes that swap without tools.',a:function(){setFocus('phys',true);selectPart('chassis')}},
+ {t:'Two power supplies in N+N redundancy and five hot-swap fans. Everything is serviced without shutting the system down.',a:function(){setFocus('power',true);selectPart('psu')}},
+ {t:'Compute nodes slide out as sleds. Each XE130c has an Intel Xeon 6 SoC, eight memory slots, NVMe drives and mirrored boot drives.',a:function(){setFocus('compute',true);selectPart('node130')}},
+ {t:'For heavier AI, the 2RU XE150c carries a full-size NVIDIA GPU. Lighter inference runs on the CPU with no GPU at all.',a:function(){setFocus('compute',true);selectPart('gpu')}},
+ {t:'Behind the nodes, a cable-free midplane links each one at 25 gigabits to two controllers, each with a built-in switch.',a:function(){setFocus('fabric',true);selectPart('cmc')}},
+ {t:'A secure router node adds SD-WAN and powered ports for cameras, phones and access points, inside the same chassis.',a:function(){setFocus('fabric',true);selectPart('router')}},
+ {t:'Security is designed in: a locking bezel with intrusion detection, hardware roots of trust and zero-trust management.',a:function(){setFocus('sec',true);selectPart('zerotrust')}},
+ {t:'Cisco Intersight runs the fleet from the cloud: zero-touch onboarding, blueprints and automated updates for every site.',a:function(){setFocus('mgmt',true);selectPart('intersight')}},
+ {t:'On top runs the software customers already use, including Nutanix, Red Hat, VMware, SUSE and Ubuntu, with AI inference alongside.',a:function(){setFocus('sw',true);selectPart('sw_os')}},
+ {t:'In a retail store, three compute nodes and a router node serve cameras, tills and signage, and keep trading if the WAN drops.',a:function(){setMode('usecases',true);setUse('retail',true)}},
+ {t:'In a venue, two GPU nodes turn live video into queue and crowd analytics. Now try your own configuration.',a:function(){setUse('venue')}},
+ {t:'Pick what goes in each slot and watch the totals change. That is the tour. Explore freely.',a:function(){setMode('build',true)}}
+];
+var tourI=-1,tourT=0,TDUR=9.5;
+function startTour(){tourI=-1;$('#tour').hidden=false;$('#bTour').textContent='■ Stop';tourStep(0)}
+function tourStep(i){
+  if(i<0)i=0;if(i>=TOUR.length){stopTour();return}
+  tourI=i;tourT=0;$('#tourText').textContent=TOUR[i].t;$('#tourN').textContent=(i+1)+' / '+TOUR.length;sfx.layer();TOUR[i].a();
+  if(mobile())document.body.classList.add('collapsed'),resize();
+}
+function stopTour(){if(tourI<0)return;tourI=-1;$('#tour').hidden=true;$('#bTour').textContent='▶ Tour';if(mobile()){document.body.classList.remove('collapsed');resize()}}
+$('#tNext').onclick=function(){tourStep(tourI+1)};$('#tPrev').onclick=function(){tourStep(tourI-1)};$('#tStop').onclick=stopTour;
+
+/* ───────────────────────── resize & loop ───────────────────────── */
+function resize(){
+  var w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;
+  rail.style.top=mobile()?(document.querySelector('.top').offsetHeight-4)+'px':'';
+  if(mobile()){var sh=document.body.classList.contains('collapsed')?46:h*.4;camera.fov=46;camera.setViewOffset(w,h,0,(sh-110)/2,w,h)}
+  else{camera.fov=36;camera.setViewOffset(w,h,58,10,w,h)}
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize',resize);
+
+var clock=new T.Clock(),time=0,cWhite=new T.Color(),cTmp=new T.Color();
+function frame(){
+  requestAnimationFrame(frame);
+  var dt=Math.min(clock.getDelta(),.05);time+=dt;
+  var k=1-Math.exp(-dt*3.2),kf=1-Math.exp(-dt*7);
+
+  // explode
+  exCur+=(exGoal-exCur)*k;
+  for(var i=0;i<EX.length;i++){var e=EX[i],x=e.b.x,y=e.b.y,z=e.b.z;for(var j=0;j<e.s.length;j++){var s=e.s[j],f=sm(exCur,s[3],s[4]);x+=s[0]*f;y+=s[1]*f;z+=s[2]*f}e.o.position.set(x,y,z)}
+  // bezel on/off
+  bezelK+=((bezelOn?1:0)-bezelK)*k;bezel.visible=bezelK>.02;bezel.scale.setScalar(.6+.4*bezelK);
+  if(!bezelOn)bezel.position.y+=(1-bezelK)*2.2;
+  // slot insert animation
+  for(i=0;i<5;i++)if(slotAnim[i]>0){slotAnim[i]=Math.max(0,slotAnim[i]-dt*1.6);var n=slotG[i].children[0];if(n){var q=slotAnim[i];n.position.z=3.2*q*q*q}}
+  // fans, cloud
+  for(i=0;i<rotors.length;i++)rotors[i].rotation.z-=dt*9;
+  cring.rotation.z+=dt*.3;cring2.rotation.z-=dt*.5;cloud.position.y=6.3+Math.sin(time*.7)*.08;
+  mLed.emissiveIntensity=1+Math.sin(time*4)*.5;
+
+  // layer dimming + highlight
+  for(i=0;i<MATS.length;i++){
+    var m=MATS[i],u=m.userData,inL=!focus||u.layers.indexOf(focus)>=0,tgt=u.only?(focus&&inL?u.base:0):(inL?u.base:.06);
+    if(Math.abs(m.opacity-tgt)>.002){m.opacity+=(tgt-m.opacity)*kf;var tr=u.aT||m.opacity<.985;if(m.transparent!==tr){m.transparent=tr;m.needsUpdate=true}if(!u.aT)m.depthWrite=m.opacity>.5;m.visible=m.opacity>.012}
+    if(u.em){
+      var on=u.part===selected?1:u.part===hovered?.5:0;
+      if(on){cTmp.set(LBY[u.layers[0]].c).multiplyScalar(.55*on+.12*Math.sin(time*5)*on);m.emissive.lerp(cTmp,kf);m.emissiveIntensity+=(1-m.emissiveIntensity)*kf}
+      else{m.emissive.lerp(u.em,kf);m.emissiveIntensity+=(u.emI-m.emissiveIntensity)*kf}
+    }
+  }
+  var showFlow=!focus||focus==='fabric'||focus==='mgmt';pMat.opacity+=((showFlow?1:.0)-pMat.opacity)*kf;
+  updateFlow(time);
+
+  // tour progress
+  if(tourI>=0){tourT+=dt;$('#tourBar').style.width=Math.min(100,tourT/TDUR*100)+'%';if(tourT>=TDUR)tourStep(tourI+1)}
+
+  // camera
+  if(spin&&performance.now()-lastTouch>5000&&!Object.keys(ptrs).length)goal.th+=dt*.06;
+  cam.th+=(goal.th-cam.th)*k;cam.ph+=(goal.ph-cam.ph)*k;cam.r+=(goal.r-cam.r)*k;cam.t.lerp(goal.t,k);
+  var sp=Math.sin(cam.ph);
+  camera.position.set(cam.t.x+cam.r*sp*Math.sin(cam.th),cam.t.y+cam.r*Math.cos(cam.ph),cam.t.z+cam.r*sp*Math.cos(cam.th));
+  camera.lookAt(cam.t);
+  renderer.render(scene,camera);
+}
+
+for(var si=0;si<5;si++)setSlot(si,false);
+refreshPick();resize();buildRail();showOverview();
+goal.r*=mobile()?2.1:1.3;
+window.__ue={setMode:setMode,setFocus:setFocus,selectPart:selectPart,setUse:setUse,setExplode:setExplode,cam:cam,goal:goal};
+frame();
+})();
+</script>
